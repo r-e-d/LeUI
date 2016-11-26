@@ -1,0 +1,5 @@
+//component names
+@10000 = ~lefreut's Enhanced UI - Core component~
+@10001 = ~lefreut's Enhanced UI - BG2 vanilla bams~
+//messages during installation
+@90000 = ~This mod requires BG1:EE, SOD, BG2:EE or EET~
