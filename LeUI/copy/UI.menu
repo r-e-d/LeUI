@@ -2127,7 +2127,7 @@ menu
 		area 448 492 374 120
 		text lua "getStringFromAmbiguousSource(helpString)"
 		text style normal
-		text align center center
+		text align left top
 		text color D
 		scrollbar 'GUISCRC'
 	}
@@ -5541,10 +5541,8 @@ menu
 		action
 		"
 			if(sidebarsGreyed ~= 1) then
+				wasPaused = worldScreen:CheckIfPaused()
 				e:GetActiveEngine():OnLeftPanelButtonClick(2)
-				local tf = next(textflashes)
-				setSelectedQuest(textflashes[tf][5])
-				textflashes[tf] = nil
 			end
 		"
 		actionEnter "hoverPopup = true"
@@ -5910,19 +5908,18 @@ menu
 	modal
 	label
 	{
-		area 0 0 667 234
-		mosaic GUIERR6
+		area 0 0 406 415
+		mosaic GUIERR
 	}
 	label
 	{
-		area 34 20 606 128
+		area 70 120 264 120
 		text lua "messages[messageBoxCurMessage]"
 		text style "label"
 	}
 	button
 	{
-		area 88 170 234 44
-		bam GUIOSTUL
+		area 52 262 300 38
 		text "DONE_BUTTON"
 		text style "button"
 		action
@@ -8403,7 +8400,7 @@ menu
 	text
 	{
 		enabled "selectedSpell ~= nil"
-		area 420 200 306 368
+		area 420 200 306 362
 		text lua "Infinity_FetchString(selectedSpell.description)"
 		text style "parchment"
 		scrollbar 'GUISBR'
@@ -9051,8 +9048,20 @@ menu
 	}
 	button
 	{
-		area 276 640 234 44
+		area 282 642 234 44
 		bam GUIOSTUL
+		text "TRAVEL_BUTTON"
+		text style "button"
+		clickable lua "worldMapScreen:IsTravelButtonClickable()"
+		action
+		"
+			worldMapScreen:TravelToSelected()
+		"
+	}
+	button
+	{
+		area 544 642 234 44
+		bam GUIOSTUR
 		text "BACK_BUTTON"
 		text style "button"
 		on escape
@@ -9063,18 +9072,6 @@ menu
 			else
 				e:GetActiveEngine():OnLeftPanelButtonClick(0)
 			end
-		"
-	}
-	button
-	{
-		area 550 640 234 44
-		bam GUIOSTUR
-		text "TRAVEL_BUTTON"
-		text style "button"
-		clickable lua "worldMapScreen:IsTravelButtonClickable()"
-		action
-		"
-			worldMapScreen:TravelToSelected()
 		"
 	}
 }
@@ -10492,7 +10489,7 @@ menu
 	}
 	button
 	{
-		area 88 170 234 44
+		area 92 178 234 44
 		bam GUIOSTUL
 		text "LOAD_BUTTON"
 		text style "button"
@@ -10505,7 +10502,7 @@ menu
 	}
 	button
 	{
-		area 370 170 234 44
+		area 342 178 234 44
 		bam GUIOSTUR
 		text style "button"
 		text lua "worldDeathQuitText()"
@@ -12307,18 +12304,18 @@ menu
 	label
 	{
 		name 'messagesRect'
-		area 0 0 840 186
+		area 0 0 840 156
 		mosaic box5
 	}
 	label
 	{
-		area 0 182 840 4
+		area 0 152 840 4
 		mosaic box5B
 	}
 	text
 	{
 		name "worldMessageBox"
-		area 12 8 816 170
+		area 12 8 816 140
 		text lua "worldMessageBoxText"
 		text style "normal"
 		scrollbar 'GUISCRC'
@@ -12938,7 +12935,7 @@ menu
 	"
 		portraitTable = {}
 		selPortrait = 1
-		local firstPortrait = createCharScreen:GetCurrentPortrait()
+		local firstPortrait = createCharScreen:GetCurrentPortrait():upper()
 		local curGender = gender == 1 and 15729749 or 15729635
 		local curPortrait = firstPortrait
 		if CurrentlyInGame() then
@@ -12961,7 +12958,7 @@ menu
 				selPortrait = idx
 			end
 			createCharScreen:IncCurrentPortrait()
-			portrait = createCharScreen:GetCurrentPortrait()
+			portrait = createCharScreen:GetCurrentPortrait():upper()
 			idx = idx + 1
 		end
 	"
@@ -15714,6 +15711,7 @@ menu
 	}
 	button
 	{
+		clickable lua "list_GUIMOVIE_0_0_idx > 0"
 		area 110 495 300 44
 		bam GUIOSTCL
 		text "PLAY_MOVIE_BUTTON"
@@ -16618,22 +16616,21 @@ menu
 	align center center
 	label
 	{
-		area 0 0 667 234
-		mosaic GUIERR6
+		area 0 0 406 415
+		mosaic GUIERR
 	}
 	label --Title
 	{
-		area 34 20 606 128
+		area 70 120 264 120
 		text 20274
 		text style "label"
 	}
 	button
 	{
-		area 88 170 234 44
-		bam GUIOSTUL
+		on escape
+		area 52 304 300 38
 		text "CANCEL_BUTTON"
 		text style "button"
-		on escape
 		action
 		"
 			Infinity_PopMenu()
@@ -16665,7 +16662,7 @@ menu
 		text style "button"
 		action
 		"
-			Infinity_PopMenu();
+			Infinity_PopMenu()
 		"
 	}
 }
@@ -16715,7 +16712,7 @@ menu
 		action
 		"
 			Infinity_PopMenu('CONNECTION_WAITING_FOR_SERVER')
-			connectionScreen:CancelJoinGame();
+			connectionScreen:CancelJoinGame()
 		"
 	}
 }
@@ -18987,20 +18984,7 @@ menu
 	}
 	button
 	{
-		area 88 170 234 44
-		bam GUIOSTUL
-		text "CANCEL_BUTTON" -- cancel
-		text style "button"
-		align center center
-		on escape
-		action
-		"
-			Infinity_PopMenu()
-		"
-	}
-	button
-	{
-		area 370 170 234 44
+		area 92 178 234 44
 		bam GUIOSTUR
 		text lua "multiplayerIsDelete()"
 		text style "button"
@@ -19017,6 +19001,19 @@ menu
 			end
 		"
 	}
+	button
+	{
+		area 342 178 234 44
+		bam GUIOSTUL
+		text "CANCEL_BUTTON" -- cancel
+		text style "button"
+		align center center
+		on escape
+		action
+		"
+			Infinity_PopMenu()
+		"
+	}
 }
 menu
 {
@@ -19025,24 +19022,23 @@ menu
 	modal
 	label
 	{
-		mosaic GUIERR6
-		area 0 0 667 234
+		area 0 0 406 415
+		mosaic GUIERR
 	}
 	label
 	{
-		area 34 20 606 128
+		area 70 120 264 120
 		text lua "Infinity_FetchString( mpErrorText )"
 		text style "normal"
 		align center center
 	}
 	button
 	{
-		area 88 170 234 44
-		bam GUIOSTUL
+		on return
+		area 52 262 300 38
 		text "DONE_BUTTON" -- done
 		text style "button"
 		align center center
-		on return
 		action
 		"
 			Infinity_PopMenu()
@@ -19580,13 +19576,21 @@ function containsChapter(tab, chapter)
 	if(not tab) then return nil end
 	return tab[chapter]
 end
+function childrenContainsChapter(children)
+	for k,v in pairs(children) do
+		if containsChapter(questDisplay[v].chapters,chapter) then
+			return questDisplay[v].chapters
+		end
+	end
+	return nil
+end
 function getFinished(row)
 	local rowTab =  questDisplay[row]
 	if rowTab.parent ~= nil then return getFinished(rowTab.parent) end
 	if rowTab.stateType == const.ENTRY_TYPE_COMPLETE then return 1 else return 0 end
 end
 function questEnabled(row)
-	return questDisplay[row] and questDisplay[row].quest and containsChapter(questDisplay[row].chapters,chapter) and (#questDisplay[row].children > 0)
+	return questDisplay[row] and questDisplay[row].quest and containsChapter(questDisplay[row].chapters,chapter) and childrenContainsChapter(questDisplay[row].children)
 end
 function getQuestText(row)
 	local rowTab =  questDisplay[row]
@@ -19662,6 +19666,11 @@ menu
 		buildQuestDisplay()
 		chapter = math.max(0, Infinity_GetMaxChapterPage())
 		journalMode = 0
+		local tf = next(textflashes)
+		if tf then
+			setSelectedQuest(textflashes[tf][5])
+			textflashes[tf] = nil
+		end
 		pushSidebars()
 	"
 	onClose
@@ -19767,7 +19776,7 @@ menu
 		table		"questDisplay"
 		var			selectedQuest
 		scrollbar	'GUISBR'
-		area		152 240 582 340
+		area		152 236 582 346
 		action
 		"
 			if questDisplay[selectedQuest].quest then
@@ -19808,7 +19817,7 @@ menu
 		table		"journalDisplay"
 		var			selectedJournal
 		scrollbar	'GUISBR'
-		area		152 240 582 340
+		area		152 236 582 346
 		action
 		"
 			journalNoteEditRef = getJournalEntryRef(journalDisplay, selectedJournal)
@@ -19845,7 +19854,7 @@ menu
 		table		"userDisplay"
 		var			selectedUser
 		scrollbar	'GUISBR'
-		area		152 240 582 340
+		area		152 236 582 346
 		action
 		"
 			journalNoteEditRef = getJournalEntryRef(userDisplay, selectedUser)
@@ -19946,7 +19955,7 @@ menu
 
 	edit
 	{
-		area 152 240 582 340
+		area 152 236 582 346
 		text style "edit_parchment"
 		var journalNoteEdit
 		scrollbar 'GUISBR'
