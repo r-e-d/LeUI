@@ -4802,12 +4802,14 @@ function buildInventoryStats()
 	inventoryStats = {}
 
 	if(itemComparison and tempStats[id] ~= nil) then
-		table.insert(inventoryStats, {1,tempStats[id].tempItem})
 		getTempStat(characters[id].AC.current,'AC',t("ARMOR_CLASS_LABEL"),-1)
 		getTempStat(characters[id].HP.max,'maxHP',t("HIT_POINTS_LABEL"),1)
 		getTempStat(characters[id].THAC0.current,'THAC0',t("THAC0_LABEL"),-1)
 		getTempDamage()
-		return inventoryStats
+		if length(inventoryStats) ~= 0 then
+			table.insert(inventoryStats, 1, {1,tempStats[id].tempItem})
+			return inventoryStats
+		end
 	end
 
 	table.insert(inventoryStats, {1,t("ARMOR_CLASS_LABEL"),1})
@@ -5521,14 +5523,16 @@ menu
 		text point 14
 		text color C
 	}
-	label
+	text
 	{
 		area 92 36 348 26
 		text lua "getSubtitleString()"
 		text style "label"
-		text align left center
+		text align left top
 		text point 14
 		text color D
+		scrollbar 'GUISCRC'
+		scrollbar hide lua "1"
 	}
 	text
 	{
@@ -12281,7 +12285,7 @@ function dragMessagesY(newY)
 
 	--lower bound on height, sliced rects can't get too small and we don't want to make the message box invisible.
 	--also don't go too high because it looks bad.
-	if hNew > 114 and hNew < 455 then
+	if hNew > 79 and hNew < 455 then
 		adjustItemGroup({"messagesHandleY"},0,newY,0,0)
 		adjustItemGroup({"messagesRect","worldMessageBox"},0,newY,0,-newY)
 	end
@@ -12911,10 +12915,10 @@ menu
 `
 function setCurrentPortrait(idx)
 	local portrait = portraitTable[idx]
-	local curPortrait = createCharScreen:GetCurrentPortrait()
+	local curPortrait = createCharScreen:GetCurrentPortrait():upper()
 	while portrait ~= curPortrait do
 		createCharScreen:IncCurrentPortrait()
-		curPortrait = createCharScreen:GetCurrentPortrait()
+		curPortrait = createCharScreen:GetCurrentPortrait():upper()
 	end
 end
 function getPortrait(idx)
@@ -12946,9 +12950,9 @@ menu
 		local idx = 1
 		while idx == 1 or portrait ~= firstPortrait do
 			local gender = nil
-			if portrait:find('m#') == 1 then
+			if portrait:find('M#') == 1 then
 				gender = 15729749
-			elseif portrait:find('f#') == 1 then
+			elseif portrait:find('F#') == 1 then
 				gender = 15729635
 			end
 			if gender == curGender or gender == nil then
