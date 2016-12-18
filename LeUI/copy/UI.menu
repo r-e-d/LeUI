@@ -10959,50 +10959,52 @@ function groundItemClick(slotId)
 	local slot = loot.groundItems[slotId + worldScreen:GetTopGroundItem()]
 	if(slot and slot.item) then
 		worldScreen:OnGroundButtonClick(slot.slotId, slot.containerId, slot.item.res)
+		mouseOverQuicklootContainer = nil
 	end
 end
 function setQuickLootOffset()
 	local x,y,w,h = Infinity_GetArea('messagesRect')
-	Infinity_SetOffset('WORLD_QUICKLOOT', 0, -(h + 100))
+	Infinity_SetOffset('WORLD_QUICKLOOT_L', -288, -(h + 78))
+	Infinity_SetOffset('WORLD_QUICKLOOT_0', -243, -(h + 78))
+	Infinity_SetOffset('WORLD_QUICKLOOT_1', -189, -(h + 78))
+	Infinity_SetOffset('WORLD_QUICKLOOT_2', -135, -(h + 78))
+	Infinity_SetOffset('WORLD_QUICKLOOT_3', -81, -(h + 78))
+	Infinity_SetOffset('WORLD_QUICKLOOT_4', -27, -(h + 78))
+	Infinity_SetOffset('WORLD_QUICKLOOT_5', 27, -(h + 78))
+	Infinity_SetOffset('WORLD_QUICKLOOT_6', 81, -(h + 78))
+	Infinity_SetOffset('WORLD_QUICKLOOT_7', 135, -(h + 78))
+	Infinity_SetOffset('WORLD_QUICKLOOT_8', 189, -(h + 78))
+	Infinity_SetOffset('WORLD_QUICKLOOT_9', 243, -(h + 78))
+	Infinity_SetOffset('WORLD_QUICKLOOT_R', 288, -(h + 78))
 end
 `
 menu
 {
-	enabled "showJournal == 0"
-	name 'WORLD_QUICKLOOT'
+	enabled "showJournal == 0 and worldScreen:GroundScrollEnabled(-1)"
+	name 'WORLD_QUICKLOOT_L'
 	align center bottom
 	ignoreEsc
-	onOpen
-	"
-		setQuickLootOffset()
-	"
 	button
 	{
 		area 0 0 34 52
 		bam GUIBTACT
 		frame 44
-		enabled "worldScreen:GroundScrollEnabled(-1)"
 		action
 		"
 			worldScreen:OnGroundScroll(-1)
 		"
 	}
+}
+menu
+{
+	enabled "showJournal == 0 and getSlotContainerId(0)"
+	name 'WORLD_QUICKLOOT_0'
+	align center bottom
+	ignoreEsc
 	button
 	{
-		area 576 0 34 52
-		bam GUIBTACT
-		frame 42
-		enabled "worldScreen:GroundScrollEnabled(1)"
-		action
-		"
-			worldScreen:OnGroundScroll(1)
-		"
-	}
-	button
-	{
-		area 36 0 52 52
+		area 0 0 52 52
 		bam STONSLOT
-		enabled "getSlotContainerId(0)"
 		tooltip lua	"getGroundItemProperty(0,'name')"
 		tint lua	"getGroundItemProperty(0,'tint')"
 		icon lua	"getGroundItemProperty(0,'icon')"
@@ -11012,131 +11014,244 @@ menu
 		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(0)"
 		actionExit "mouseOverQuicklootContainer = nil"
 	}
+}
+menu
+{
+	enabled "showJournal == 0 and getSlotContainerId(1)"
+	name 'WORLD_QUICKLOOT_1'
+	align center bottom
+	ignoreEsc
 	button
 	{
-		area 90 0 52 52
+		area 0 0 52 52
 		bam STONSLOT
-		enabled "getSlotContainerId(1)"
 		tooltip lua	"getGroundItemProperty(1,'name')"
 		tint lua	"getGroundItemProperty(1,'tint')"
 		icon lua	"getGroundItemProperty(1,'icon')"
 		count lua	"getGroundItemProperty(1,'count')"
 		usages lua	"getGroundItemProperty(1,'usages')"
 		action "groundItemClick(1)"
-		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(1,'containerId')"
+		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(1)"
 		actionExit "mouseOverQuicklootContainer = nil"
 	}
+}
+menu
+{
+	enabled "showJournal == 0 and getSlotContainerId(2)"
+	name 'WORLD_QUICKLOOT_2'
+	align center bottom
+	ignoreEsc
 	button
 	{
-		area 144 0 52 52
+		area 0 0 52 52
 		bam STONSLOT
-		enabled "getSlotContainerId(2)"
 		tooltip lua	"getGroundItemProperty(2,'name')"
 		tint lua	"getGroundItemProperty(2,'tint')"
 		icon lua	"getGroundItemProperty(2,'icon')"
 		count lua	"getGroundItemProperty(2,'count')"
 		usages lua	"getGroundItemProperty(2,'usages')"
 		action "groundItemClick(2)"
-		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(2,'containerId')"
+		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(2)"
 		actionExit "mouseOverQuicklootContainer = nil"
 	}
+}
+menu
+{
+	enabled "showJournal == 0 and getSlotContainerId(3)"
+	name 'WORLD_QUICKLOOT_3'
+	align center bottom
+	ignoreEsc
 	button
 	{
-		area 198 0 52 52
+		area 0 0 52 52
 		bam STONSLOT
-		enabled "getSlotContainerId(3)"
 		tooltip lua	"getGroundItemProperty(3,'name')"
 		tint lua	"getGroundItemProperty(3,'tint')"
 		icon lua	"getGroundItemProperty(3,'icon')"
 		count lua	"getGroundItemProperty(3,'count')"
 		usages lua	"getGroundItemProperty(3,'usages')"
 		action "groundItemClick(3)"
-		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(3,'containerId')"
+		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(3)"
 		actionExit "mouseOverQuicklootContainer = nil"
 	}
+}
+menu
+{
+	enabled "showJournal == 0 and getSlotContainerId(4)"
+	name 'WORLD_QUICKLOOT_4'
+	align center bottom
+	ignoreEsc
 	button
 	{
-		area 252 0 52 52
+		area 0 0 52 52
 		bam STONSLOT
-		enabled "getSlotContainerId(4)"
 		tooltip lua	"getGroundItemProperty(4,'name')"
 		tint lua	"getGroundItemProperty(4,'tint')"
 		icon lua	"getGroundItemProperty(4,'icon')"
 		count lua	"getGroundItemProperty(4,'count')"
 		usages lua	"getGroundItemProperty(4,'usages')"
 		action "groundItemClick(4)"
-		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(4,'containerId')"
+		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(4)"
 		actionExit "mouseOverQuicklootContainer = nil"
 	}
+}
+menu
+{
+	enabled "showJournal == 0 and getSlotContainerId(5)"
+	name 'WORLD_QUICKLOOT_5'
+	align center bottom
+	ignoreEsc
 	button
 	{
-		area 306 0 52 52
+		area 0 0 52 52
 		bam STONSLOT
-		enabled "getSlotContainerId(5)"
 		tooltip lua	"getGroundItemProperty(5,'name')"
 		tint lua	"getGroundItemProperty(5,'tint')"
 		icon lua	"getGroundItemProperty(5,'icon')"
 		count lua	"getGroundItemProperty(5,'count')"
 		usages lua	"getGroundItemProperty(5,'usages')"
 		action "groundItemClick(5)"
-		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(5,'containerId')"
+		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(5)"
 		actionExit "mouseOverQuicklootContainer = nil"
 	}
+}
+menu
+{
+	enabled "showJournal == 0 and getSlotContainerId(6)"
+	name 'WORLD_QUICKLOOT_6'
+	align center bottom
+	ignoreEsc
 	button
 	{
-		area 360 0 52 52
+		area 0 0 52 52
 		bam STONSLOT
-		enabled "getSlotContainerId(6)"
 		tooltip lua	"getGroundItemProperty(6,'name')"
 		tint lua	"getGroundItemProperty(6,'tint')"
 		icon lua	"getGroundItemProperty(6,'icon')"
 		count lua	"getGroundItemProperty(6,'count')"
 		usages lua	"getGroundItemProperty(6,'usages')"
 		action "groundItemClick(6)"
-		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(6,'containerId')"
+		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(6)"
 		actionExit "mouseOverQuicklootContainer = nil"
 	}
+}
+menu
+{
+	enabled "showJournal == 0 and getSlotContainerId(7)"
+	name 'WORLD_QUICKLOOT_7'
+	align center bottom
+	ignoreEsc
 	button
 	{
-		area 414 0 52 52
+		area 0 0 52 52
 		bam STONSLOT
-		enabled "getSlotContainerId(7)"
 		tooltip lua	"getGroundItemProperty(7,'name')"
 		tint lua	"getGroundItemProperty(7,'tint')"
 		icon lua	"getGroundItemProperty(7,'icon')"
 		count lua	"getGroundItemProperty(7,'count')"
 		usages lua	"getGroundItemProperty(7,'usages')"
 		action "groundItemClick(7)"
-		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(7,'containerId')"
+		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(7)"
 		actionExit "mouseOverQuicklootContainer = nil"
 	}
+}
+menu
+{
+	enabled "showJournal == 0 and getSlotContainerId(8)"
+	name 'WORLD_QUICKLOOT_8'
+	align center bottom
+	ignoreEsc
 	button
 	{
-		area 468 0 52 52
+		area 0 0 52 52
 		bam STONSLOT
-		enabled "getSlotContainerId(8)"
 		tooltip lua	"getGroundItemProperty(8,'name')"
 		tint lua	"getGroundItemProperty(8,'tint')"
 		icon lua	"getGroundItemProperty(8,'icon')"
 		count lua	"getGroundItemProperty(8,'count')"
 		usages lua	"getGroundItemProperty(8,'usages')"
 		action "groundItemClick(8)"
-		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(8,'containerId')"
+		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(8)"
 		actionExit "mouseOverQuicklootContainer = nil"
 	}
+}
+menu
+{
+	enabled "showJournal == 0 and getSlotContainerId(9)"
+	name 'WORLD_QUICKLOOT_9'
+	align center bottom
+	ignoreEsc
 	button
 	{
-		area 522 0 52 52
+		area 0 0 52 52
 		bam STONSLOT
-		enabled "getSlotContainerId(9)"
 		tooltip lua	"getGroundItemProperty(9,'name')"
 		tint lua	"getGroundItemProperty(9,'tint')"
 		icon lua	"getGroundItemProperty(9,'icon')"
 		count lua	"getGroundItemProperty(9,'count')"
 		usages lua	"getGroundItemProperty(9,'usages')"
 		action "groundItemClick(9)"
-		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(9,'containerId')"
+		actionEnter "mouseOverQuicklootContainer = getSlotContainerId(9)"
 		actionExit "mouseOverQuicklootContainer = nil"
+	}
+}
+menu
+{
+	enabled "showJournal == 0 and worldScreen:GroundScrollEnabled(1)"
+	name 'WORLD_QUICKLOOT_R'
+	align center bottom
+	ignoreEsc
+	button
+	{
+		area 0 0 34 52
+		bam GUIBTACT
+		frame 42
+		action
+		"
+			worldScreen:OnGroundScroll(1)
+		"
+	}
+}
+menu
+{
+	enabled "showJournal == 0"
+	name 'WORLD_QUICKLOOT'
+	align center bottom
+	ignoreEsc
+	onOpen
+	"
+		setQuickLootOffset()
+		Infinity_PushMenu('WORLD_QUICKLOOT_L')
+		Infinity_PushMenu('WORLD_QUICKLOOT_0')
+		Infinity_PushMenu('WORLD_QUICKLOOT_1')
+		Infinity_PushMenu('WORLD_QUICKLOOT_2')
+		Infinity_PushMenu('WORLD_QUICKLOOT_3')
+		Infinity_PushMenu('WORLD_QUICKLOOT_4')
+		Infinity_PushMenu('WORLD_QUICKLOOT_5')
+		Infinity_PushMenu('WORLD_QUICKLOOT_6')
+		Infinity_PushMenu('WORLD_QUICKLOOT_7')
+		Infinity_PushMenu('WORLD_QUICKLOOT_8')
+		Infinity_PushMenu('WORLD_QUICKLOOT_9')
+		Infinity_PushMenu('WORLD_QUICKLOOT_R')
+	"
+	onClose
+	"
+		Infinity_PopMenu('WORLD_QUICKLOOT_L')
+		Infinity_PopMenu('WORLD_QUICKLOOT_0')
+		Infinity_PopMenu('WORLD_QUICKLOOT_1')
+		Infinity_PopMenu('WORLD_QUICKLOOT_2')
+		Infinity_PopMenu('WORLD_QUICKLOOT_3')
+		Infinity_PopMenu('WORLD_QUICKLOOT_4')
+		Infinity_PopMenu('WORLD_QUICKLOOT_5')
+		Infinity_PopMenu('WORLD_QUICKLOOT_6')
+		Infinity_PopMenu('WORLD_QUICKLOOT_7')
+		Infinity_PopMenu('WORLD_QUICKLOOT_8')
+		Infinity_PopMenu('WORLD_QUICKLOOT_9')
+		Infinity_PopMenu('WORLD_QUICKLOOT_R')
+	"
+	label
+	{
+		area 0 0 0 0
 	}
 }
 menu
@@ -12285,7 +12400,7 @@ function dragMessagesY(newY)
 
 	--lower bound on height, sliced rects can't get too small and we don't want to make the message box invisible.
 	--also don't go too high because it looks bad.
-	if hNew > 79 and hNew < 455 then
+	if hNew > 89 and hNew < 432 then
 		adjustItemGroup({"messagesHandleY"},0,newY,0,0)
 		adjustItemGroup({"messagesRect","worldMessageBox"},0,newY,0,-newY)
 	end
@@ -12308,18 +12423,18 @@ menu
 	label
 	{
 		name 'messagesRect'
-		area 0 0 840 156
+		area 0 0 840 146
 		mosaic box5
 	}
 	label
 	{
-		area 0 152 840 4
+		area 0 142 840 4
 		mosaic box5B
 	}
 	text
 	{
 		name "worldMessageBox"
-		area 12 8 816 140
+		area 12 8 816 130
 		text lua "worldMessageBoxText"
 		text style "normal"
 		scrollbar 'GUISCRC'
