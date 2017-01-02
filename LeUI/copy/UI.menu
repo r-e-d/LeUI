@@ -6955,7 +6955,10 @@ function makeBlankTable(num)
 end
 
 function contingencyComplete()
-	return #bottomSpells == #bottomSpellsPlaceHolder and (currentContingencyCondition or 0) > 0 and (currentContingencyTarget or 0) > 0
+	if showContingency then
+		return #bottomSpells == #bottomSpellsPlaceHolder and (currentContingencyCondition or 0) > 0 and (currentContingencyTarget or 0) > 0
+	end
+	return #bottomSpells == #bottomSpellsPlaceHolder
 end
 
 function getSpellOpacity(num)
@@ -7547,10 +7550,18 @@ menu
 		bam GUIOSTLR
 		text "REMOVE_BUTTON"
 		text style "button"
-		action "popup2Button(engine_mode == 0 and 24485 or 63745, 'REMOVE_BUTTON', function() mageScreen:EraseKnownSpell(bookSpells[selectedSpell].resref); selectedSpell = nil end)"
+		action "popup2Button(engine_mode == 0 and 24485 or 63745, 'REMOVE_BUTTON', function() mageScreen:EraseKnownSpell(selectedSpell.resref); selectedSpell = nil end)"
 	}
 }
-
+`
+function getCastableCount(idx)
+	local nb = bookSpells[idx].castableCount
+	if nb <= 1 then
+		return 0
+	end
+	return nb
+end
+`
 menu
 {
 	name 'MAGE_CHOOSE_CONTINGENCY'
@@ -7588,15 +7599,10 @@ menu
 			label
 			{
 				enabled "bookSpells[4 * rowNumber - 3] ~= nil"
-				area 0 0 -1 -1
+				area 6 5 52 52
 				bam GUIWDBUT
-				align center center
-			}
-			label
-			{
-				enabled "bookSpells[4 * rowNumber - 3] ~= nil"
-				area 0 0 -1 -1
-				bam lua "bookSpells[4 * rowNumber - 3].icon:sub(1, -2) .. 'B'"
+				icon lua "bookSpells[4 * rowNumber - 3].icon:sub(1, -2) .. 'B'"
+				count lua "getCastableCount(4 * rowNumber - 3)"
 				align center center
 			}
 		}
@@ -7606,15 +7612,10 @@ menu
 			label
 			{
 				enabled "bookSpells[4 * rowNumber - 2] ~= nil"
-				area 0 0 -1 -1
+				area 6 5 52 52
 				bam GUIWDBUT
-				align center center
-			}
-			label
-			{
-				enabled "bookSpells[4 * rowNumber - 2] ~= nil"
-				area 0 0 -1 -1
-				bam lua "bookSpells[4 * rowNumber - 2].icon:sub(1, -2) .. 'B'"
+				icon lua "bookSpells[4 * rowNumber - 2].icon:sub(1, -2) .. 'B'"
+				count lua "getCastableCount(4 * rowNumber - 2)"
 				align center center
 			}
 		}
@@ -7624,15 +7625,10 @@ menu
 			label
 			{
 				enabled "bookSpells[4 * rowNumber - 1] ~= nil"
-				area 0 0 -1 -1
+				area 6 5 52 52
 				bam GUIWDBUT
-				align center center
-			}
-			label
-			{
-				enabled "bookSpells[4 * rowNumber - 1] ~= nil"
-				area 0 0 -1 -1
-				bam lua "bookSpells[4 * rowNumber - 1].icon:sub(1, -2) .. 'B'"
+				icon lua "bookSpells[4 * rowNumber - 1].icon:sub(1, -2) .. 'B'"
+				count lua "getCastableCount(4 * rowNumber - 1)"
 				align center center
 			}
 		}
@@ -7642,15 +7638,10 @@ menu
 			label
 			{
 				enabled "bookSpells[4 * rowNumber] ~= nil"
-				area 0 0 -1 -1
+				area 6 5 52 52
 				bam GUIWDBUT
-				align center center
-			}
-			label
-			{
-				enabled "bookSpells[4 * rowNumber] ~= nil"
-				area 0 0 -1 -1
-				bam lua "bookSpells[4 * rowNumber].icon:sub(1, -2) .. 'B'"
+				icon lua "bookSpells[4 * rowNumber].icon:sub(1, -2) .. 'B'"
+				count lua "getCastableCount(4 * rowNumber)"
 				align center center
 			}
 		}
@@ -7664,8 +7655,6 @@ menu
 			contingencyDescription = mageBookStrings[contingencyResRef].tip
 			local idx = 4 * (currentBookSpell - 1) + cellNumber
 			if bookSpells[idx] and #bottomSpells < #bottomSpellsPlaceHolder then
-				Infinity_PlaySound('GAM_24')
-				showMageMemorizationFlash = true
 				mageScreen:SequenceSpell(bookSpells[idx].resref)
 			end
 		"
@@ -7738,7 +7727,6 @@ menu
 		action
 		"
 			if bottomSpells[currentBottomSpell] then
-				Infinity_PlaySound('GAM_44')
 				mageScreen:UnSequenceSpell(bottomSpells[currentBottomSpell].resref)
 				table.remove(sequencerSpells, currentBottomSpell)
 				bottomSpells = sequencerSpells
@@ -7747,6 +7735,7 @@ menu
 	}
 	label
 	{
+		enabled "showContingency == true"
 		area 320 130 240 30
 		text "CONDITION_NORMAL"
 		text style "label"
@@ -7781,6 +7770,7 @@ menu
 				text color H
 			}
 		}
+		enabled "showContingency == true"
 		area 320 172 240 206
 		rowheight 40
 		hidehighlight
@@ -7796,6 +7786,7 @@ menu
 	}
 	label
 	{
+		enabled "showContingency == true"
 		area 572 130 240 30
 		text "TARGET_NORMAL"
 		text style "label"
@@ -7830,6 +7821,7 @@ menu
 				text color H
 			}
 		}
+		enabled "showContingency == true"
 		area 572 172 240 206
 		rowheight 40
 		hidehighlight
@@ -8566,6 +8558,13 @@ menu
 		text "OPTIONS_TITLE"
 		text style "title"
 	}
+	label
+	{
+		area 244 174 378 454
+		bam BIGLOGO
+		align center center
+		frame lua 'getBigLogo()'
+	}
 	button
 	{
 		bam STARTMBT
@@ -8610,7 +8609,7 @@ menu
 	}
 	button
 	{
-		area 284 628 300 44
+		area 278 628 300 44
 		bam GUIOSTCL
 		text "RETURN_GAME_BUTTON"
 		text style "button"
@@ -8663,13 +8662,6 @@ menu
 		"
 			optionsScreen:SaveGame(0)
 		"
-	}
-	label
-	{
-		area 244 174 378 454
-		bam BIGLOGO
-		align center center
-		frame lua 'getBigLogo()'
 	}
 }
 menu
@@ -9111,7 +9103,10 @@ menu
 	name 'CHAPTER'
 	align center center
 	ignoreEsc
-
+	onOpen
+	"
+		Infinity_SetBackground('BACKGROUND')
+	"
 	label
 	{
 		area 0 0 1024 768
@@ -12400,7 +12395,7 @@ function dragMessagesY(newY)
 
 	--lower bound on height, sliced rects can't get too small and we don't want to make the message box invisible.
 	--also don't go too high because it looks bad.
-	if hNew > 89 and hNew < 432 then
+	if hNew > 54 and hNew < 432 then
 		adjustItemGroup({"messagesHandleY"},0,newY,0,0)
 		adjustItemGroup({"messagesRect","worldMessageBox"},0,newY,0,-newY)
 	end
@@ -13043,6 +13038,25 @@ function getPortrait(idx)
 	end
 	return portrait
 end
+function comparePortrait(portrait, curPortrait)
+	if portrait:sub(-1) == 'L' or portrait:sub(-1) == 'M' then
+		portrait = portrait:sub(1, -2)
+	end
+	if curPortrait:sub(-1) == 'L' or curPortrait:sub(-1) == 'M' then
+		curPortrait = curPortrait:sub(1, -2)
+	end
+	return portrait == curPortrait
+end
+function portraitScroll(top, height, contentHeight)
+	if scrollPortrait ~= nil then
+		top = top - 94 * scrollPortrait
+		top = math.min(top, 0)
+		top = math.max(top, height - contentHeight)
+		scrollPortrait = nil
+		return top
+	end
+	return nil
+end
 `
 menu
 {
@@ -13073,13 +13087,14 @@ menu
 			if gender == curGender or gender == nil then
 				table.insert(portraitTable, portrait)
 			end
-			if portrait == curPortrait or portrait:sub(1, -2) .. 'L' == curPortrait then
+			if comparePortrait(portrait, curPortrait) then
 				selPortrait = idx
 			end
 			createCharScreen:IncCurrentPortrait()
 			portrait = createCharScreen:GetCurrentPortrait():upper()
 			idx = idx + 1
 		end
+		scrollPortrait = selPortrait - 1
 	"
 	onClose
 	"
@@ -13140,7 +13155,6 @@ menu
 				area 70 0 -1 -1
 				text lua "getPortrait(rowNumber)"
 				text style 'label'
-				text upper
 				glow lua "rowNumber == mouseoverRow"
 			}
 			label
@@ -13159,6 +13173,39 @@ menu
 		table "portraitTable"
 		var selPortrait
 		scrollbar 'GUISCRC'
+		scrollbar func "portraitScroll"
+	}
+	button
+	{
+		on up
+		action
+		"
+			scrollPortrait = -1
+		"
+	}
+	button
+	{
+		on down
+		action
+		"
+			scrollPortrait = 1
+		"
+	}
+	button
+	{
+		on pageup
+		action
+		"
+			scrollPortrait = -5
+		"
+	}
+	button
+	{
+		on pagedown
+		action
+		"
+			scrollPortrait = 5
+		"
 	}
 	label
 	{
