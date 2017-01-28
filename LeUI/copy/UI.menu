@@ -6055,26 +6055,26 @@ menu
 
 	button
 	{
-		on escape
 		area 278 712 234 44
 		bam GUIOSTUL
-		text "BACK_BUTTON" -- Back
-		text style "button"
-		action
-		"
-			createPartyScreen:OnBackButtonClick()
-		"
-	}
-	button
-	{
-		area 530 712 234 44
-		bam GUIOSTUR
 		text "PLAY_IMPORT_BUTTON" -- Play
 		text style "button"
 		clickable lua "partyImport.playbuttonclickable"
 		action
 		"
 			createPartyScreen:OnDoneButtonClick()
+		"
+	}
+	button
+	{
+		on escape
+		area 530 712 234 44
+		bam GUIOSTUR
+		text "BACK_BUTTON" -- Back
+		text style "button"
+		action
+		"
+			createPartyScreen:OnBackButtonClick()
 		"
 	}
 
@@ -13408,6 +13408,7 @@ menu
 	onOpen
 	"
 		currentChargenClass = nil
+		currentChargenKit = nil
 	"
 	label
 	{
@@ -15888,7 +15889,7 @@ menu
 	{
 		area 110 545 300 44
 		bam GUIOSTCL
-		text "CREDITS_BUTTON"
+		text "CREDITS_MOVIE_BUTTON"
 		text style "button"
 		action "moviesScreen:OnCreditsButtonClick()"
 	}
