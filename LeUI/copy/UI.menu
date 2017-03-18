@@ -4156,6 +4156,10 @@ function toggleSidebar(side)
 	end
 end
 function codeId(code)
+	if showJournal == 0 and e:GetActiveEngine() == worldScreen then
+		wasPaused = worldScreen:CheckIfPaused()
+		return
+	end
 	if code == keybindings[1][1][6] then
 		return 3
 	elseif code == keybindings[1][2][6] then
@@ -4180,9 +4184,6 @@ end
 function keyPress(code)
 	local id = codeId(code)
 	if id ~= nil then
-		if showJournal == 0 and e:GetActiveEngine() == worldScreen then
-			wasPaused = worldScreen:CheckIfPaused()
-		end
 		if showJournal == 1 and id == 0 then
 			e:GetActiveEngine():OnLeftPanelButtonClick(2)
 		end
@@ -4457,20 +4458,24 @@ menu
 	--end clock
 }
 `
-	mouseOverPortrait = -1
+mouseOverPortrait = -1
+draggedPortrait = nil
+function swapPortraits(dest)
+	worldScreen:SwapPortraits(dest,draggedPortrait)
 	draggedPortrait = nil
-	function swapPortraits(dest)
-		worldScreen:SwapPortraits(dest,draggedPortrait)
-		draggedPortrait = nil
-	end
+end
 
-	function getPartyAITooltip()
-		if aiButtonToggle == 1 then
-			return Infinity_FetchString(15918)
-		else
-			return Infinity_FetchString(15917)
-		end
+function getPartyAITooltip()
+	if aiButtonToggle == 1 then
+		return Infinity_FetchString(15918)
 	end
+	return Infinity_FetchString(15917)
+end
+
+function onPortraitRClick(id)
+	if showJournal == 1 then Infinity_OnPortraitRClick(id) end
+	Infinity_OnPortraitRClick(id)
+end
 `
 menu
 {
@@ -4507,7 +4512,7 @@ menu
 		enabled "Infinity_GetNumCharacters() > 0"
 		glow lua "draggedPortrait and draggedPortrait == 0"
 		action "Infinity_OnPortraitLClick(0)"
-		actionAlt "Infinity_OnPortraitRClick(0)"
+		actionAlt "onPortraitRClick(0)"
 		actionDbl "Infinity_OnPortraitDblClick(0)"
 		actionDrag "Infinity_SwapWithPortrait(0)"
 		actionEnter "mouseOverPortrait = 0"
@@ -4525,7 +4530,7 @@ menu
 		enabled "Infinity_GetNumCharacters() > 1"
 		glow lua "draggedPortrait and draggedPortrait == 1"
 		action "Infinity_OnPortraitLClick(1)"
-		actionAlt "Infinity_OnPortraitRClick(1)"
+		actionAlt "onPortraitRClick(1)"
 		actionDbl "Infinity_OnPortraitDblClick(1)"
 		actionDrag "Infinity_SwapWithPortrait(1)"
 		actionEnter "mouseOverPortrait = 1"
@@ -4543,7 +4548,7 @@ menu
 		enabled "Infinity_GetNumCharacters() > 2"
 		glow lua "draggedPortrait and draggedPortrait == 2"
 		action "Infinity_OnPortraitLClick(2)"
-		actionAlt "Infinity_OnPortraitRClick(2)"
+		actionAlt "onPortraitRClick(2)"
 		actionDbl "Infinity_OnPortraitDblClick(2)"
 		actionDrag "Infinity_SwapWithPortrait(2)"
 		actionEnter "mouseOverPortrait = 2"
@@ -4561,7 +4566,7 @@ menu
 		enabled "Infinity_GetNumCharacters() > 3"
 		glow lua "draggedPortrait and draggedPortrait == 3"
 		action "Infinity_OnPortraitLClick(3)"
-		actionAlt "Infinity_OnPortraitRClick(3)"
+		actionAlt "onPortraitRClick(3)"
 		actionDbl "Infinity_OnPortraitDblClick(3)"
 		actionDrag "Infinity_SwapWithPortrait(3)"
 		actionEnter "mouseOverPortrait = 3"
@@ -4579,7 +4584,7 @@ menu
 		enabled "Infinity_GetNumCharacters() > 4"
 		glow lua "draggedPortrait and draggedPortrait == 4"
 		action "Infinity_OnPortraitLClick(4)"
-		actionAlt "Infinity_OnPortraitRClick(4)"
+		actionAlt "onPortraitRClick(4)"
 		actionDbl "Infinity_OnPortraitDblClick(4)"
 		actionDrag "Infinity_SwapWithPortrait(4)"
 		actionEnter "mouseOverPortrait = 4"
@@ -4597,7 +4602,7 @@ menu
 		enabled "Infinity_GetNumCharacters() > 5"
 		glow lua "draggedPortrait and draggedPortrait == 5"
 		action "Infinity_OnPortraitLClick(5)"
-		actionAlt "Infinity_OnPortraitRClick(5)"
+		actionAlt "onPortraitRClick(5)"
 		actionDbl "Infinity_OnPortraitDblClick(5)"
 		actionDrag "Infinity_SwapWithPortrait(5)"
 		actionEnter "mouseOverPortrait = 5"
@@ -12866,7 +12871,7 @@ menu
 	}
 	label
 	{
-		area 775 171 210 330
+		area 775 172 210 330
 		bitmap lua "chargen.portrait"
 	}
 
@@ -12972,7 +12977,7 @@ menu
 	button
 	{
 		on escape
-		area 194 718 234 44
+		area 198 718 234 44
 		text "BACK_BUTTON"
 		text style "button"
 		bam GUIOSTUL
@@ -12982,7 +12987,7 @@ menu
 	button
 	{
 		on escape
-		area 194 718 234 44
+		area 198 718 234 44
 		text "CANCEL_BUTTON"
 		text style "button"
 		bam GUIOSTUL
@@ -13000,7 +13005,7 @@ menu
 	}
 	button
 	{
-		area 650 718 234 44
+		area 646 718 234 44
 		text "CREATE_PARTY_BUTTON"
 		text style "button"
 		bam GUIOSTUR
@@ -13524,7 +13529,7 @@ menu
 	ignoreesc
 	onOpen
 	"
-		currentChargenKit = nil
+		currentChargenKit = 1
 	"
 	label
 	{
@@ -14773,7 +14778,7 @@ menu
 	ignoreesc
 	onOpen
 	"
-		currentChargenCustomSound = nil
+		currentChargenCustomSound = 1
 	"
 	label
 	{
@@ -19565,11 +19570,12 @@ end
 function setSelectedQuest(id)
 	--set to the correct state
 	local quest = quests[entryToQuest[id]]
+	journalMode = 2
 	if(not quest) then return end
+	journalMode = 0
 	for k,objective in pairs(quest.objectives) do
 		for k2,entry in pairs(objective.entries) do
 			if(entry.id == id) then
-				journalMode = 0
 				if entry.stateType == const.ENTRY_TYPE_COMPLETE then
 					journalMode = 1
 				end
