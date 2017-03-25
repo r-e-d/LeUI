@@ -5509,7 +5509,7 @@ menu
 {
 	name 'textflash'
 	opacity lua 'hoverPopup and 1 or getOpacityForInfoBlock(1000)'
-	enabled 'next(textflashes)'
+	enabled 'hoverPopup and 1 or getOpacityForInfoBlock(1000) ~= 0'
 	align center top
 	offset 0 10
 
@@ -9111,6 +9111,10 @@ menu
 	onOpen
 	"
 		Infinity_SetBackground('BACKGROUND')
+	"
+	onClose
+	"
+		Infinity_SetBackground(nil)
 	"
 	label
 	{
@@ -13831,8 +13835,10 @@ menu
 		"
 			if ticksStarting < 10 then
 				if cellNumber == 3 then
+					Infinity_PlaySound('GAM_09')
 					createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, false)
 				elseif cellNumber == 4 then
+					Infinity_PlaySound('GAM_09')
 					createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, true)
 				end
 			end
@@ -14146,8 +14152,10 @@ menu
 			currentChargenThiefSkill = nil
 			if ticksStarting < 10 then
 				if cellNumber == 7 and minusButtonClickable(currentChargenProficiency) then
+					Infinity_PlaySound('GAM_09')
 					createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, false)
 				elseif cellNumber == 8 and plusButtonClickable(currentChargenProficiency) then
+					Infinity_PlaySound('GAM_09')
 					createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, true)
 				end
 			end
@@ -14232,8 +14240,10 @@ menu
 			if ticksStarting < 10 then
 				if createCharScreen:IsThiefSkillPlusMinusButtonClickable() then
 					if cellNumber == 3 then
+						Infinity_PlaySound('GAM_09')
 						createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, false)
 					elseif cellNumber == 4 then
+						Infinity_PlaySound('GAM_09')
 						createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, true)
 					end
 				end
@@ -14580,8 +14590,10 @@ menu
 		action
 		"
 			if cellNumber == 3 then
+				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnMemorizeMageSpellButtonClick(currentChargenMemorizeMageSpell, -1)
 			elseif cellNumber == 4 and spellSelectable(currentChargenMemorizeMageSpell) then
+				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnMemorizeMageSpellButtonClick(currentChargenMemorizeMageSpell, 1)
 			end
 			cellNumber = nil
@@ -14721,8 +14733,10 @@ menu
 		action
 		"
 			if cellNumber == 3 then
+				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnMemorizePriestSpellButtonClick(currentChargenMemorizePriestSpell, -1)
 			elseif cellNumber == 4 then
+				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnMemorizePriestSpellButtonClick(currentChargenMemorizePriestSpell, 1)
 			end
 			cellNumber = nil
@@ -15739,8 +15753,10 @@ menu
 		action
 		"
 			if cellNumber == 3 and chargenHLAPlusMinusFrame(3, currentHLASelection) ~= 3 then
+				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnHLAButtonClick(currentHLASelection, -1)
 			elseif cellNumber == 4 and chargenHLAPlusMinusFrame(4, currentHLASelection) ~= 3 then
+				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnHLAButtonClick(currentHLASelection, 1)
 			end
 			cellNumber = nil
@@ -19607,7 +19623,7 @@ function updateJournalEntry(journalId, recvTime, stateType, chapter, timeStamp)
 	--NOTE this can be placed in a loop if there needs to be more than quest to an entry
 	--this would just mean entryToQuest returns a table that we iterate over
 	local questId = entryToQuest[journalId]
-	if stateType == const.ENTRY_TYPE_INFO or questId == nil then
+	if questId == nil then
 		--add loose entries into the looseEntries table so they still get displayed.
 		local entry = buildEntry(journalId, recvTime, stateType, chapter, timeStamp)
 		table.insert(looseEntries,entry)
@@ -19678,6 +19694,12 @@ function updateJournalEntry(journalId, recvTime, stateType, chapter, timeStamp)
 	end
 	--sort the objectives.
 	table.sort(quest.objectives,compareByRecvTime)
+
+	if stateType == const.ENTRY_TYPE_INFO then
+		--add loose entries into the looseEntries table so they still get displayed.
+		local entry = buildEntry(journalId, recvTime, stateType, chapter, timeStamp)
+		table.insert(looseEntries,entry)
+	end
 
 	--update display data
 	buildQuestDisplay()
