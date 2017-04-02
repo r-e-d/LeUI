@@ -13155,7 +13155,7 @@ menu
 			width 100
 			label
 			{
-				area 0 0 64 90
+				area 0 0 57 90
 				bitmap lua "portraitTable[rowNumber]"
 				glow lua "rowNumber == mouseoverRow"
 			}
@@ -13224,13 +13224,13 @@ menu
 	label
 	{
 		enabled "portraitTable[selPortrait]:sub(-1) == 'L'"
-		area 327 303 95 121
-		rectangle 4
+		area 344 320 64 90
+		bam GUIRSP10
 	}
 	label
 	{
 		enabled "portraitTable[selPortrait]:sub(-1) == 'L'"
-		area 342 318 64 90
+		area 348 322 55 85
 		bitmap lua "portraitTable[selPortrait]:sub(1, -2) .. 'M'"
 	}
 	button
@@ -13925,6 +13925,11 @@ menu
 		action "createCharScreen:OnAbilityRecallButtonClick()"
 	}
 
+	button
+	{
+		on '8'
+		action "createCharScreen:OnCheatyMcCheaterson()"
+	}
 	button
 	{
 		on return
