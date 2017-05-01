@@ -19786,8 +19786,18 @@ function childrenContainsChapter(children)
 end
 function getFinished(row)
 	local rowTab =  questDisplay[row]
-	if rowTab.parent ~= nil then return getFinished(rowTab.parent) end
 	if rowTab.stateType == const.ENTRY_TYPE_COMPLETE then return 1 else return 0 end
+end
+function hasEntry(row, stateType)
+	local rowTab =  questDisplay[row]
+	for _,objective in pairs(rowTab.objectives) do
+		for _,entry in pairs(objective.entries) do
+			if containsChapter(entry.chapters,chapter) and entry.stateType == stateType then
+				return 1
+			end
+		end
+	end
+	return nil
 end
 function questEnabled(row)
 	return questDisplay[row] and questDisplay[row].quest and containsChapter(questDisplay[row].chapters,chapter) and childrenContainsChapter(questDisplay[row].children)
@@ -19933,7 +19943,7 @@ menu
 			width 100
 			label
 			{
-				enabled "questEnabled(rowNumber) and getFinished(rowNumber) == journalMode"
+				enabled "questEnabled(rowNumber) and hasEntry(rowNumber, journalMode + 1)"
 				area 0 0 -1 -1
 				text lua "questDisplay[rowNumber].hidden and '+' or '-'"
 				text style "edit"
@@ -19941,7 +19951,7 @@ menu
 			}
 			label
 			{
-				enabled "questEnabled(rowNumber) and getFinished(rowNumber) == journalMode"
+				enabled "questEnabled(rowNumber) and hasEntry(rowNumber, journalMode + 1)"
 				area 8 0 -1 -1
 				pad 0 0 0 10
 				text lua "getQuestText(rowNumber)"
@@ -19950,7 +19960,7 @@ menu
 			}
 			label
 			{
-				enabled "questEnabled(rowNumber) and getFinished(rowNumber) == journalMode and not questDisplay[rowNumber].hidden"
+				enabled "questEnabled(rowNumber) and hasEntry(rowNumber, journalMode + 1) and not questDisplay[rowNumber].hidden"
 				area 16 24 536 2
 				fill 0 0 0 180
 			}
