@@ -3531,7 +3531,19 @@ end
 function inventorySplitStack(cnt)
 	Infinity_SplitItemStack(characters[id].equipment[selectedSlot].id, cnt, 'slot_inv_' .. characters[id].equipment[selectedSlot].id)
 end
+function isRequesterPlusMinusButtonClickable(minus)
+	local amt = tonumber(itemRequestAmt) or 0
+	if minus then return amt > 1 end
+	return amt < requester.requesterMax
+end
+function requesterPlusMinusButtonClick(minus)
+	local amt = tonumber(itemRequestAmt) or 0
+	local delta = 1
+	if minus then delta = -1 end
+	itemRequestAmt = amt + delta
+end
 
+reverseButtonPosition = false
 requester = {}
 requester.requesterMax = 0
 requester.requesterFunc = nil
@@ -3589,34 +3601,30 @@ menu
 	{
 		bam GUIOSW
 		area 258 180 45 42
-		clickable lua "(tonumber(itemRequestAmt) or 0) < requester.requesterMax"
-		sequence 0
+		clickable lua "isRequesterPlusMinusButtonClickable(not reverseButtonPosition)"
+		sequence lua "reverseButtonPosition and 0 or 4"
 		action
 		"
-			local amt = tonumber(itemRequestAmt) or 0
-			itemRequestAmt = amt + 1
+			requesterPlusMinusButtonClick(not reverseButtonPosition)
 		"
 		actionHold
 		"
-			local amt = tonumber(itemRequestAmt) or 0
-			itemRequestAmt = amt + 1
+			requesterPlusMinusButtonClick(not reverseButtonPosition)
 		"
 	}
 	button
 	{
 		bam GUIOSW
 		area 212 180 45 42
-		clickable lua "(tonumber(itemRequestAmt) or 0) > 1"
-		sequence 1
+		clickable lua "isRequesterPlusMinusButtonClickable(reverseButtonPosition)"
+		sequence lua "reverseButtonPosition and 1 or 3"
 		action
 		"
-			local amt = tonumber(itemRequestAmt) or 0
-			itemRequestAmt = amt - 1
+			requesterPlusMinusButtonClick(reverseButtonPosition)
 		"
 		actionHold
 		"
-			local amt = tonumber(itemRequestAmt) or 0
-			itemRequestAmt = amt - 1
+			requesterPlusMinusButtonClick(reverseButtonPosition)
 		"
 	}
 	button
@@ -7358,11 +7366,12 @@ menu
 				align center center
 			}
 		}
-		area 158 204 256 372
+		area 154 204 266 372
 		name "bookListMage"
+		scrollbar 'GUISBR'
 		rowheight 62
 		hidehighlight
-		table "makeTable(length(bookSpells) / 4)"
+		table "makeTable((#bookSpells - 1) / 4)"
 		var currentBookSpell
 		action
 		"
@@ -7423,51 +7432,6 @@ menu
 				bam SPELFRMS
 				align center center
 			}
-		}
-		column
-		{
-			width 25
-			label
-			{
-				enabled "bottomSpellsPlaceHolder[4 * rowNumber - 2] ~= nil"
-				area 0 0 -1 -1
-				bam SPELFRMS
-				align center center
-			}
-		}
-		column
-		{
-			width 25
-			label
-			{
-				enabled "bottomSpellsPlaceHolder[4 * rowNumber - 1] ~= nil"
-				area 0 0 -1 -1
-				bam SPELFRMS
-				align center center
-			}
-		}
-		column
-		{
-			width 25
-			label
-			{
-				enabled "bottomSpellsPlaceHolder[4 * rowNumber] ~= nil"
-				area 0 0 -1 -1
-				bam SPELFRMS
-				align center center
-			}
-		}
-		enabled "selectedSpell == nil"
-		area 450 204 256 372
-		rowheight 62
-		hidehighlight
-		table "makeTable(length(bottomSpellsPlaceHolder) / 4)"
-	}
-	list
-	{
-		column
-		{
-			width 25
 			label
 			{
 				enabled "bottomSpells[4 * rowNumber - 3] ~= nil"
@@ -7482,6 +7446,13 @@ menu
 			width 25
 			label
 			{
+				enabled "bottomSpellsPlaceHolder[4 * rowNumber - 2] ~= nil"
+				area 0 0 -1 -1
+				bam SPELFRMS
+				align center center
+			}
+			label
+			{
 				enabled "bottomSpells[4 * rowNumber - 2] ~= nil"
 				area 0 0 -1 -1
 				bam lua "bottomSpells[4 * rowNumber - 2].icon"
@@ -7492,6 +7463,13 @@ menu
 		column
 		{
 			width 25
+			label
+			{
+				enabled "bottomSpellsPlaceHolder[4 * rowNumber - 1] ~= nil"
+				area 0 0 -1 -1
+				bam SPELFRMS
+				align center center
+			}
 			label
 			{
 				enabled "bottomSpells[4 * rowNumber - 1] ~= nil"
@@ -7506,6 +7484,13 @@ menu
 			width 25
 			label
 			{
+				enabled "bottomSpellsPlaceHolder[4 * rowNumber] ~= nil"
+				area 0 0 -1 -1
+				bam SPELFRMS
+				align center center
+			}
+			label
+			{
 				enabled "bottomSpells[4 * rowNumber] ~= nil"
 				area 0 0 -1 -1
 				bam lua "bottomSpells[4 * rowNumber].icon"
@@ -7513,12 +7498,13 @@ menu
 				align center center
 			}
 		}
-		area 450 204 256 372
+		area 450 204 266 372
 		name "memorizedListMage"
-		enabled "#bottomSpells ~= 0 and selectedSpell == nil"
+		enabled "selectedSpell == nil"
+		scrollbar 'GUISBR'
 		rowheight 62
 		hidehighlight
-		table "makeTable(length(bottomSpells) / 4)"
+		table "makeTable((#bottomSpellsPlaceHolder - 1) / 4)"
 		var currentBottomSpell
 		action
 		"
@@ -7651,9 +7637,10 @@ menu
 			}
 		}
 		area 54 130 256 248
+		scrollbar 'GUISCRC'
 		rowheight 62
 		hidehighlight
-		table "makeTable(length(bookSpells) / 4)"
+		table "makeTable((#bookSpells - 1) / 4)"
 		var currentBookSpell
 		action
 		"
@@ -8303,7 +8290,7 @@ menu
 	}
 	text
 	{
-		area 138 180 256 22
+		area 138 178 256 22
 		text lua "Infinity_FetchString(11945)"
 		text style "normal_parchment"
 	}
@@ -8353,11 +8340,12 @@ menu
 				align center center
 			}
 		}
-		area 138 204 256 372
+		area 138 200 266 372
 		name "bookListPriest"
+		scrollbar 'GUISBR'
 		rowheight 62
 		hidehighlight
-		table "makeTable(length(characters[id].priestSpells[currentSpellLevel]) / 4)"
+		table "makeTable((#characters[id].priestSpells[currentSpellLevel] - 1) / 4)"
 		var currentBookSpell
 		action
 		"
@@ -8382,7 +8370,7 @@ menu
 	text
 	{
 		enabled "selectedSpell == nil"
-		area 460 180 256 22
+		area 460 178 256 22
 		text lua "Infinity_FetchString(11944)"
 		text style "normal_parchment"
 		text align right top
@@ -8401,7 +8389,7 @@ menu
 	text
 	{
 		enabled "selectedSpell ~= nil"
-		area 420 200 306 362
+		area 420 196 306 362
 		text lua "Infinity_FetchString(selectedSpell.description)"
 		text style "parchment"
 		scrollbar 'GUISBR'
@@ -8418,51 +8406,6 @@ menu
 				bam SPELFRMS
 				align center center
 			}
-		}
-		column
-		{
-			width 25
-			label
-			{
-				enabled "bottomSpellsPlaceHolder[4 * rowNumber - 2] ~= nil"
-				area 0 0 -1 -1
-				bam SPELFRMS
-				align center center
-			}
-		}
-		column
-		{
-			width 25
-			label
-			{
-				enabled "bottomSpellsPlaceHolder[4 * rowNumber - 1] ~= nil"
-				area 0 0 -1 -1
-				bam SPELFRMS
-				align center center
-			}
-		}
-		column
-		{
-			width 25
-			label
-			{
-				enabled "bottomSpellsPlaceHolder[4 * rowNumber] ~= nil"
-				area 0 0 -1 -1
-				bam SPELFRMS
-				align center center
-			}
-		}
-		enabled "selectedSpell == nil"
-		area 460 204 256 372
-		rowheight 62
-		hidehighlight
-		table "makeTable(length(bottomSpellsPlaceHolder) / 4)"
-	}
-	list
-	{
-		column
-		{
-			width 25
 			label
 			{
 				enabled "bottomSpells[4 * rowNumber - 3] ~= nil"
@@ -8477,6 +8420,13 @@ menu
 			width 25
 			label
 			{
+				enabled "bottomSpellsPlaceHolder[4 * rowNumber - 2] ~= nil"
+				area 0 0 -1 -1
+				bam SPELFRMS
+				align center center
+			}
+			label
+			{
 				enabled "bottomSpells[4 * rowNumber - 2] ~= nil"
 				area 0 0 -1 -1
 				bam lua "bottomSpells[4 * rowNumber - 2].icon"
@@ -8487,6 +8437,13 @@ menu
 		column
 		{
 			width 25
+			label
+			{
+				enabled "bottomSpellsPlaceHolder[4 * rowNumber - 1] ~= nil"
+				area 0 0 -1 -1
+				bam SPELFRMS
+				align center center
+			}
 			label
 			{
 				enabled "bottomSpells[4 * rowNumber - 1] ~= nil"
@@ -8501,6 +8458,13 @@ menu
 			width 25
 			label
 			{
+				enabled "bottomSpellsPlaceHolder[4 * rowNumber] ~= nil"
+				area 0 0 -1 -1
+				bam SPELFRMS
+				align center center
+			}
+			label
+			{
 				enabled "bottomSpells[4 * rowNumber] ~= nil"
 				area 0 0 -1 -1
 				bam lua "bottomSpells[4 * rowNumber].icon"
@@ -8508,12 +8472,13 @@ menu
 				align center center
 			}
 		}
-		area 460 204 256 372
+		area 460 200 266 372
 		name "memorizedListPriest"
-		enabled "#bottomSpells ~= 0 and selectedSpell == nil"
+		enabled "selectedSpell == nil"
+		scrollbar 'GUISBR'
 		rowheight 62
 		hidehighlight
-		table "makeTable(length(bottomSpells) / 4)"
+		table "makeTable((#bottomSpellsPlaceHolder - 1) / 4)"
 		var currentBottomSpell
 		action
 		"
@@ -9019,15 +8984,6 @@ menu
 	{
 		area 23 65 1000 564
 		worldmap
-	}
-	label
-	{
-		area 0 0 1044 694
-		mosaic GUIMAPWB
-	}
-	map
-	{
-		area 23 65 1000 564
 		action
 		"
 			worldMapScreen:OnMapMouseDown(eventXCoord,eventYCoord)
@@ -9040,6 +8996,12 @@ menu
 		"
 			worldMapScreen:OnMapMouseMove(eventXCoord,eventYCoord)
 		"
+	}
+	label
+	{
+		area 0 0 1044 694
+		mosaic GUIMAPWB
+		ignoreEvents
 	}
 	label
 	{
@@ -9734,6 +9696,17 @@ function getDonationFrame()
 		return 0
 	end
 end
+function isStorePlusMinusButtonClickable(minus)
+	local amt = tonumber(storeDonateAmountEdit) or 0
+	if minus then return amt > 0 end
+	return amt < game:GetPartyGold()
+end
+function storePlusMinusButtonClick(minus)
+	local amt = tonumber(storeDonateAmountEdit) or 0
+	local delta = 1
+	if minus then delta = -1 end
+	storeDonateAmountEdit = amt + delta
+end
 storeDonateAmountEdit = 0 --no longer used in ui, but the engine needs it.
 `
 menu
@@ -9799,34 +9772,30 @@ menu
 	{
 		bam GUIOSW
 		area 288 482 45 42
-		sequence 0
-		clickable lua "(tonumber(storeDonateAmountEdit) or 0) < game:GetPartyGold()"
+		clickable lua "isStorePlusMinusButtonClickable(not reverseButtonPosition)"
+		sequence lua "reverseButtonPosition and 0 or 4"
 		action
 		"
-			local amt = tonumber(storeDonateAmountEdit) or 0
-			storeDonateAmountEdit = amt + 1
+			storePlusMinusButtonClick(not reverseButtonPosition)
 		"
 		actionHold
 		"
-			local amt = tonumber(storeDonateAmountEdit) or 0
-			storeDonateAmountEdit = amt + 1
+			storePlusMinusButtonClick(not reverseButtonPosition)
 		"
 	}
 	button
 	{
 		bam GUIOSW
 		area 244 482 45 42
-		sequence 1
-		clickable lua "(tonumber(storeDonateAmountEdit) or 0) > 0"
+		clickable lua "isStorePlusMinusButtonClickable(reverseButtonPosition)"
+		sequence lua "reverseButtonPosition and 1 or 3"
 		action
 		"
-			local amt = tonumber(storeDonateAmountEdit) or 0
-			storeDonateAmountEdit = amt - 1
+			storePlusMinusButtonClick(reverseButtonPosition)
 		"
 		actionHold
 		"
-			local amt = tonumber(storeDonateAmountEdit) or 0
-			storeDonateAmountEdit = amt - 1
+			storePlusMinusButtonClick(reverseButtonPosition)
 		"
 	}
 	button
@@ -13817,7 +13786,7 @@ menu
 				area 0 6 45 42
 				bam GUIOSW
 				frame lua "currentCellCheck(3)"
-				sequence 1
+				sequence lua "reverseButtonPosition and 1 or 3"
 			}
 		}
 		column
@@ -13828,7 +13797,7 @@ menu
 				area 0 6 45 42
 				bam GUIOSW
 				frame lua "currentCellCheck(4)"
-				sequence 0
+				sequence lua "reverseButtonPosition and 0 or 4"
 			}
 		}
 		action
@@ -13836,10 +13805,10 @@ menu
 			if ticksStarting < 10 then
 				if cellNumber == 3 then
 					Infinity_PlaySound('GAM_09')
-					createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, false)
+					createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, not reverseButtonPosition)
 				elseif cellNumber == 4 then
 					Infinity_PlaySound('GAM_09')
-					createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, true)
+					createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, reverseButtonPosition)
 				end
 			end
 			cellNumber = nil
@@ -13853,9 +13822,9 @@ menu
 				ticksPassed = ticksPassed + 1
 				if ticksPassed > 7 then
 					if cellNumber == 3 then
-						createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, false)
+						createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, not reverseButtonPosition)
 					elseif cellNumber == 4 then
-						createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, true)
+						createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, reverseButtonPosition)
 					end
 					ticksPassed = 0
 				end
@@ -14137,8 +14106,8 @@ menu
 			{
 				area 0 6 45 42
 				bam GUIOSW
-				frame lua "getMinusFrame(7)"
-				sequence 1
+				frame lua "reverseButtonPosition and getMinusFrame(7) or getPlusFrame(7)"
+				sequence lua "reverseButtonPosition and 1 or 3"
 			}
 		}
 		column
@@ -14148,20 +14117,22 @@ menu
 			{
 				area 0 6 45 42
 				bam GUIOSW
-				sequence 0
-				frame lua "getPlusFrame(8)"
+				frame lua "reverseButtonPosition and getPlusFrame(8) or getMinusFrame(8)"
+				sequence lua "reverseButtonPosition and 0 or 4"
 			}
 		}
 		action
 		"
 			currentChargenThiefSkill = nil
 			if ticksStarting < 10 then
-				if cellNumber == 7 and minusButtonClickable(currentChargenProficiency) then
+				local isClickable1 = reverseButtonPosition and minusButtonClickable or plusButtonClickable
+				local isClickable2 = reverseButtonPosition and plusButtonClickable or minusButtonClickable
+				if cellNumber == 7 and isClickable1(currentChargenProficiency) then
 					Infinity_PlaySound('GAM_09')
-					createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, false)
-				elseif cellNumber == 8 and plusButtonClickable(currentChargenProficiency) then
+					createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, not reverseButtonPosition)
+				elseif cellNumber == 8 and isClickable2(currentChargenProficiency) then
 					Infinity_PlaySound('GAM_09')
-					createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, true)
+					createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, reverseButtonPosition)
 				end
 			end
 			cellNumber = nil
@@ -14175,10 +14146,12 @@ menu
 			if ticksStarting > 10 then
 				ticksPassed = ticksPassed + 1
 				if ticksPassed > 2 then
-					if cellNumber == 7 and minusButtonClickable(currentChargenProficiency) then
-						createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, false)
-					elseif cellNumber == 8 and plusButtonClickable(currentChargenProficiency) then
-						createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, true)
+					local isClickable1 = reverseButtonPosition and minusButtonClickable or plusButtonClickable
+					local isClickable2 = reverseButtonPosition and plusButtonClickable or minusButtonClickable
+					if cellNumber == 7 and isClickable1(currentChargenProficiency) then
+						createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, not reverseButtonPosition)
+					elseif cellNumber == 8 and isClickable2(currentChargenProficiency) then
+						createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, reverseButtonPosition)
 					end
 					ticksPassed = 0
 				end
@@ -14224,7 +14197,7 @@ menu
 				bam GUIOSW
 				enabled "createCharScreen:IsThiefSkillPlusMinusButtonClickable()"
 				frame lua "currentCellCheck(3)"
-				sequence 1
+				sequence lua "reverseButtonPosition and 1 or 3"
 			}
 		}
 		column
@@ -14236,7 +14209,7 @@ menu
 				bam GUIOSW
 				enabled "createCharScreen:IsThiefSkillPlusMinusButtonClickable()"
 				frame lua "currentCellCheck(4)"
-				sequence 0
+				sequence lua "reverseButtonPosition and 0 or 4"
 			}
 		}
 		action
@@ -14246,10 +14219,10 @@ menu
 				if createCharScreen:IsThiefSkillPlusMinusButtonClickable() then
 					if cellNumber == 3 then
 						Infinity_PlaySound('GAM_09')
-						createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, false)
+						createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, not reverseButtonPosition)
 					elseif cellNumber == 4 then
 						Infinity_PlaySound('GAM_09')
-						createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, true)
+						createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, reverseButtonPosition)
 					end
 				end
 			end
@@ -14266,9 +14239,9 @@ menu
 					ticksPassed = ticksPassed + 1
 					if ticksPassed > 2 then
 						if cellNumber == 3 then
-							createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, false)
+							createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, not reverseButtonPosition)
 						elseif cellNumber == 4 then
-							createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, true)
+							createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, reverseButtonPosition)
 						end
 						ticksPassed = 0
 					end
@@ -14513,6 +14486,15 @@ function spellSelectable(row)
 	end
 	return selectable
 end
+function getMageFrame(cellNum, minus)
+	if minus and chargen.choose_spell[cellNum].count > 0 then
+		return true
+	elseif not minus and spellSelectable(cellNum) then
+		return true
+	else
+		return false
+	end
+end
 `
 menu
 {
@@ -14571,8 +14553,8 @@ menu
 			{
 				area 0 4 45 42
 				bam GUIOSW
-				frame lua "chargen.choose_spell[rowNumber].count > 0 and currentCellCheck(3) or 3"
-				sequence 1
+				frame lua "getMageFrame(rowNumber, reverseButtonPosition) and currentCellCheck(3) or 3"
+				sequence lua "reverseButtonPosition and 1 or 3"
 			}
 		}
 		column
@@ -14582,8 +14564,8 @@ menu
 			{
 				area 0 4 45 42
 				bam GUIOSW
-				frame lua "spellSelectable(rowNumber) and currentCellCheck(4) or 3"
-				sequence 0
+				frame lua "getMageFrame(rowNumber, not reverseButtonPosition) and currentCellCheck(4) or 3"
+				sequence lua "reverseButtonPosition and 0 or 4"
 			}
 		}
 		scrollbar 'GUISCRC'
@@ -14594,12 +14576,13 @@ menu
 		var currentChargenMemorizeMageSpell
 		action
 		"
-			if cellNumber == 3 then
+			local delta = reverseButtonPosition and -1 or 1
+			if cellNumber == 3 and (reverseButtonPosition or spellSelectable(currentChargenMemorizeMageSpell)) then
 				Infinity_PlaySound('GAM_09')
-				createCharScreen:OnMemorizeMageSpellButtonClick(currentChargenMemorizeMageSpell, -1)
-			elseif cellNumber == 4 and spellSelectable(currentChargenMemorizeMageSpell) then
+				createCharScreen:OnMemorizeMageSpellButtonClick(currentChargenMemorizeMageSpell, delta)
+			elseif cellNumber == 4 and (not reverseButtonPosition or spellSelectable(currentChargenMemorizeMageSpell)) then
 				Infinity_PlaySound('GAM_09')
-				createCharScreen:OnMemorizeMageSpellButtonClick(currentChargenMemorizeMageSpell, 1)
+				createCharScreen:OnMemorizeMageSpellButtonClick(currentChargenMemorizeMageSpell, -delta)
 			end
 			cellNumber = nil
 		"
@@ -14656,6 +14639,15 @@ function priestMemorizeSpellOrGeneralHelp()
 		end
 	end
 	return Infinity_FetchString(17253)
+end
+function getPriestFrame(cellNum, minus)
+	if minus and chargen.choose_spell[cellNum].count > 0 then
+		return true
+	elseif not minus and chargen.extraSpells > 0 then
+		return true
+	else
+		return false
+	end
 end
 `
 menu
@@ -14714,8 +14706,8 @@ menu
 			{
 				area 0 4 45 42
 				bam GUIOSW
-				frame lua "chargen.choose_spell[rowNumber].count > 0 and currentCellCheck(3) or 3"
-				sequence 1
+				frame lua "getPriestFrame(rowNumber, reverseButtonPosition) and currentCellCheck(3) or 3"
+				sequence lua "reverseButtonPosition and 1 or 3"
 			}
 		}
 		column
@@ -14725,8 +14717,8 @@ menu
 			{
 				area 0 4 45 42
 				bam GUIOSW
-				frame lua "chargen.extraSpells > 0 and currentCellCheck(4) or 3"
-				sequence 0
+				frame lua "getPriestFrame(rowNumber, not reverseButtonPosition) and currentCellCheck(4) or 3"
+				sequence lua "reverseButtonPosition and 0 or 4"
 			}
 		}
 		scrollbar 'GUISCRC'
@@ -14737,12 +14729,13 @@ menu
 		var currentChargenMemorizePriestSpell
 		action
 		"
+			local delta = reverseButtonPosition and -1 or 1
 			if cellNumber == 3 then
 				Infinity_PlaySound('GAM_09')
-				createCharScreen:OnMemorizePriestSpellButtonClick(currentChargenMemorizePriestSpell, -1)
+				createCharScreen:OnMemorizePriestSpellButtonClick(currentChargenMemorizePriestSpell, delta)
 			elseif cellNumber == 4 then
 				Infinity_PlaySound('GAM_09')
-				createCharScreen:OnMemorizePriestSpellButtonClick(currentChargenMemorizePriestSpell, 1)
+				createCharScreen:OnMemorizePriestSpellButtonClick(currentChargenMemorizePriestSpell, -delta)
 			end
 			cellNumber = nil
 		"
@@ -15651,19 +15644,13 @@ function chargenHLADescription()
 	end
 	return chargen.HLAs[currentHLASelection].description
 end
-function chargenHLAPlusMinusFrame(cell, rownumber)
-	if cell == 3 then
-		if chargen.HLAs[rownumber].canSubtract then
-			return currentCellCheck(cell)
-		else
-			return 3
-		end
-	elseif cell == 4 then
-		if chargen.HLAs[rownumber].canAdd then
-			return currentCellCheck(cell)
-		else
-			return 3
-		end
+function chargenHLAPlusMinusFrame(minus, cell, rownumber)
+	if minus and chargen.HLAs[rownumber].canSubtract then
+		return currentCellCheck(cell)
+	elseif not minus and chargen.HLAs[rownumber].canAdd then
+		return currentCellCheck(cell)
+	else
+		return 3
 	end
 end
 `
@@ -15734,8 +15721,8 @@ menu
 			{
 				area 0 4 45 42
 				bam GUIOSW
-				frame lua "chargenHLAPlusMinusFrame(3, rowNumber)"
-				sequence 1
+				frame lua "chargenHLAPlusMinusFrame(reverseButtonPosition, 3, rowNumber)"
+				sequence lua "reverseButtonPosition and 1 or 3"
 			}
 		}
 		column
@@ -15745,8 +15732,8 @@ menu
 			{
 				area 0 4 45 42
 				bam GUIOSW
-				frame lua "chargenHLAPlusMinusFrame(4, rowNumber)"
-				sequence 0
+				frame lua "chargenHLAPlusMinusFrame(not reverseButtonPosition, 4, rowNumber)"
+				sequence lua "reverseButtonPosition and 0 or 4"
 			}
 		}
 		scrollbar 'GUISCRC'
@@ -15757,12 +15744,13 @@ menu
 		var currentHLASelection
 		action
 		"
-			if cellNumber == 3 and chargenHLAPlusMinusFrame(3, currentHLASelection) ~= 3 then
+			local delta = reverseButtonPosition and -1 or 1
+			if cellNumber == 3 and chargenHLAPlusMinusFrame(reverseButtonPosition, 3, currentHLASelection) ~= 3 then
 				Infinity_PlaySound('GAM_09')
-				createCharScreen:OnHLAButtonClick(currentHLASelection, -1)
-			elseif cellNumber == 4 and chargenHLAPlusMinusFrame(4, currentHLASelection) ~= 3 then
+				createCharScreen:OnHLAButtonClick(currentHLASelection, delta)
+			elseif cellNumber == 4 and chargenHLAPlusMinusFrame(not reverseButtonPosition, 4, currentHLASelection) ~= 3 then
 				Infinity_PlaySound('GAM_09')
-				createCharScreen:OnHLAButtonClick(currentHLASelection, 1)
+				createCharScreen:OnHLAButtonClick(currentHLASelection, -delta)
 			end
 			cellNumber = nil
 		"
@@ -16596,10 +16584,10 @@ menu
 
 	button
 	{
-		bam 		GUIOSW
+		bam		GUIOSW
 		on escape
-		area 		592 22 45 42
-		sequence 	2
+		area		592 22 45 42
+		sequence	2
 		action
 		"
 			Infinity_PopMenu()
@@ -19786,18 +19774,8 @@ function childrenContainsChapter(children)
 end
 function getFinished(row)
 	local rowTab =  questDisplay[row]
+	if rowTab.parent ~= nil then return getFinished(rowTab.parent) end
 	if rowTab.stateType == const.ENTRY_TYPE_COMPLETE then return 1 else return 0 end
-end
-function hasEntry(row, stateType)
-	local rowTab =  questDisplay[row]
-	for _,objective in pairs(rowTab.objectives) do
-		for _,entry in pairs(objective.entries) do
-			if containsChapter(entry.chapters,chapter) and entry.stateType == stateType then
-				return 1
-			end
-		end
-	end
-	return nil
 end
 function questEnabled(row)
 	return questDisplay[row] and questDisplay[row].quest and containsChapter(questDisplay[row].chapters,chapter) and childrenContainsChapter(questDisplay[row].children)
@@ -19943,7 +19921,7 @@ menu
 			width 100
 			label
 			{
-				enabled "questEnabled(rowNumber) and hasEntry(rowNumber, journalMode + 1)"
+				enabled "questEnabled(rowNumber) and getFinished(rowNumber) == journalMode"
 				area 0 0 -1 -1
 				text lua "questDisplay[rowNumber].hidden and '+' or '-'"
 				text style "edit"
@@ -19951,7 +19929,7 @@ menu
 			}
 			label
 			{
-				enabled "questEnabled(rowNumber) and hasEntry(rowNumber, journalMode + 1)"
+				enabled "questEnabled(rowNumber) and getFinished(rowNumber) == journalMode"
 				area 8 0 -1 -1
 				pad 0 0 0 10
 				text lua "getQuestText(rowNumber)"
@@ -19960,7 +19938,7 @@ menu
 			}
 			label
 			{
-				enabled "questEnabled(rowNumber) and hasEntry(rowNumber, journalMode + 1) and not questDisplay[rowNumber].hidden"
+				enabled "questEnabled(rowNumber) and getFinished(rowNumber) == journalMode and not questDisplay[rowNumber].hidden"
 				area 16 24 536 2
 				fill 0 0 0 180
 			}
