@@ -7074,10 +7074,13 @@ function refreshMageBook()
 	end
 end
 
-function setMageBookLevel(num)
+function setMageBookLevel(num, noSound)
 	currentBookSpell = 0
 	currentSpellLevel = num
-	mageScreen:SetSpellLevel(num-1)
+	if noSound ~= true then
+		Infinity_PlaySound('GAM_05')
+	end
+	mageScreen:SetSpellLevel(num - 1)
 	selectedSpell = nil
 	refreshMageBook()
 end
@@ -7158,7 +7161,7 @@ menu
 	"
 		showMageMemorizationFlash = false
 		selectedSpell = nil
-		setMageBookLevel(1)
+		setMageBookLevel(1, true)
 		currentAnimationID = 1
 		updateCounterMemorizationSparkles = 1
 		if bookMode == 1 then
@@ -8113,10 +8116,13 @@ function refreshPriestBook()
 	end
 end
 
-function setPriestBookLevel(num)
+function setPriestBookLevel(num, noSound)
 	currentBookSpell = 0
 	currentSpellLevel = num
 	selectedSpell = nil
+	if noSound ~= true then
+		Infinity_PlaySound('GAM_06')
+	end
 	refreshPriestBook()
 end
 
@@ -8151,7 +8157,7 @@ menu
 		showPriestMemorizationFlash = false
 		selectedSpell = nil
 		pushSidebars()
-		setPriestBookLevel(1)
+		setPriestBookLevel(1, true)
 		currentAnimationID = 1
 		updateCounterMemorizationSparkles = 1
 	"
@@ -8970,7 +8976,9 @@ menu
 		"
 	}
 }
-
+`
+singleClickTravel = false
+`
 menu
 {
 	name "WORLD_MAP"
@@ -8987,6 +8995,9 @@ menu
 		action
 		"
 			worldMapScreen:OnMapMouseDown(eventXCoord,eventYCoord)
+			if singleClickTravel and worldMapScreen:IsTravelButtonClickable() then
+				worldMapScreen:TravelToSelected()
+			end
 		"
 		actionDbl
 		"
@@ -13155,6 +13166,17 @@ menu
 	}
 	button
 	{
+		enabled "not CurrentlyInGame()"
+		on "Left Shift"
+		action
+		"
+			if gender == 2 then gender = 1 else gender = 2 end
+			Infinity_PopMenu()
+			createCharScreen:OnCancelButtonClick()
+		"
+	}
+	button
+	{
 		on up
 		action
 		"
@@ -13872,6 +13894,7 @@ menu
 		sequence 0
 		text "REROLL_BUTTON"
 		text style "button"
+		on R
 		action "createCharScreen:OnAbilityReRollButtonClick()"
 	}
 	button
@@ -13881,6 +13904,7 @@ menu
 		sequence 0
 		text "STORE_BUTTON"
 		text style "button"
+		on S
 		action "createCharScreen:OnAbilityStoreButtonClick()"
 	}
 	button
@@ -13890,6 +13914,7 @@ menu
 		sequence 0
 		text "RECALL_BUTTON"
 		text style "button"
+		on C
 		clickable lua "createCharScreen:IsAbilityRecallButtonClickable()"
 		action "createCharScreen:OnAbilityRecallButtonClick()"
 	}
