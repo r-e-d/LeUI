@@ -14352,7 +14352,7 @@ function chooseSpellOrGeneralHelp()
 			return Infinity_FetchString(desc)
 		end
 	end
-	return Infinity_FetchString(engine_mode == 0 and 24314 or 55489)
+	return Infinity_FetchString(engine_mode == 0 and 24314 or 17250)
 end
 
 function nextOrDone()
@@ -14360,6 +14360,33 @@ function nextOrDone()
 		return t('NEXT_BUTTON')
 	else
 		return t('DONE_BUTTON')
+	end
+end
+
+function autopickSpells()
+	local spells = {table.unpack(chargen.choose_spell)}
+	local rnd = {}
+	for k, v in pairs(spells) do
+		local spell = mageSpells[chargen.currentSpellLevelChoice][v.key]
+		local nb = (spell.autopick and 2 or 0) + (spell.specialist and 1 or 0)
+		rnd[spell.name] = math.random() + nb
+		v.k = k
+	end
+
+	table.sort(spells,
+		function(v1, v2)
+			local s1 = mageSpells[chargen.currentSpellLevelChoice][v1.key]
+			local s2 = mageSpells[chargen.currentSpellLevelChoice][v2.key]
+			return rnd[s1.name] > rnd[s2.name]
+		end)
+	for _, v in pairs(spells) do
+		local spell = mageSpells[chargen.currentSpellLevelChoice][v.key]
+		if not v.enabled and chargen.extraSpells > 0 then
+			createCharScreen:OnLearnMageSpellButtonClick(v.k)
+			if chargen.extraSpells == 0 and not createCharScreen:IsDoneButtonClickable() then
+				createCharScreen:OnLearnMageSpellButtonClick(v.k)
+			end
+		end
 	end
 end
 `
@@ -14441,7 +14468,7 @@ menu
 	}
 	label
 	{
-		area 46 116 336 48
+		area 274 56 336 48
 		text lua "t('SPELLS_REMAINING_NORMAL') .. ': ' .. chargen.extraSpells"
 		text style "normal"
 		text align center center
@@ -14453,6 +14480,18 @@ menu
 		text lua "chooseSpellOrGeneralHelp()"
 		text style "normal"
 		scrollbar 'GUISCRC'
+	}
+	button
+	{
+		bam GUIOSTUM
+		area 111 120 201 44
+		text style "button"
+		text lua "Infinity_FetchString(engine_mode == 0 and 24411 or 34210)"
+		clickable lua "chargen.extraSpells > 0"
+		action
+		"
+			autopickSpells()
+		"
 	}
 	button
 	{
@@ -14602,10 +14641,10 @@ menu
 		action
 		"
 			local delta = reverseButtonPosition and -1 or 1
-			if cellNumber == 3 and (reverseButtonPosition or spellSelectable(currentChargenMemorizeMageSpell)) then
+			if cellNumber == 3 and getMageFrame(currentChargenMemorizeMageSpell, reverseButtonPosition) then
 				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnMemorizeMageSpellButtonClick(currentChargenMemorizeMageSpell, delta)
-			elseif cellNumber == 4 and (not reverseButtonPosition or spellSelectable(currentChargenMemorizeMageSpell)) then
+			elseif cellNumber == 4 and getMageFrame(currentChargenMemorizeMageSpell, not reverseButtonPosition) then
 				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnMemorizeMageSpellButtonClick(currentChargenMemorizeMageSpell, -delta)
 			end
@@ -14755,10 +14794,10 @@ menu
 		action
 		"
 			local delta = reverseButtonPosition and -1 or 1
-			if cellNumber == 3 then
+			if cellNumber == 3 and getPriestFrame(currentChargenMemorizePriestSpell, reverseButtonPosition) then
 				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnMemorizePriestSpellButtonClick(currentChargenMemorizePriestSpell, delta)
-			elseif cellNumber == 4 then
+			elseif cellNumber == 4 and getPriestFrame(currentChargenMemorizePriestSpell, not reverseButtonPosition) then
 				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnMemorizePriestSpellButtonClick(currentChargenMemorizePriestSpell, -delta)
 			end
