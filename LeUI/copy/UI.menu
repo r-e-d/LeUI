@@ -3483,7 +3483,7 @@ menu
 	align center center
 	label -- Background
 	{
-		area 0 0 667 234
+		area 0 0 677 234
 		mosaic GUIERR6
 	}
 	label --Title
@@ -10465,7 +10465,7 @@ menu
 	modal
 	label
 	{
-		area 0 0 667 234
+		area 0 0 677 234
 		mosaic GUIERR6
 	}
 	label
@@ -12833,6 +12833,7 @@ menu
 	onOpen
 	"
 		gender = 2
+		randomCharacter = 0
 	"
 	label
 	{
@@ -12939,6 +12940,31 @@ menu
 		text "NAME_BUTTON"
 		text style "button"
 		action "createCharScreen:OnMenuButtonClick()"
+	}
+	button
+	{
+		enabled "createCharScreen:GetCurrentStep() < 15 and type(randChar) == 'function'"
+		area 22 564 340 32
+		bam GUICHLNG
+		text "Random"
+		text style "button"
+		action "randChar()"
+	}
+	button
+	{
+		enabled "randomCharacter == 1 and createCharScreen:GetCurrentStep() == 15 and type(randChar) == 'function'"
+		area 22 564 340 32
+		bam GUICHLNG
+		text "Again?"
+		text style "button"
+		action
+		"
+			randomCharacter = 0
+			while createCharScreen:GetCurrentStep() > 0 do
+				createCharScreen:OnMainBackButtonClick()
+			end
+			randChar()
+		"
 	}
 
 	button
@@ -16386,7 +16412,7 @@ menu
 	onopen "Infinity_FocusTextEdit('ConnectionTCPIPEditArea')"
 	label
 	{
-		area 0 0 667 234
+		area 0 0 677 234
 		mosaic GUIERR6
 	}
 	label --Title
@@ -16711,7 +16737,7 @@ menu
 
 	label
 	{
-		area 0 0 667 234
+		area 0 0 677 234
 		mosaic GUIERR6
 	}
 	label
@@ -19218,7 +19244,7 @@ menu
 	label
 	{
 		mosaic GUIERR6
-		area 0 0 667 234
+		area 0 0 677 234
 	}
 	label
 	{
@@ -20278,7 +20304,7 @@ menu
 	align center center
 	label
 	{
-		area 0 0 667 234
+		area 0 0 677 234
 		mosaic GUIERR6
 	}
 	label
