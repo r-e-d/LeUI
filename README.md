@@ -4,4 +4,4 @@ The goal of this mod is to provide an unified and improved UI for Baldur's Gate 
 
 The mod changes some screens to use a look and feel closer to the 1.3 version of the game. Some other screens use improved design from the UI Discussion and Workshop from the Beamdog forum. It also uses some resources from BG2 vanilla.
 
-See https://forums.beamdog.com/discussion/61571/mod-lefreuts-enhanced-ui-for-bg1ee-bg1ee-sod-bg2ee-and-eet/p1 for more information and screens.
+See https://forums.beamdog.com/discussion/61571/mod-lefreuts-enhanced-ui-for-bg1ee-sod-bg2ee-and-eet/p1 for more information and screens.

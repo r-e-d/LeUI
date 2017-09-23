@@ -9202,7 +9202,6 @@ menu
 	name 'CHAPTER_WAITING_FOR_PROVIDER'
 	modal
 	align center center
-
 	label
 	{
 		area 0 0 406 415
@@ -10537,9 +10536,11 @@ menu
 	}
 	button
 	{
-		area 10 10 32 32
+		area 0 0 52 52
+        align center center
 		bam ROUNDBUT
 		toggle groundItemsButtonToggle
+		tooltip lua "Infinity_FetchString(engine_mode == 0 and 32217 or 99897)"
 		action
 		"
 			if(groundItemsButtonToggle == 1) then
@@ -13203,6 +13204,30 @@ menu
 	}
 	button
 	{
+		on "left"
+		action
+		"
+			selPortrait = selPortrait - 1
+			if selPortrait == 0 then
+				scrollPortrait = nil
+				selPortrait = #portraitTable
+			end
+		"
+	}
+	button
+	{
+		on "right"
+		action
+		"
+			if selPortrait == #portraitTable then
+				scrollPortrait = nil
+				selPortrait = 0
+			end
+			selPortrait = selPortrait + 1
+		"
+	}
+	button
+	{
 		on up
 		action
 		"
@@ -13850,12 +13875,10 @@ menu
 		}
 		action
 		"
-			if ticksStarting < 10 then
+			if ticksStarting <= 10 then
 				if cellNumber == 3 then
-					Infinity_PlaySound('GAM_09')
 					createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, not reverseButtonPosition)
 				elseif cellNumber == 4 then
-					Infinity_PlaySound('GAM_09')
 					createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, reverseButtonPosition)
 				end
 			end
@@ -13866,15 +13889,12 @@ menu
 		actionUpdate
 		"
 			ticksStarting = ticksStarting + 1
+			if ticksStarting == 1 and (cellNumber == 3 or cellNumber == 4) then Infinity_PlaySound('GAM_09') end
 			if ticksStarting > 10 then
-				ticksPassed = ticksPassed + 1
-				if ticksPassed > 7 then
-					if cellNumber == 3 then
-						createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, not reverseButtonPosition)
-					elseif cellNumber == 4 then
-						createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, reverseButtonPosition)
-					end
-					ticksPassed = 0
+				if cellNumber == 3 then
+					createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, not reverseButtonPosition)
+				elseif cellNumber == 4 then
+					createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, reverseButtonPosition)
 				end
 			end
 		"
@@ -14175,14 +14195,12 @@ menu
 		action
 		"
 			currentChargenThiefSkill = nil
-			if ticksStarting < 10 then
+			if ticksStarting <= 10 then
 				local isClickable1 = reverseButtonPosition and minusButtonClickable or plusButtonClickable
 				local isClickable2 = reverseButtonPosition and plusButtonClickable or minusButtonClickable
 				if cellNumber == 7 and isClickable1(currentChargenProficiency) then
-					Infinity_PlaySound('GAM_09')
 					createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, not reverseButtonPosition)
 				elseif cellNumber == 8 and isClickable2(currentChargenProficiency) then
-					Infinity_PlaySound('GAM_09')
 					createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, reverseButtonPosition)
 				end
 			end
@@ -14194,17 +14212,14 @@ menu
 		"
 			currentChargenThiefSkill = nil
 			ticksStarting = ticksStarting + 1
+			if ticksStarting == 1 and (cellNumber == 7 or cellNumber == 8) then Infinity_PlaySound('GAM_09') end
 			if ticksStarting > 10 then
-				ticksPassed = ticksPassed + 1
-				if ticksPassed > 2 then
-					local isClickable1 = reverseButtonPosition and minusButtonClickable or plusButtonClickable
-					local isClickable2 = reverseButtonPosition and plusButtonClickable or minusButtonClickable
-					if cellNumber == 7 and isClickable1(currentChargenProficiency) then
-						createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, not reverseButtonPosition)
-					elseif cellNumber == 8 and isClickable2(currentChargenProficiency) then
-						createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, reverseButtonPosition)
-					end
-					ticksPassed = 0
+				local isClickable1 = reverseButtonPosition and minusButtonClickable or plusButtonClickable
+				local isClickable2 = reverseButtonPosition and plusButtonClickable or minusButtonClickable
+				if cellNumber == 7 and isClickable1(currentChargenProficiency) then
+					createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, not reverseButtonPosition)
+				elseif cellNumber == 8 and isClickable2(currentChargenProficiency) then
+					createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, reverseButtonPosition)
 				end
 			end
 		"
@@ -14266,13 +14281,11 @@ menu
 		action
 		"
 			currentChargenProficiency = nil
-			if ticksStarting < 10 then
+			if ticksStarting <= 10 then
 				if createCharScreen:IsThiefSkillPlusMinusButtonClickable() then
 					if cellNumber == 3 then
-						Infinity_PlaySound('GAM_09')
 						createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, not reverseButtonPosition)
 					elseif cellNumber == 4 then
-						Infinity_PlaySound('GAM_09')
 						createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, reverseButtonPosition)
 					end
 				end
@@ -14286,15 +14299,12 @@ menu
 			currentChargenProficiency = nil
 			if createCharScreen:IsThiefSkillPlusMinusButtonClickable() then
 				ticksStarting = ticksStarting + 1
+				if ticksStarting == 1 and (cellNumber == 3 or cellNumber == 4) then Infinity_PlaySound('GAM_09') end
 				if ticksStarting > 10 then
-					ticksPassed = ticksPassed + 1
-					if ticksPassed > 2 then
-						if cellNumber == 3 then
-							createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, not reverseButtonPosition)
-						elseif cellNumber == 4 then
-							createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, reverseButtonPosition)
-						end
-						ticksPassed = 0
+					if cellNumber == 3 then
+						createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, not reverseButtonPosition)
+					elseif cellNumber == 4 then
+						createCharScreen:OnThiefSkillPlusMinusButtonClick(chargen.thief_skill[currentChargenThiefSkill].id, reverseButtonPosition)
 					end
 				end
 			end
@@ -16211,7 +16221,6 @@ menu
 				text style	"list_parchment"
 				align left center
 			}
-
 		}
 		column
 		{
@@ -16223,7 +16232,6 @@ menu
 				text style	"list_parchment"
 				align left center
 			}
-
 		}
 		column
 		{
@@ -16235,7 +16243,6 @@ menu
 				text style	"list_parchment"
 				align left center
 			}
-
 		}
 		column
 		{
@@ -16247,11 +16254,8 @@ menu
 				text style	"list_parchment"
 				align left center
 			}
-
 		}
-
 		area 72 220 882 364
-
 		rowheight	44
 		table		"mp_shownSessions"
 		var			selectedMp
@@ -16366,19 +16370,6 @@ menu
 		"
 	}
 
-	button -- Back/ Log out
-	{
-		area		532 714 234 44
-		bam			GUIOSTUR
-		text  "BACK_BUTTON"
-		text style	"button"
-		on 			escape
-		action
-		"
-			Infinity_PopMenu();
-			connectionScreen:OnMainCancelButtonClick()
-		"
-	}
 	button -- Join game
 	{
 		area		278 714 234 44
@@ -16397,6 +16388,19 @@ menu
 			else
 				Infinity_PushMenu('CONNECTION_PASSWORD')
 			end
+		"
+	}
+	button -- Back/ Log out
+	{
+		area		532 714 234 44
+		bam			GUIOSTUR
+		text  "BACK_BUTTON"
+		text style	"button"
+		on 			escape
+		action
+		"
+			Infinity_PopMenu();
+			connectionScreen:OnMainCancelButtonClick()
 		"
 	}
 }
@@ -16943,7 +16947,6 @@ menu
 	name 'CONNECTION_WAITING_FOR_PROVIDER'
 	modal
 	align center center
-
 	label
 	{
 		area 0 0 406 415
@@ -16962,7 +16965,6 @@ menu
 	name 'CONNECTION_WAITING_FOR_SERVER'
 	modal
 	align center center
-
 	label
 	{
 		area 0 0 406 415
@@ -19299,7 +19301,7 @@ menu
 	label
 	{
 		area 70 120 264 120
-		text lua "Infinity_FetchString( mpErrorText )"
+		text lua "Infinity_FetchString(mpErrorText)"
 		text style "normal"
 		align center center
 	}
