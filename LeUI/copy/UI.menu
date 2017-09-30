@@ -10537,7 +10537,7 @@ menu
 	button
 	{
 		area 0 0 52 52
-        align center center
+		align center center
 		bam ROUNDBUT
 		toggle groundItemsButtonToggle
 		tooltip lua "Infinity_FetchString(engine_mode == 0 and 32217 or 99897)"
@@ -10622,7 +10622,6 @@ menu
 		action "buttonArray:OnLButtonPressed(7)"
 		actionAlt "buttonArray:OnRButtonPressed(7)"
 	}
-
 	button
 	{
 		area 486 0 52 52
@@ -11422,8 +11421,9 @@ menu
 	button
 	{
 		enabled "gameSaves.files[currentPage + 1] and gameSaves.files[currentPage + 1].hasScreenShot"
-		area 28 136 160 128
+		area 18 136 170 128
 		bitmap res "gameSaves.files[currentPage + 1].screenshot"
+		bitmap area 10 0 170 128
 	}
 	label
 	{
@@ -11480,8 +11480,9 @@ menu
 	button
 	{
 		enabled "gameSaves.files[currentPage + 2] and gameSaves.files[currentPage + 2].hasScreenShot"
-		area 28 280 160 128
+		area 18 280 170 128
 		bitmap res "gameSaves.files[currentPage + 2].screenshot"
+		bitmap area 10 0 170 128
 	}
 	label
 	{
@@ -11538,8 +11539,9 @@ menu
 	button
 	{
 		enabled "gameSaves.files[currentPage + 3] and gameSaves.files[currentPage + 3].hasScreenShot"
-		area 28 425 160 128
+		area 18 425 170 128
 		bitmap res "gameSaves.files[currentPage + 3].screenshot"
+		bitmap area 10 0 170 128
 	}
 	label
 	{
@@ -11596,8 +11598,9 @@ menu
 	button
 	{
 		enabled "gameSaves.files[currentPage + 4] and gameSaves.files[currentPage + 4].hasScreenShot"
-		area 28 569 160 128
+		area 18 569 170 128
 		bitmap res "gameSaves.files[currentPage + 4].screenshot"
+		bitmap area 10 0 170 128
 	}
 	label
 	{
@@ -11855,8 +11858,9 @@ menu
 	button
 	{
 		enabled "gameSaves.files[currentPage + 1] and gameSaves.files[currentPage + 1].hasScreenShot"
-		area 28 136 160 128
+		area 18 136 170 128
 		bitmap res "gameSaves.files[currentPage + 1].screenshot"
+		bitmap area 10 0 170 128
 	}
 	label
 	{
@@ -11913,8 +11917,9 @@ menu
 	button
 	{
 		enabled "gameSaves.files[currentPage + 2] and gameSaves.files[currentPage + 2].hasScreenShot"
-		area 28 280 160 128
+		area 18 280 170 128
 		bitmap res "gameSaves.files[currentPage + 2].screenshot"
+		bitmap area 10 0 170 128
 	}
 	label
 	{
@@ -11971,8 +11976,9 @@ menu
 	button
 	{
 		enabled "gameSaves.files[currentPage + 3] and gameSaves.files[currentPage + 3].hasScreenShot"
-		area 28 425 160 128
+		area 18 425 170 128
 		bitmap res "gameSaves.files[currentPage + 3].screenshot"
+		bitmap area 10 0 170 128
 	}
 	label
 	{
@@ -12029,8 +12035,9 @@ menu
 	button
 	{
 		enabled "gameSaves.files[currentPage + 4] and gameSaves.files[currentPage + 4].hasScreenShot"
-		area 28 569 160 128
+		area 18 569 170 128
 		bitmap res "gameSaves.files[currentPage + 4].screenshot"
+		bitmap area 10 0 170 128
 	}
 	label
 	{
@@ -12314,8 +12321,9 @@ menu
 	button
 	{
 		enabled "gameSaves.files[currentSave].hasScreenShot"
-		area 66 72 162 142
+		area 57 73 170 128
 		bitmap res "gameSaves.files[currentSave].screenshot"
+		bitmap area 10 0 170 128
 	}
 	button
 	{
