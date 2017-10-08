@@ -306,6 +306,7 @@ menu
 	}
 	button
 	{
+		on escape
 		enabled "not CurrentlyInGame()"
 		area 331 546 201 44
 		bam GUIOSTUM
@@ -15128,12 +15129,12 @@ menu
 	ignoreesc
 	onopen
 	"
-		Infinity_FocusTextEdit('charNameEditArea')
 		if chargen.name then
 			charNameEdit = chargen.name
 		else
 			charNameEdit = ''
 		end
+		Infinity_FocusTextEdit('charNameEditArea')
 	"
 	label
 	{
@@ -15154,6 +15155,14 @@ menu
 		text style	"edit"
 		maxlines	1
 		maxchars	20
+		action
+		"
+			--if key_pressed is return
+			if (key_pressed == 13) then
+				return 0
+			end
+			return 1
+		"
 	}
 	button
 	{
