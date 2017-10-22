@@ -4061,12 +4061,38 @@ function itemDescRightButtonAction()
 		Infinity_PopMenu()
 	end
 end
+function computeSplitPosition(str, name)
+	splitPos = str:byte() < 194 and 2 or -1
+	curPos = splitPos
+	while splitPos ~= -1 do
+		local b = str:byte(curPos)
+		if b == nil then
+			splitPos = curPos
+		elseif b >= 240 then
+			curPos = curPos + 3
+		elseif b >= 224 then
+			curPos = curPos + 2
+		elseif b >= 194 then
+			curPos = curPos + 1
+		elseif b == 10 or b == 32 then
+			splitPos = curPos
+		end
+		Infinity_ScaleToText(name)
+		local x,y,w,h = Infinity_GetArea(name)
+		if h > 50 or curPos > str:len() then break end
+		curPos = curPos + 1
+	end
+end
 `
 menu
 {
 	name 'ITEM_DESCRIPTION'
 	align center center
 	modal
+	onOpen
+	"
+		computeSplitPosition(itemDesc.item.description, 'itemDescriptionSplit')
+	"
 	label
 	{
 		area 0 0 864 710
@@ -4075,16 +4101,68 @@ menu
 	label
 	{
 		area 81 11 700 44
-		text lua "itemDesc.item.name"
+		text "ITEM_TITLE"
 		text style title
 	}
 	label
 	{
-		area 402 66 52 52
+		area 95 70 52 52
+		bam STONSLOT
 		icon lua "itemDesc.item.icon"
+	}
+	label
+	{
+		area 282 67 300 50
+		text lua "itemDesc.item.name"
+		text align center center
+		text style "label"
+	}
+	label
+	{
+		name "itemDescriptionSplit"
+		enabled "false"
+		area 0 0 380 -1
+		text lua "itemDesc.item.description:sub(2, curPos)"
+		text style "parchment"
+		scrollbar 'GUISBR'
+	}
+	list
+	{
+		column
+		{
+			width 100
+			label
+			{
+				enabled "rowNumber == 1"
+				area 0 0 40 38
+				bam INITIALS
+				sequence lua "itemDesc.item.description:byte() - 1"
+			}
+			label
+			{
+				enabled "rowNumber == 1"
+				area 44 0 -1 -1
+				text lua "itemDesc.item.description:sub(2, splitPos - 1)"
+				text style "parchment"
+			}
+			label
+			{
+				enabled "rowNumber == 2"
+				area 0 0 -1 -1
+				text lua "itemDesc.item.description:sub(splitPos + 1)"
+				text style "parchment"
+			}
+		}
+		enabled "splitPos ~= -1"
+		rowheight dynamic
+		hidehighlight
+		table "makeTable(1)"
+		area 356 185 430 340
+		scrollbar 'GUISBR'
 	}
 	text
 	{
+		enabled "splitPos == -1"
 		area 356 185 430 340
 		text lua "itemDesc.item.description"
 		scrollbar 'GUISBR'
@@ -8037,6 +8115,10 @@ menu
 	name "POPUP_DETAILS"
 	align center center
 	modal
+	onOpen
+	"
+		computeSplitPosition(Infinity_FetchString(PopupDetails.description), 'popupDetailsSplit')
+	"
 	label
 	{
 		area 0 0 864 710
@@ -8045,18 +8127,74 @@ menu
 	label
 	{
 		area 81 11 700 44
-		text lua "Infinity_FetchString(PopupDetails.name)"
+		text lua "Infinity_FetchString(PopupDetails.title)"
 		text style title
 	}
 	label
 	{
-		area 402 66 52 52
+		area 95 70 52 52
+		bam STONSLOT
+	}
+	label
+	{
+		area 95 70 52 52
 		bam lua "PopupDetails.icon"
 		sequence 0
 		align center center
 	}
+	label
+	{
+		area 282 67 300 50
+		text lua "Infinity_FetchString(PopupDetails.name)"
+		text align center center
+		text style "label"
+	}
+	label
+	{
+		name "popupDetailsSplit"
+		enabled "false"
+		area 0 0 665 -1
+		text lua "Infinity_FetchString(PopupDetails.description):sub(2, curPos)"
+		text style "parchment"
+		scrollbar 'GUISBR'
+	}
+	list
+	{
+		column
+		{
+			width 100
+			label
+			{
+				enabled "rowNumber == 1"
+				area 0 0 40 38
+				bam INITIALS
+				sequence lua "Infinity_FetchString(PopupDetails.description):byte() - 1"
+			}
+			label
+			{
+				enabled "rowNumber == 1"
+				area 44 0 -1 -1
+				text lua "Infinity_FetchString(PopupDetails.description):sub(2, splitPos - 1)"
+				text style "parchment"
+			}
+			label
+			{
+				enabled "rowNumber == 2"
+				area 0 0 -1 -1
+				text lua "Infinity_FetchString(PopupDetails.description):sub(splitPos + 1)"
+				text style "parchment"
+			}
+		}
+		enabled "splitPos ~= -1"
+		rowheight dynamic
+		hidehighlight
+		table "makeTable(1)"
+		area 71 185 715 340
+		scrollbar 'GUISBR'
+	}
 	text
 	{
+		enabled "splitPos == -1"
 		area 71 185 715 340
 		text lua "Infinity_FetchString(PopupDetails.description)"
 		text style "parchment"
@@ -20012,14 +20150,24 @@ menu
 
 	label -- Initial
 	{
+		enabled "chapterText():byte() < 194"
 		area 152 190 40 38
 		bam INITIALS
-		sequence lua "string.byte(chapterText()) - 1"
+		sequence lua "chapterText():byte() - 1"
 	}
 	label -- Chapter
 	{
+		enabled "chapterText():byte() < 194"
 		area 195 190 200 38
-		text lua "string.sub(chapterText(), 2)"
+		text lua "chapterText():sub(2)"
+		text style "parchment"
+		text point 14
+	}
+	label -- Chapter
+	{
+		enabled "chapterText():byte() >= 194"
+		area 152 190 243 38
+		text lua "chapterText()"
 		text style "parchment"
 		text point 14
 	}
