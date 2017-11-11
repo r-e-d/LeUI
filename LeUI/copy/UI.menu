@@ -4363,6 +4363,7 @@ menu
 		"
 		actionalt
 		"
+			fromAreaMap = false
 			worldMapScreen:StartWorldMap(0)
 			e:SelectEngine(worldMapScreen)
 		"
@@ -8896,14 +8897,36 @@ end
 `
 menu
 {
+	name 'AREA_MAP_TITLE2'
+	align center top
+	offset 0 10
+	ignoreesc
+	button
+	{
+		area 0 0 300 44
+		bam GUIOSTCL
+		text style "button"
+		text "WORLD_MAP_BUTTON"
+		action
+		"
+			fromAreaMap = true
+			worldMapScreen:StartWorldMap(0)
+			e:SelectEngine(worldMapScreen)
+		"
+	}
+}
+menu
+{
 	name 'AREA_MAP_TITLE'
 	align right bottom
 	opacity lua "notesAlpha"
-	offset -100 0
+	offset -100 -10
 	ignoreEsc
+	onOpen "Infinity_PushMenu('AREA_MAP_TITLE2')"
+	onClose "Infinity_PopMenu('AREA_MAP_TITLE2')"
 	label
 	{
-		area 36 0 170 36
+		area 36 0 200 36
 		action "mapScreen:ToggleDisplayExploredMap()"
 		text "WORLDMAP_HIGHLIGHT_LABEL"
 		text style "label"
@@ -8911,14 +8934,14 @@ menu
 	}
 	button
 	{
-		area 0 0 206 36
+		area 0 0 236 36
 		bam "4CHECK"
 		sequence lua "mapScreen:DisplayExploredMap() and 0 or 1"
 		action "mapScreen:ToggleDisplayExploredMap()"
 	}
 	label
 	{
-		area 36 40 170 36
+		area 36 40 200 36
 		toggle showNotes
 		text "WORLD_MAP_NOTES_LABEL"
 		text style "label"
@@ -8926,7 +8949,7 @@ menu
 	}
 	button
 	{
-		area 0 40 206 36
+		area 0 40 236 36
 		bam "4CHECK"
 		sequence lua "showNotes == 1 and 0 or 1"
 		toggle showNotes
@@ -9116,6 +9139,7 @@ menu
 	}
 }
 `
+fromAreaMap = false
 singleClickTravel = false
 `
 menu
@@ -9180,11 +9204,12 @@ menu
 		on escape
 		action
 		"
-			if worldMapScreen:IsTravelButtonVisible() then
+			if worldMapScreen:IsTravelButtonVisible() or fromAreaMap then
 				worldMapScreen:OnCancelButtonClick()
 			else
 				e:GetActiveEngine():OnLeftPanelButtonClick(0)
 			end
+			fromAreaMap = false
 		"
 	}
 }
@@ -9195,6 +9220,7 @@ text_CHAPTERSCROLL = ""
 text_CHAPTERSCROLL_timeStart = 0
 text_CHAPTERSCROLL_auto = 1
 function UpdateChapterScroll(top, height, contentHeight)
+	textOpacity = 255
 	if(text_CHAPTERSCROLL_auto == 0) then
 		--defer to default scrolling
 		return nil
@@ -9222,6 +9248,8 @@ menu
 	ignoreEsc
 	onOpen
 	"
+		textOpacity = 0
+		computeSplitPosition(text_CHAPTERSCROLL, 'chapterSplit')
 		Infinity_SetBackground('BACKGROUND')
 	"
 	onClose
@@ -9239,8 +9267,57 @@ menu
 		text lua "chapterTitle"
 		text style "title"
 	}
+	label
+	{
+		name "chapterSplit"
+		enabled "false"
+		area 0 0 782 -1
+		text lua "text_CHAPTERSCROLL:sub(2, curPos)"
+		text style normal
+		scrollbar 'GUISCRC'
+	}
+	list
+	{
+		column
+		{
+			width 100
+			label
+			{
+				enabled "rowNumber == 1"
+				opacity lua "textOpacity"
+				area 0 0 40 38
+				bam INITIALS
+				sequence lua "text_CHAPTERSCROLL:byte() - 1"
+			}
+			label
+			{
+				enabled "rowNumber == 1"
+				opacity lua "textOpacity"
+				area 44 0 -1 -1
+				text lua "text_CHAPTERSCROLL:sub(2, splitPos - 1)"
+				text style normal
+			}
+			label
+			{
+				enabled "rowNumber == 2"
+				opacity lua "textOpacity"
+				area 0 0 -1 -1
+				text lua "text_CHAPTERSCROLL:sub(splitPos + 1)"
+				text style normal
+			}
+		}
+		enabled "splitPos ~= -1"
+		rowheight dynamic
+		hidehighlight
+		table "makeTable(1)"
+		area 96 470 832 224
+		scrollbar 'GUISCRC'
+		scrollbar func 'UpdateChapterScroll'
+		scrollbar hide lua 'text_CHAPTERSCROLL_auto == 1'
+	}
 	text
 	{
+		enabled "splitPos == -1"
 		name "text_CHAPTERSCROLL_item"
 		area 96 470 832 224
 		text lua "text_CHAPTERSCROLL"
@@ -9286,7 +9363,11 @@ menu
 	name 'EPILOGUE'
 	align center center
 	ignoreEsc
-
+	onOpen
+	"
+		textOpacity = 0
+		computeSplitPosition(text_CHAPTERSCROLL, 'epilogueSplit')
+	"
 	label
 	{
 		area 0 0 1024 768
@@ -9297,8 +9378,57 @@ menu
 		area 106 230 210 330
 		bitmap lua "epilogueImage"
 	}
+	label
+	{
+		name "epilogueSplit"
+		enabled "false"
+		area 0 0 490 -1
+		text lua "text_CHAPTERSCROLL:sub(2, curPos)"
+		text style normal
+		scrollbar 'GUISCRC'
+	}
+	list
+	{
+		column
+		{
+			width 100
+			label
+			{
+				enabled "rowNumber == 1"
+				opacity lua "textOpacity"
+				area 0 0 40 38
+				bam INITIALS
+				sequence lua "text_CHAPTERSCROLL:byte() - 1"
+			}
+			label
+			{
+				enabled "rowNumber == 1"
+				opacity lua "textOpacity"
+				area 44 0 -1 -1
+				text lua "text_CHAPTERSCROLL:sub(2, splitPos - 1)"
+				text style normal
+			}
+			label
+			{
+				enabled "rowNumber == 2"
+				opacity lua "textOpacity"
+				area 0 0 -1 -1
+				text lua "text_CHAPTERSCROLL:sub(splitPos + 1)"
+				text style normal
+			}
+		}
+		enabled "splitPos ~= -1"
+		rowheight dynamic
+		hidehighlight
+		table "makeTable(1)"
+		area 424 128 540 534
+		scrollbar 'GUISCRC'
+		scrollbar func 'UpdateChapterScroll'
+		scrollbar hide lua 'text_CHAPTERSCROLL_auto == 1'
+	}
 	text
 	{
+		enabled "splitPos == -1"
 		name "text_CHAPTERSCROLL_item"
 		area 424 128 540 534
 		text lua "text_CHAPTERSCROLL"
@@ -9313,8 +9443,8 @@ menu
 	}
 	button
 	{
-		area 590 708 234 44
-		bam GUIOSTUR
+		area 252 708 234 44
+		bam GUIOSTUL
 		text "DONE_BUTTON"
 		text style "button"
 		clickable lua "chapterScreen:IsDoneButtonClickable()"
@@ -9325,8 +9455,8 @@ menu
 	}
 	button
 	{
-		area 252 708 234 44
-		bam GUIOSTUL
+		area 590 708 234 44
+		bam GUIOSTUR
 		text "REPLAY_BUTTON"
 		text style "button"
 		clickable lua "chapterScreen:IsReplayButtonClickable()"
