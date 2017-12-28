@@ -4,7 +4,7 @@ keyboardMap[9] = "Tab"
 keyboardMap[13] = "Return"
 keyboardMap[32] = "Space"
 
-for i = 33,127 do
+for i = 33,126 do
 	keyboardMap[i] = string.upper(string.char(i))
 end
 
@@ -24,10 +24,10 @@ keyboardMap[1073741904] = "Left"
 keyboardMap[1073741905] = "Down"
 keyboardMap[1073741906] = "Up"
 
-for i = 1073741913,1073741922 do
-	keyboardMap[i] = "Keypad " .. string.char(i - 1073741912)
+for i = 1073741913,1073741921 do
+	keyboardMap[i] = "Keypad " .. (i - 1073741912)
 end
-keyboardMap[1073741922] = "0"
+keyboardMap[1073741922] = "Keypad 0"
 
 keyboardMap[1073742048] = "Left Ctrl"
 keyboardMap[1073742049] = "Left Shift"
