@@ -94,8 +94,6 @@ function buildRecordStats()
 		local pos = s:find(":", 1)
 		table.insert(recordStats, {2,s:sub(1, pos - 1),s:sub(pos + 2)})
 	end
-
-	return recordStats
 end
 function empty(t)
 	if next(t) == nil then
@@ -163,7 +161,11 @@ function buildRecordInfos()
 	table.insert(recordInfos, {1,t("RESISTANCES_LABEL")})
 	table.insert(recordInfos, {1,characters[currentID].proficiencies.resistances})
 
-	return recordInfos
+	if characters[currentID].proficiencies.weaponStyleBonus then
+		table.insert(recordInfos, {1,""})
+		table.insert(recordInfos, {1,t("WEAPON_STYLE_BONUS_LABEL")}) --24444 / 32131
+		table.insert(recordInfos, {1,trim(characters[currentID].proficiencies.weaponStyleBonus)})
+	end
 end
 `
 menu
@@ -178,6 +180,8 @@ menu
 			pushSidebars()
 		end
 		updateAttrTable()
+		buildRecordStats()
+		buildRecordInfos()
 	"
 	onclose
 	"
@@ -245,7 +249,7 @@ menu
 		}
 		area 28 78 296 510
 		rowheight dynamic
-		table "buildRecordStats()"
+		table "recordStats"
 		hidehighlight
 	}
 	list
@@ -281,7 +285,7 @@ menu
 		}
 		area 548 84 296 502
 		rowheight dynamic
-		table "buildRecordInfos()"
+		table "recordInfos"
 		hidehighlight
 		scrollbar 'GUISCRC'
 	}
@@ -1009,8 +1013,8 @@ menu
 	label
 	{
 		area 36 120 788 44
-		text	"CURRENT_SCRIPT_LABEL"
-		text style	'label'
+		text "CURRENT_SCRIPT_LABEL"
+		text style 'label'
 	}
 	text
 	{
@@ -3041,37 +3045,41 @@ menu
 	}
 }
 `
+keyString = ''
 function displayHelp()
 	if key ~= 0 and keybindings[keyCategory][key] ~= nil then
-		return engine_mode == 0 and 24680 or 80750
+		return Infinity_FetchString(engine_mode == 0 and 24680 or 80750)
 	end
-	return 0
+	return keyString
 end
 function getHotkeyName(category,number)
 	local key = keybindings[category][number][4]
 	if category < 5 then
 		local ret = t(key)
 		if ret ~= key then
-			return ret;
+			return ret
 		end
 	end
 	return Infinity_FetchString(key)
 end
 function setKey(newValue)
-	if newValue ~= 0 and newValue ~=27 and keybindings[keyCategory][key] ~= nil then
+	if newValue ~= 0 and newValue ~= 27 and keybindings[keyCategory][key] ~= nil then
 		newValue = math.max(newValue, 0)
 
 		--Resolve conflicts.
+		local chKey = keybindings[keyCategory][key]
 		for catIndex, cat in pairs(keybindings) do
 			for keyIndex, curKey in pairs(cat) do
-				if (curKey[6] == newValue) then
+				if (curKey[6] == newValue and curKey[6] ~= chKey[6]) then
+					local str = Infinity_FetchString(engine_mode == 0 and 24682 or 80751)
+					if str:byte() ~= 32 then str = ' ' .. str end
+					keyString = getStringFromAmbiguousSource(curKey[4]) .. str
 					keybindings[catIndex][keyIndex][6] = 0
 					Infinity_SetKey(0, curKey[1])
 					Infinity_SetINIValue(keycategories[curKey[2]][3], curKey[3], 0)
 				end
 			end
 		end
-		local chKey = keybindings[keyCategory][key]
 		keybindings[keyCategory][key][6] = newValue
 		Infinity_SetKey(newValue, chKey[1])
 		if (newValue ~= keybindings[keyCategory][key][7]) then
@@ -3107,6 +3115,7 @@ menu
 	"
 		key = 0
 		keyCategory = 1
+		keyString = ''
 	"
 	label -- Background
 	{
@@ -3122,7 +3131,7 @@ menu
 	label -- Contextual instruction
 	{
 		area 42 116 778 50
-		text lua "Infinity_FetchString(displayHelp())"
+		text lua "displayHelp()"
 		text style "label"
 	}
 
@@ -3170,6 +3179,7 @@ menu
 		scrollbar	'GUISCRC'
 		action
 		"
+			keyString = ''
 			if keyCategory_Idx ~= -1 then
 				keyCategory = keyCategory_Idx
 			end
@@ -3235,6 +3245,7 @@ menu
 		scrollbar	'GUISCRC'
 		action
 		"
+			keyString = ''
 			if keybindings[keyCategory][key] ~= nil then
 				Infinity_StartKeybind(key)
 			end
@@ -3271,6 +3282,7 @@ menu
 		text "REVERT_BUTTON"
 		action
 		"
+			keyString = ''
 			revertKeymap()
 		"
 	}
@@ -4166,7 +4178,7 @@ menu
 		enabled "splitPos ~= -1"
 		rowheight dynamic
 		hidehighlight
-		table "makeTable(1)"
+		table "makeTable(2)"
 		area 356 185 430 340
 		scrollbar 'GUISBR'
 	}
@@ -4968,7 +4980,7 @@ function inventoryScroll(top, height, contentHeight)
 end
 function makeTable(length)
 	local t = {}
-	for i=0,length do
+	for i=1,length do
 		table.insert(t, 1, '')
 	end
 	return t
@@ -5293,7 +5305,7 @@ menu
 		area 580 578 232 106
 		hidehighlight
 		rowheight	106
-		table		"makeTable(Infinity_GetMaxGroundPage())"
+		table		"makeTable(Infinity_GetMaxGroundPage() + 1)"
 		scrollbar 'GUISCRC'
 		scrollbar func "groundScroll"
 	}
@@ -6312,7 +6324,6 @@ function onCampaignButton(buttonNum)
 end
 
 function getTutorialEnabled()
-	--Tutorial and campaign import should never be enabled for the same campaign - the button uses the same space
 	if eetState == 0 then
 		return logoFrame == 0
 	end
@@ -7233,6 +7244,14 @@ function removeMageSpell(idx)
 	mageScreen:UnmemorizeSpell(bottomSpells[idx].level, bottomSpells[idx].memorizedIndex)
 end
 
+function spellTooltip(spells, cellNumber)
+	local idx = 4 * (currentBookSpell - 1) + cellNumber
+	if spells[idx] then
+		return Infinity_FetchString(spells[idx].name)
+	end
+	return ''
+end
+
 memorizationFlashes =
 {
 	{false, 0, false},
@@ -7470,7 +7489,7 @@ menu
 		scrollbar 'GUISBR'
 		rowheight 62
 		hidehighlight
-		table "makeTable((#bookSpells - 1) / 4)"
+		table "makeTable(math.ceil(#bookSpells / 4))"
 		var currentBookSpell
 		action
 		"
@@ -7490,6 +7509,152 @@ menu
 				selectedSpell = bookSpells[idx]
 			end
 		"
+		actionEnter	"currentBookSpell = mouseoverRow"
+		actionExit	"currentBookSpell = 0"
+	}
+	text
+	{
+		area 154 204 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 1)"
+	}
+	text
+	{
+		area 216 204 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 2)"
+	}
+	text
+	{
+		area 278 204 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 3)"
+	}
+	text
+	{
+		area 340 204 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 4)"
+	}
+	text
+	{
+		area 154 266 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 1)"
+	}
+	text
+	{
+		area 216 266 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 2)"
+	}
+	text
+	{
+		area 278 266 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 3)"
+	}
+	text
+	{
+		area 340 266 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 4)"
+	}
+	text
+	{
+		area 154 328 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 1)"
+	}
+	text
+	{
+		area 216 328 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 2)"
+	}
+	text
+	{
+		area 278 328 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 3)"
+	}
+	text
+	{
+		area 340 328 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 4)"
+	}
+	text
+	{
+		area 154 390 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 1)"
+	}
+	text
+	{
+		area 216 390 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 2)"
+	}
+	text
+	{
+		area 278 390 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 3)"
+	}
+	text
+	{
+		area 340 390 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 4)"
+	}
+	text
+	{
+		area 154 452 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 1)"
+	}
+	text
+	{
+		area 216 452 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 2)"
+	}
+	text
+	{
+		area 278 452 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 3)"
+	}
+	text
+	{
+		area 340 452 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 4)"
+	}
+	text
+	{
+		area 154 514 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 1)"
+	}
+	text
+	{
+		area 216 514 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 2)"
+	}
+	text
+	{
+		area 278 514 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 3)"
+	}
+	text
+	{
+		area 340 514 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bookSpells, 4)"
 	}
 
 	text
@@ -7603,7 +7768,7 @@ menu
 		scrollbar 'GUISBR'
 		rowheight 62
 		hidehighlight
-		table "makeTable((#bottomSpellsPlaceHolder - 1) / 4)"
+		table "makeTable(math.ceil(#bottomSpellsPlaceHolder / 4))"
 		var currentBottomSpell
 		action
 		"
@@ -7616,12 +7781,158 @@ menu
 				end
 			end
 		"
+		actionEnter	"currentBookSpell = mouseoverRow"
+		actionExit	"currentBookSpell = 0"
 	}
 	label
 	{
 		area 294 608 276 50
 		text lua "magePageInfo()"
 		text style "label"
+	}
+	text
+	{
+		area 450 204 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 1)"
+	}
+	text
+	{
+		area 512 204 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 2)"
+	}
+	text
+	{
+		area 574 204 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 3)"
+	}
+	text
+	{
+		area 636 204 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 4)"
+	}
+	text
+	{
+		area 450 266 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 1)"
+	}
+	text
+	{
+		area 512 266 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 2)"
+	}
+	text
+	{
+		area 574 266 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 3)"
+	}
+	text
+	{
+		area 636 266 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 4)"
+	}
+	text
+	{
+		area 450 328 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 1)"
+	}
+	text
+	{
+		area 512 328 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 2)"
+	}
+	text
+	{
+		area 574 328 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 3)"
+	}
+	text
+	{
+		area 636 328 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 4)"
+	}
+	text
+	{
+		area 450 390 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 1)"
+	}
+	text
+	{
+		area 512 390 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 2)"
+	}
+	text
+	{
+		area 574 390 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 3)"
+	}
+	text
+	{
+		area 636 390 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 4)"
+	}
+	text
+	{
+		area 450 452 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 1)"
+	}
+	text
+	{
+		area 512 452 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 2)"
+	}
+	text
+	{
+		area 574 452 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 3)"
+	}
+	text
+	{
+		area 636 452 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 4)"
+	}
+	text
+	{
+		area 450 514 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 1)"
+	}
+	text
+	{
+		area 512 514 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 2)"
+	}
+	text
+	{
+		area 574 514 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 3)"
+	}
+	text
+	{
+		area 636 514 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 4)"
 	}
 
 	button
@@ -7739,13 +8050,14 @@ menu
 		scrollbar 'GUISCRC'
 		rowheight 62
 		hidehighlight
-		table "makeTable((#bookSpells - 1) / 4)"
+		table "makeTable(math.ceil(#bookSpells / 4))"
 		var currentBookSpell
 		action
 		"
 			contingencyDescription = mageBookStrings[contingencyResRef].tip
 			local idx = 4 * (currentBookSpell - 1) + cellNumber
 			if bookSpells[idx] and #bottomSpells < #bottomSpellsPlaceHolder then
+				Infinity_PlaySound('GAM_24')
 				mageScreen:SequenceSpell(bookSpells[idx].resref)
 			end
 		"
@@ -7818,6 +8130,7 @@ menu
 		action
 		"
 			if bottomSpells[currentBottomSpell] then
+				Infinity_PlaySound('GAM_44')
 				mageScreen:UnSequenceSpell(bottomSpells[currentBottomSpell].resref)
 				table.remove(sequencerSpells, currentBottomSpell)
 				bottomSpells = sequencerSpells
@@ -8205,7 +8518,7 @@ menu
 		enabled "splitPos ~= -1"
 		rowheight dynamic
 		hidehighlight
-		table "makeTable(1)"
+		table "makeTable(2)"
 		area 71 185 715 340
 		scrollbar 'GUISBR'
 	}
@@ -8507,7 +8820,7 @@ menu
 		scrollbar 'GUISBR'
 		rowheight 62
 		hidehighlight
-		table "makeTable((#characters[id].priestSpells[currentSpellLevel] - 1) / 4)"
+		table "makeTable(math.ceil(#characters[id].priestSpells[currentSpellLevel] / 4))"
 		var currentBookSpell
 		action
 		"
@@ -8527,6 +8840,152 @@ menu
 				selectedSpell = characters[id].priestSpells[currentSpellLevel][idx]
 			end
 		"
+		actionEnter	"currentBookSpell = mouseoverRow"
+		actionExit	"currentBookSpell = 0"
+	}
+	text
+	{
+		area 138 200 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 1)"
+	}
+	text
+	{
+		area 200 200 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 2)"
+	}
+	text
+	{
+		area 262 200 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 3)"
+	}
+	text
+	{
+		area 324 200 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 4)"
+	}
+	text
+	{
+		area 138 262 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 1)"
+	}
+	text
+	{
+		area 200 262 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 2)"
+	}
+	text
+	{
+		area 262 262 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 3)"
+	}
+	text
+	{
+		area 324 262 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 4)"
+	}
+	text
+	{
+		area 138 324 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 1)"
+	}
+	text
+	{
+		area 200 324 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 2)"
+	}
+	text
+	{
+		area 262 324 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 3)"
+	}
+	text
+	{
+		area 324 324 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 4)"
+	}
+	text
+	{
+		area 138 386 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 1)"
+	}
+	text
+	{
+		area 200 386 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 2)"
+	}
+	text
+	{
+		area 262 386 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 3)"
+	}
+	text
+	{
+		area 324 386 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 4)"
+	}
+	text
+	{
+		area 138 448 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 1)"
+	}
+	text
+	{
+		area 200 448 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 2)"
+	}
+	text
+	{
+		area 262 448 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 3)"
+	}
+	text
+	{
+		area 324 448 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 4)"
+	}
+	text
+	{
+		area 138 510 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 1)"
+	}
+	text
+	{
+		area 200 510 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 2)"
+	}
+	text
+	{
+		area 262 510 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 3)"
+	}
+	text
+	{
+		area 324 510 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(characters[id].priestSpells[currentSpellLevel], 4)"
 	}
 
 	text
@@ -8640,7 +9099,7 @@ menu
 		scrollbar 'GUISBR'
 		rowheight 62
 		hidehighlight
-		table "makeTable((#bottomSpellsPlaceHolder - 1) / 4)"
+		table "makeTable(math.ceil(#bottomSpellsPlaceHolder / 4))"
 		var currentBottomSpell
 		action
 		"
@@ -8653,12 +9112,158 @@ menu
 				end
 			end
 		"
+		actionEnter	"currentBookSpell = mouseoverRow"
+		actionExit	"currentBookSpell = 0"
 	}
 	label
 	{
 		area 294 608 276 50
 		text lua "priestPageInfo()"
 		text style "label"
+	}
+	text
+	{
+		area 460 200 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 1)"
+	}
+	text
+	{
+		area 522 200 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 2)"
+	}
+	text
+	{
+		area 584 200 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 3)"
+	}
+	text
+	{
+		area 646 200 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 4)"
+	}
+	text
+	{
+		area 460 262 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 1)"
+	}
+	text
+	{
+		area 522 262 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 2)"
+	}
+	text
+	{
+		area 584 262 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 3)"
+	}
+	text
+	{
+		area 646 262 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 4)"
+	}
+	text
+	{
+		area 460 324 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 1)"
+	}
+	text
+	{
+		area 522 324 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 2)"
+	}
+	text
+	{
+		area 584 324 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 3)"
+	}
+	text
+	{
+		area 646 324 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 4)"
+	}
+	text
+	{
+		area 460 386 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 1)"
+	}
+	text
+	{
+		area 522 386 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 2)"
+	}
+	text
+	{
+		area 584 386 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 3)"
+	}
+	text
+	{
+		area 646 386 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 4)"
+	}
+	text
+	{
+		area 460 448 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 1)"
+	}
+	text
+	{
+		area 522 448 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 2)"
+	}
+	text
+	{
+		area 584 448 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 3)"
+	}
+	text
+	{
+		area 646 448 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 4)"
+	}
+	text
+	{
+		area 460 510 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 1)"
+	}
+	text
+	{
+		area 522 510 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 2)"
+	}
+	text
+	{
+		area 584 510 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 3)"
+	}
+	text
+	{
+		area 646 510 62 62
+		ignoreEvents
+		tooltip lua "spellTooltip(bottomSpells, 4)"
 	}
 }
 `
@@ -9030,6 +9635,7 @@ menu
 		name "mapNoteEditArea"
 		area 66 112 272 44
 		var mapNoteEdit
+		scrollbar 'GUISCRC'
 		text style "edit"
 	}
 	button
@@ -9242,11 +9848,7 @@ function UpdateChapterScroll(top, height, contentHeight)
 		return nil
 	end
 	local dT = Infinity_GetClockTicks() - text_CHAPTERSCROLL_timeStart
-	local newTop = (dT * -0.006) + height
-	if(newTop + contentHeight + height < height) then
-		return top
-	end
-	return newTop
+	return (dT * -0.006) + height
 end
 function setChapterBackground(id)
 	chapter = math.max(0, Infinity_GetMaxChapterPage())
@@ -9325,11 +9927,15 @@ menu
 		enabled "splitPos ~= -1"
 		rowheight dynamic
 		hidehighlight
-		table "makeTable(1)"
+		table "makeTable(2)"
 		area 96 470 832 224
 		scrollbar 'GUISCRC'
 		scrollbar func 'UpdateChapterScroll'
 		scrollbar hide lua 'text_CHAPTERSCROLL_auto == 1'
+		action
+		"
+			text_CHAPTERSCROLL_auto = 0
+		"
 	}
 	text
 	{
@@ -9436,11 +10042,15 @@ menu
 		enabled "splitPos ~= -1"
 		rowheight dynamic
 		hidehighlight
-		table "makeTable(1)"
+		table "makeTable(2)"
 		area 424 128 540 534
 		scrollbar 'GUISCRC'
 		scrollbar func 'UpdateChapterScroll'
 		scrollbar hide lua 'text_CHAPTERSCROLL_auto == 1'
+		action
+		"
+			text_CHAPTERSCROLL_auto = 0
+		"
 	}
 	text
 	{
@@ -11150,7 +11760,7 @@ menu
 		area 411 8 125 106
 		hidehighlight
 		rowheight	106
-		table		"makeTable(6)"
+		table		"makeTable(7)"
 		scrollbar 'GUISCRC'
 		scrollbar func "groupScroll"
 	}
@@ -11958,7 +12568,7 @@ menu
 		area 0 164 1004 536
 		rowheight 134
 		hidehighlight
-		table "makeTable(length(gameSaves.files) - 1)"
+		table "makeTable(#gameSaves.files)"
 		scrollbar 'GUISCRC'
 		scrollbar func "scrollFunc"
 	}
@@ -12120,7 +12730,7 @@ function makeSaveTable()
 		table.insert(gameSaves.files, 1, newSave)
 		gameSaves.newSave = true
 	end
-	return makeTable(length(gameSaves.files) - 1)
+	return makeTable(#gameSaves.files)
 end
 `
 menu
@@ -12569,7 +13179,6 @@ menu
 			newSaveName = gameSaves.files[currentSave].slotName
 		end
 		Infinity_FocusTextEdit('newSaveNameArea')
-
 	"
 	label
 	{
@@ -13030,7 +13639,7 @@ menu
 		area 28 128 960 536
 		rowheight 134
 		hidehighlight
-		table "makeTable(length(character_select) - 1)"
+		table "makeTable(#character_select)"
 		scrollbar 'GUISCRC'
 		scrollbar func "scrollFunc"
 	}
@@ -13246,7 +13855,7 @@ menu
 		enabled "createCharScreen:GetCurrentStep() < 15 and type(randChar) == 'function'"
 		area 22 564 340 32
 		bam GUICHLNG
-		text "Random"
+		text lua "'???'"
 		text style "button"
 		action "randChar()"
 	}
@@ -13255,7 +13864,7 @@ menu
 		enabled "randomCharacter == 1 and createCharScreen:GetCurrentStep() == 15 and type(randChar) == 'function'"
 		area 22 564 340 32
 		bam GUICHLNG
-		text "Again?"
+		text lua "'???'"
 		text style "button"
 		action
 		"
@@ -14702,7 +15311,7 @@ function autopickSpells()
 	local spells = {table.unpack(chargen.choose_spell)}
 	local rnd = {}
 	for k, v in pairs(spells) do
-		local spell = mageSpells[chargen.currentSpellLevelChoice][v.key]
+		local spell = spellBook[chargen.currentSpellLevelChoice][v.key]
 		local nb = (spell.autopick and 2 or 0) + (spell.specialist and 1 or 0)
 		rnd[spell.name] = math.random() + nb
 		v.k = k
@@ -14710,12 +15319,12 @@ function autopickSpells()
 
 	table.sort(spells,
 		function(v1, v2)
-			local s1 = mageSpells[chargen.currentSpellLevelChoice][v1.key]
-			local s2 = mageSpells[chargen.currentSpellLevelChoice][v2.key]
+			local s1 = spellBook[chargen.currentSpellLevelChoice][v1.key]
+			local s2 = spellBook[chargen.currentSpellLevelChoice][v2.key]
 			return rnd[s1.name] > rnd[s2.name]
 		end)
 	for _, v in pairs(spells) do
-		local spell = mageSpells[chargen.currentSpellLevelChoice][v.key]
+		local spell = spellBook[chargen.currentSpellLevelChoice][v.key]
 		if not v.enabled and chargen.extraSpells > 0 then
 			createCharScreen:OnLearnMageSpellButtonClick(v.k)
 			if chargen.extraSpells == 0 and not createCharScreen:IsDoneButtonClickable() then
@@ -15433,8 +16042,8 @@ menu
 	}
 	label
 	{
-		area 66 46 272 44
-		text "NAME_LABEL"
+		area 70 70 264 42
+		text "ENTER_NAME_LABEL"
 		text style "title"
 	}
 	edit
@@ -16576,7 +17185,7 @@ menu
 	label -- player name
 	{
 		area 300 80 210 40
-		text  "PLAYER_NAME_LABEL"
+		text "PLAYER_NAME_LABEL"
 		text style "label"
 	}
 	label
@@ -16586,13 +17195,12 @@ menu
 	}
 	edit
 	{
-		name		"ConnectionPlayerNameEditArea"
 		area		308 125 196 27
 		var			connectionPlayerNameEdit
 		text style	"edit"
-		text align  center center
+		text align	center center
 		maxlines	1
-		maxchars 	32
+		maxchars	32
 	}
 
 	label -- filter options
@@ -17280,9 +17888,9 @@ menu
 		area		110 479 280 35
 		var			connectionPlayerNameEdit
 		text style	"edit"
-		text align  center center
+		text align	center center
 		maxlines	1
-		maxchars 	32
+		maxchars	32
 	}
 	button
 	{
