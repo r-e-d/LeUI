@@ -21,6 +21,8 @@ function updateAttrTable()
 			{ characters[currentID].attr.wis, 9586 },
 			{ characters[currentID].attr.cha, 9587 }
 		}
+		buildRecordStats()
+		buildRecordInfos()
 	end
 end
 
@@ -162,9 +164,12 @@ function buildRecordInfos()
 	table.insert(recordInfos, {1,characters[currentID].proficiencies.resistances})
 
 	if characters[currentID].proficiencies.weaponStyleBonus then
-		table.insert(recordInfos, {1,""})
-		table.insert(recordInfos, {1,t("WEAPON_STYLE_BONUS_LABEL")}) --24444 / 32131
-		table.insert(recordInfos, {1,trim(characters[currentID].proficiencies.weaponStyleBonus)})
+		local weaponStyleBonus = trim(characters[currentID].proficiencies.weaponStyleBonus)
+		if weaponStyleBonus ~= "" then
+			table.insert(recordInfos, {1,""})
+			table.insert(recordInfos, {1,t("WEAPON_STYLE_BONUS_LABEL")})
+			table.insert(recordInfos, {1,weaponStyleBonus})
+		end
 	end
 end
 `
@@ -180,8 +185,6 @@ menu
 			pushSidebars()
 		end
 		updateAttrTable()
-		buildRecordStats()
-		buildRecordInfos()
 	"
 	onclose
 	"
@@ -13741,6 +13744,10 @@ menu
 	ignoreesc
 	onOpen
 	"
+		gender = nil
+		if type(generateAllChargenOptions) == 'function' then
+			generateAllChargenOptions()
+		end
 		gender = 2
 		randomCharacter = 0
 	"
@@ -13937,9 +13944,11 @@ menu
 	name 'CHARGEN_GENDER'
 	onOpen
 	"
-		createCharScreen:OnGenderSelectButtonClick(gender)
-		Infinity_PopMenu()
-		createCharScreen:OnDoneButtonClick()
+		if gender ~= nil then
+			createCharScreen:OnGenderSelectButtonClick(gender)
+			Infinity_PopMenu()
+			createCharScreen:OnDoneButtonClick()
+		end
 	"
 	label
 	{
@@ -14349,13 +14358,19 @@ menu
 }
 `
 function classOrGeneralHelp()
-	class = chargen.class[currentChargenClass]
+	class = allChargenClasses[currentChargenClass]
 	if class then
 		return Infinity_FetchString(class.desc)
 	else
 		--only bit that may need to change for dual class! :)
 		return Infinity_FetchString(17242)
 	end
+end
+function classDisabled(id)
+	if type(getClassDisabled) == 'function' then
+		return getClassDisabled(id)
+	end
+	return false
 end
 `
 menu
@@ -14366,6 +14381,9 @@ menu
 	ignoreesc
 	onOpen
 	"
+		if type(generateAllChargenOptions) ~= 'function' or createCharScreen:GetCurrentStep() == const.STEP_DUALCLASS_CLASS then
+			allChargenClasses = chargen.class
+		end
 		currentChargenClass = nil
 		currentChargenKit = nil
 	"
@@ -14387,27 +14405,37 @@ menu
 			width 100
 			label
 			{
-				enabled "rowNumber ~= currentChargenClass and rowNumber ~= hoverChargenClass"
+				enabled "classDisabled(allChargenClasses[rowNumber].id)"
+				opacity lua "50"
 				area 8 0 340 44
-				text lua "Infinity_FetchString(chargen.class[rowNumber].name)"
+				text lua "Infinity_FetchString(allChargenClasses[rowNumber].name)"
 				text style "list"
 				text align center center
 				text color D
 			}
 			label
 			{
-				enabled "rowNumber == currentChargenClass and rowNumber ~= hoverChargenClass"
+				enabled "rowNumber ~= currentChargenClass and rowNumber ~= hoverChargenClass and not classDisabled(allChargenClasses[rowNumber].id)"
 				area 8 0 340 44
-				text lua "Infinity_FetchString(chargen.class[rowNumber].name)"
+				text lua "Infinity_FetchString(allChargenClasses[rowNumber].name)"
+				text style "list"
+				text align center center
+				text color D
+			}
+			label
+			{
+				enabled "rowNumber == currentChargenClass and rowNumber ~= hoverChargenClass and not classDisabled(allChargenClasses[rowNumber].id)"
+				area 8 0 340 44
+				text lua "Infinity_FetchString(allChargenClasses[rowNumber].name)"
 				text style "list"
 				text align center center
 				text color S
 			}
 			label
 			{
-				enabled "rowNumber == hoverChargenClass"
+				enabled "rowNumber == hoverChargenClass and not classDisabled(allChargenClasses[rowNumber].id)"
 				area 8 0 340 44
-				text lua "Infinity_FetchString(chargen.class[rowNumber].name)"
+				text lua "Infinity_FetchString(allChargenClasses[rowNumber].name)"
 				text style "list"
 				text align center center
 				text color H
@@ -14415,8 +14443,9 @@ menu
 		}
 		action
 		"
-			if chargen.class[currentChargenClass] then
-				createCharScreen:OnClassSelectButtonClick(chargen.class[currentChargenClass].id)
+			createCharScreen:OnClassSelectButtonClick(0)
+			if allChargenClasses[currentChargenClass] and not classDisabled(allChargenClasses[currentChargenClass].id) then
+				createCharScreen:OnClassSelectButtonClick(allChargenClasses[currentChargenClass].id)
 			end
 		"
 		actionEnter	"hoverChargenClass = mouseoverRow"
@@ -14424,7 +14453,7 @@ menu
 		rowheight 44
 		hidehighlight
 		area 42 192 340 414
-		table "chargen.class"
+		table "allChargenClasses"
 		var currentChargenClass
 		scrollbar 'GUISCRC'
 	}
@@ -14467,12 +14496,18 @@ menu
 }
 `
 function kitOrGeneralHelp()
-	kit = chargen.kit[currentChargenKit]
+	kit = allChargenKits[currentChargenKit]
 	if kit then
 		return Infinity_FetchString(kit.desc)
 	else
 		return Infinity_FetchString(17242)
 	end
+end
+function kitDisabled(id)
+	if type(getKitDisabled) == 'function' then
+		return getKitDisabled(id)
+	end
+	return false
 end
 `
 menu
@@ -14483,6 +14518,11 @@ menu
 	ignoreesc
 	onOpen
 	"
+		if type(generateAllChargenOptions) == 'function' and allChargenClasses[currentChargenClass] ~= nil then
+			allChargenKits = allChargenClasses[currentChargenClass].kits
+		else
+			allChargenKits = chargen.kit
+		end
 		currentChargenKit = 1
 	"
 	label
@@ -14503,27 +14543,37 @@ menu
 			width 100
 			label
 			{
-				enabled "rowNumber ~= currentChargenKit and rowNumber ~= hoverChargenKit"
+				enabled "kitDisabled(allChargenKits[rowNumber].id)"
+				opacity lua "50"
 				area 8 0 340 44
-				text lua "Infinity_FetchString(chargen.kit[rowNumber].name)"
+				text lua "Infinity_FetchString(allChargenKits[rowNumber].name)"
 				text style "list"
 				text align center center
 				text color D
 			}
 			label
 			{
-				enabled "rowNumber == currentChargenKit and rowNumber ~= hoverChargenKit"
+				enabled "rowNumber ~= currentChargenKit and rowNumber ~= hoverChargenKit and not kitDisabled(allChargenKits[rowNumber].id)"
 				area 8 0 340 44
-				text lua "Infinity_FetchString(chargen.kit[rowNumber].name)"
+				text lua "Infinity_FetchString(allChargenKits[rowNumber].name)"
+				text style "list"
+				text align center center
+				text color D
+			}
+			label
+			{
+				enabled "rowNumber == currentChargenKit and rowNumber ~= hoverChargenKit and not kitDisabled(allChargenKits[rowNumber].id)"
+				area 8 0 340 44
+				text lua "Infinity_FetchString(allChargenKits[rowNumber].name)"
 				text style "list"
 				text align center center
 				text color S
 			}
 			label
 			{
-				enabled "rowNumber == hoverChargenKit"
+				enabled "rowNumber == hoverChargenKit and not kitDisabled(allChargenKits[rowNumber].id)"
 				area 8 0 340 44
-				text lua "Infinity_FetchString(chargen.kit[rowNumber].name)"
+				text lua "Infinity_FetchString(allChargenKits[rowNumber].name)"
 				text style "list"
 				text align center center
 				text color H
@@ -14531,8 +14581,8 @@ menu
 		}
 		action
 		"
-			if chargen.kit[currentChargenKit] then
-				createCharScreen:OnKitSelectButtonClick(chargen.kit[currentChargenKit].id)
+			if allChargenKits[currentChargenKit] and not kitDisabled(allChargenKits[currentChargenKit].id) then
+				createCharScreen:OnKitSelectButtonClick(allChargenKits[currentChargenKit].id)
 			end
 		"
 		actionEnter	"hoverChargenKit = mouseoverRow"
@@ -14540,7 +14590,7 @@ menu
 		rowheight 44
 		hidehighlight
 		area 42 192 340 414
-		table "chargen.kit"
+		table "allChargenKits"
 		var currentChargenKit
 		scrollbar 'GUISCRC'
 	}
@@ -14558,7 +14608,7 @@ menu
 		area 210 653 234 44
 		text style "button"
 		text "DONE_BUTTON"
-		clickable lua "createCharScreen:IsDoneButtonClickable() and currentChargenKit"
+		clickable lua "createCharScreen:IsDoneButtonClickable() and currentChargenKit and not kitDisabled(allChargenKits[currentChargenKit].id)"
 		action
 		"
 			Infinity_PopMenu()
@@ -14581,12 +14631,18 @@ menu
 }
 `
 function alignmentOrGeneralHelp()
-	alignment = chargen.alignment[currentChargenAlignment]
+	alignment = allChargenAlignments[currentChargenAlignment]
 	if alignment then
 		return Infinity_FetchString(alignment.desc)
 	else
 		return Infinity_FetchString(9602)
 	end
+end
+function alignmentDisabled(id)
+	if type(getAlignmentDisabled) == 'function' then
+		return getAlignmentDisabled(id)
+	end
+	return false
 end
 `
 menu
@@ -14597,6 +14653,9 @@ menu
 	ignoreesc
 	onOpen
 	"
+		if type(generateAllChargenOptions) ~= 'function' then
+			allChargenAlignments = chargen.alignment
+		end
 		currentChargenAlignment = nil
 	"
 	label
@@ -14617,27 +14676,37 @@ menu
 			width 100
 			label
 			{
-				enabled "rowNumber ~= currentChargenAlignment and rowNumber ~= hoverChargenAlignment"
+				enabled "alignmentDisabled(allChargenAlignments[rowNumber].id)"
+				opacity lua "50"
 				area 8 0 340 44
-				text lua "Infinity_FetchString(chargen.alignment[rowNumber].name)"
+				text lua "Infinity_FetchString(allChargenAlignments[rowNumber].name)"
 				text style "list"
 				text align center center
 				text color D
 			}
 			label
 			{
-				enabled "rowNumber == currentChargenAlignment and rowNumber ~= hoverChargenAlignment"
+				enabled "rowNumber ~= currentChargenAlignment and rowNumber ~= hoverChargenAlignment and not alignmentDisabled(allChargenAlignments[rowNumber].id)"
 				area 8 0 340 44
-				text lua "Infinity_FetchString(chargen.alignment[rowNumber].name)"
+				text lua "Infinity_FetchString(allChargenAlignments[rowNumber].name)"
+				text style "list"
+				text align center center
+				text color D
+			}
+			label
+			{
+				enabled "rowNumber == currentChargenAlignment and rowNumber ~= hoverChargenAlignment and not alignmentDisabled(allChargenAlignments[rowNumber].id)"
+				area 8 0 340 44
+				text lua "Infinity_FetchString(allChargenAlignments[rowNumber].name)"
 				text style "list"
 				text align center center
 				text color S
 			}
 			label
 			{
-				enabled "rowNumber == hoverChargenAlignment"
+				enabled "rowNumber == hoverChargenAlignment and not alignmentDisabled(allChargenAlignments[rowNumber].id)"
 				area 8 0 340 44
-				text lua "Infinity_FetchString(chargen.alignment[rowNumber].name)"
+				text lua "Infinity_FetchString(allChargenAlignments[rowNumber].name)"
 				text style "list"
 				text align center center
 				text color H
@@ -14645,8 +14714,9 @@ menu
 		}
 		action
 		"
-			if chargen.alignment[currentChargenAlignment] then
-				createCharScreen:OnAlignmentSelectButtonClick(chargen.alignment[currentChargenAlignment].id)
+			createCharScreen:OnAlignmentSelectButtonClick(0)
+			if allChargenAlignments[currentChargenAlignment] and not alignmentDisabled(allChargenAlignments[currentChargenAlignment].id) then
+				createCharScreen:OnAlignmentSelectButtonClick(allChargenAlignments[currentChargenAlignment].id)
 			end
 		"
 		actionEnter	"hoverChargenAlignment = mouseoverRow"
@@ -14654,7 +14724,7 @@ menu
 		rowheight 44
 		hidehighlight
 		area 42 192 340 414
-		table "chargen.alignment"
+		table "allChargenAlignments"
 		var currentChargenAlignment
 		scrollbar 'GUISCRC'
 	}
@@ -14908,7 +14978,7 @@ menu
 }
 `
 function proficiencyOrGeneralHelp()
-	local prof = chargen.proficiency[currentChargenProficiency]
+	local prof = allChargenProficiencies[currentChargenProficiency]
 	local skill = chargen.thief_skill[currentChargenThiefSkill]
 	if prof and prof.desc ~= -1 then
 		return Infinity_FetchString(prof.desc)
@@ -14924,6 +14994,20 @@ function proficiencyOrGeneralHelp()
 	else
 		return Infinity_FetchString(engine_mode == 0 and 24315 or 9588)
 	end
+end
+
+function proficiencyEnabled(row)
+	if type(getTranslatedProficiencyEnabled) == 'function' then
+		return getTranslatedProficiencyEnabled(row)
+	end
+	return true
+end
+
+function proficiencyValue(row)
+	if type(getTranslatedProficiencyValue) == 'function' then
+		return getTranslatedProficiencyValue(row)
+	end
+	return chargen.proficiency[row].value
 end
 
 function getProficienciesTitle()
@@ -14942,6 +15026,12 @@ menu
 	ignoreesc
 	onOpen
 	"
+		if type(generateAllChargenOptions) ~= 'function' or chargen.levelingUp or createCharScreen:GetCurrentStep() == const.STEP_DUALCLASS_PROFICIENCIES then
+			allChargenProficiencies = chargen.proficiency
+			profRowDict = nil
+		else
+			translateProficiencyRows()
+		end
 		currentChargenProficiency = nil
 		currentChargenThiefSkill = nil
 		ticksPassed = 0
@@ -15013,7 +15103,7 @@ menu
 			label
 			{
 				area 0 0 -1 55
-				text lua "Infinity_FetchString(chargen.proficiency[rowNumber].name)"
+				text lua "Infinity_FetchString(allChargenProficiencies[rowNumber].name)"
 				text style "normal"
 				align right center
 			}
@@ -15027,7 +15117,7 @@ menu
 				area 0 16 16 22
 				frame 4
 				align center center
-				enabled "chargen.proficiency[rowNumber].value > 4"
+				enabled "proficiencyValue(rowNumber) > 4"
 			}
 		}
 		column
@@ -15039,7 +15129,7 @@ menu
 				area 0 16 16 22
 				frame 4
 				align center center
-				enabled "chargen.proficiency[rowNumber].value > 3"
+				enabled "proficiencyValue(rowNumber) > 3"
 			}
 		}
 		column
@@ -15051,7 +15141,7 @@ menu
 				area 0 16 16 22
 				frame 4
 				align center center
-				enabled "chargen.proficiency[rowNumber].value > 2"
+				enabled "proficiencyValue(rowNumber) > 2"
 			}
 		}
 		column
@@ -15063,7 +15153,7 @@ menu
 				area 0 16 16 22
 				frame 4
 				align center center
-				enabled "chargen.proficiency[rowNumber].value > 1"
+				enabled "proficiencyValue(rowNumber) > 1"
 			}
 		}
 		column
@@ -15075,7 +15165,7 @@ menu
 				area 0 16 16 22
 				frame 4
 				align center center
-				enabled "chargen.proficiency[rowNumber].value > 0"
+				enabled "proficiencyValue(rowNumber) > 0"
 			}
 		}
 		column
@@ -15087,6 +15177,7 @@ menu
 				bam GUIOSW
 				frame lua "reverseButtonPosition and getMinusFrame(7) or getPlusFrame(7)"
 				sequence lua "reverseButtonPosition and 1 or 3"
+				enabled "proficiencyEnabled(rowNumber)"
 			}
 		}
 		column
@@ -15098,6 +15189,7 @@ menu
 				bam GUIOSW
 				frame lua "reverseButtonPosition and getPlusFrame(8) or getMinusFrame(8)"
 				sequence lua "reverseButtonPosition and 0 or 4"
+				enabled "proficiencyEnabled(rowNumber)"
 			}
 		}
 		action
@@ -15107,9 +15199,9 @@ menu
 				local isClickable1 = reverseButtonPosition and minusButtonClickable or plusButtonClickable
 				local isClickable2 = reverseButtonPosition and plusButtonClickable or minusButtonClickable
 				if cellNumber == 7 and isClickable1(currentChargenProficiency) then
-					createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, not reverseButtonPosition)
+					createCharScreen:OnProficiencyPlusMinusButtonClick(allChargenProficiencies[currentChargenProficiency].id, not reverseButtonPosition)
 				elseif cellNumber == 8 and isClickable2(currentChargenProficiency) then
-					createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, reverseButtonPosition)
+					createCharScreen:OnProficiencyPlusMinusButtonClick(allChargenProficiencies[currentChargenProficiency].id, reverseButtonPosition)
 				end
 			end
 			cellNumber = nil
@@ -15120,21 +15212,21 @@ menu
 		"
 			currentChargenThiefSkill = nil
 			ticksStarting = ticksStarting + 1
-			if ticksStarting == 1 and (cellNumber == 7 or cellNumber == 8) then Infinity_PlaySound('GAM_09') end
+			if ticksStarting == 1 and (cellNumber == 7 or cellNumber == 8) and proficiencyEnabled(currentChargenProficiency) then Infinity_PlaySound('GAM_09') end
 			if ticksStarting > 10 then
 				local isClickable1 = reverseButtonPosition and minusButtonClickable or plusButtonClickable
 				local isClickable2 = reverseButtonPosition and plusButtonClickable or minusButtonClickable
 				if cellNumber == 7 and isClickable1(currentChargenProficiency) then
-					createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, not reverseButtonPosition)
+					createCharScreen:OnProficiencyPlusMinusButtonClick(allChargenProficiencies[currentChargenProficiency].id, not reverseButtonPosition)
 				elseif cellNumber == 8 and isClickable2(currentChargenProficiency) then
-					createCharScreen:OnProficiencyPlusMinusButtonClick(chargen.proficiency[currentChargenProficiency].id, reverseButtonPosition)
+					createCharScreen:OnProficiencyPlusMinusButtonClick(allChargenProficiencies[currentChargenProficiency].id, reverseButtonPosition)
 				end
 			end
 		"
 		rowheight 54
 		hidehighlight
 		area 52 178 422 276
-		table "chargen.proficiency"
+		table "allChargenProficiencies"
 		var currentChargenProficiency
 		scrollbar 'GUISCRC'
 	}
