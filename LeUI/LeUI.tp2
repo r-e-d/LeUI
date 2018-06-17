@@ -1,6 +1,6 @@
 BACKUP ~LeUI/backup~
 AUTHOR ~lefreut@forum.baldursgate.com~
-VERSION ~3.2~
+VERSION ~3.3~
 LANGUAGE
 	~English~ ~en_US~ ~LeUI/lang/en_US/setup.tra~
 
@@ -32,3 +32,23 @@ BEGIN @10005
 	REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet sod~ @90000
 	COPY_EXISTING ~UI.menu~ ~override~
 		REPLACE_TEXTUALLY ~singleClickTravel = false~ ~singleClickTravel = true~
+
+BEGIN @10006
+	REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet sod~ @90000
+	COPY_EXISTING ~UI.menu~ ~override~
+		REPLACE_TEXTUALLY ~showSidebarToggle = false~ ~showSidebarToggle = true~
+
+BEGIN @10007
+	REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet sod~ @90000
+	COPY_EXISTING ~UI.menu~ ~override~
+		REPLACE_TEXTUALLY ~showQuickSaveButton = false~ ~showQuickSaveButton = true~
+
+BEGIN @10008
+	REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet sod~ @90000
+	COPY_EXISTING ~UI.menu~ ~override~
+		REPLACE_TEXTUALLY ~showHighlightButton = false~ ~showHighlightButton = true~
+
+BEGIN @10009
+	REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet sod~ @90000
+	COPY_EXISTING ~UI.menu~ ~override~
+		REPLACE_TEXTUALLY ~rightSidebarSmallButton = false~ ~rightSidebarSmallButton = true~

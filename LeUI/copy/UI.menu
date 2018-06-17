@@ -11,6 +11,11 @@ currentID = 16974083
 currentPanelID = 0
 listMetaInfo = {}
 
+showSidebarToggle = false
+showQuickSaveButton = false
+showHighlightButton = false
+rightSidebarSmallButton = false
+
 function updateAttrTable()
 	if (characters[currentID] ~= nil) then
 		attributeItems = {
@@ -1077,6 +1082,8 @@ menu
 		"
 			if scriptList[scriptList_idx] == ' ' or scriptList_idx == -1 then
 				scriptList_idx = scriptList_savedIdx
+			else
+				Infinity_PlaySound('GAM_09')
 			end
 
 			Infinity_OnScriptItemSelect(scriptList_idx - 1)
@@ -2021,7 +2028,7 @@ menu
 			appendDirectXOption()
 		end
 		panelID = 6
-		helpString = 18042
+		helpString = 18038
 		selectedGraphicOpt = 0
 		fontSizeSLDR = Infinity_GetOption(22, panelID)
 		fontSizeCancel = Infinity_GetOption(22, panelID)
@@ -3107,7 +3114,7 @@ function revertKeymap()
 			keybindings[catIndex][keyIndex][6] = default --Set the key in luas memory.
 			Infinity_SetKey(default,key[1])	--Set the key in C++ memory.
 		end
-	end 
+	end
 end
 `
 menu
@@ -3679,7 +3686,7 @@ menu
 selectedAbility = -1
 function initAbilities()
 	--initialize selected ability
-    for i=1, 4 do
+	for i=1, 4 do
 		local ability = characters[id].equipment[selectedSlot].abilities[i]
 		if(ability ~= nil) then
 			if(ability.selected == 1) then
@@ -4014,7 +4021,6 @@ function showItemDescriptionInventory(slotName)
 	end
 
 	selectedSlot = slotName
-
 	Infinity_CheckItemIdentify(characters[id].equipment[slotName].id)
 	showItemDescription(characters[id].equipment[slotName], 0)
 end
@@ -4044,7 +4050,7 @@ end
 function itemDescLeftButtonAction()
 	if(itemDesc.mode == 0) then
 		if(itemDesc.item.identified == 0) then
-			Infinity_OnSpellIdentify(itemDesc.id);
+			Infinity_OnSpellIdentify(itemDesc.id)
 			itemDesc.item = characters[id].equipment[selectedSlot].item --update itemDesc item
 		else
 			Infinity_PushMenu('ITEM_ABILITIES',0,0)
@@ -4070,7 +4076,7 @@ end
 function itemDescRightButtonAction()
 	if(itemDesc.mode == 0) then
 		if(itemDesc.item.identified == 0) then
-			Infinity_OnScrollIdentify(itemDesc.id);
+			Infinity_OnScrollIdentify(itemDesc.id)
 			itemDesc.item = characters[id].equipment[selectedSlot].item --update itemDesc item
 		else
 			Infinity_PopMenu()
@@ -4116,7 +4122,12 @@ menu
 	modal
 	onOpen
 	"
+		Infinity_PlaySound('GAM_03')
 		computeSplitPosition(itemDesc.item.description, 'itemDescriptionSplit')
+	"
+	onClose
+	"
+		Infinity_PlaySound('GAM_04')
 	"
 	label
 	{
@@ -4259,13 +4270,18 @@ sidebarVisible =
 showJournal = 0
 wasPaused = 0
 function toggleSidebar(side)
+	local show = side .. "_SIDEBAR"
+	local hide = show .. "_HIDDEN"
 	if(sidebarVisible[side] == 1) then
+		local temp = show
+		show = hide
+		hide = temp
 		sidebarVisible[side] = 0
-		Infinity_PopMenu(side .. "_SIDEBAR")
 	else
 		sidebarVisible[side] = 1
-        Infinity_PushMenu(side .. "_SIDEBAR")
 	end
+	Infinity_PushMenu(show)
+	Infinity_PopMenu(hide)
 end
 function codeId(code)
 	if showJournal == 0 and e:GetActiveEngine() == worldScreen then
@@ -4311,7 +4327,12 @@ menu
 	ignoreEsc
 	onOpen
 	"
-		Infinity_PushMenu('LEFT_SIDEBAR_BOTTOM')
+		if(sidebarVisible.LEFT == 1) then
+			Infinity_PushMenu('LEFT_SIDEBAR_BOTTOM')
+		else
+			Infinity_PopMenu('LEFT_SIDEBAR')
+			Infinity_PushMenu('LEFT_SIDEBAR_HIDDEN')
+		end
 	"
 	onClose
 	"
@@ -4507,6 +4528,16 @@ menu
 			e:GetActiveEngine():OnLeftPanelButtonClick(8)
 		"
 	}
+	button
+	{
+		enabled "showSidebarToggle"
+		area 6 0 67 16
+		bam GUIPNL10
+		action
+		"
+			toggleSidebar('LEFT')
+		"
+	}
 }
 menu
 {
@@ -4517,7 +4548,20 @@ menu
 
 	button
 	{
+		enabled "showQuickSaveButton and worldScreen == e:GetActiveEngine() and showJournal ~= 1"
 		area 2 0 72 55
+		bam GUILS10
+		sequence 14
+		tooltip lua "getTooltipWithHotkey(28, engine_mode == 0 and 31813 or 74261)"
+		clickable lua "sidebarsGreyed ~= 1"
+		action
+		"
+			worldScreen:OnQuickSaveButtonClick()
+		"
+	}
+	button
+	{
+		area 2 55 72 55
 		bam GUILS10
 		sequence 9
 		tooltip lua "getTooltipWithHotkey(31,11942)"
@@ -4532,27 +4576,27 @@ menu
 	label
 	{
 		enabled "worldScreen == e:GetActiveEngine() and showJournal == 0"
-		area 2 55 72 55
+		area 2 110 72 55
 		bam CGEAR
 		frame lua "timer:GetCurrentTime() % 24"
 	}
 	label
 	{
 		enabled "worldScreen == e:GetActiveEngine() and showJournal == 0"
-		area 2 55 72 55
+		area 2 110 72 55
 		bam CDIAL
 		frame lua "timer:GetCurrentHour() % timer.TIMESCALE_HOUR_PER_DAY"
 	}
 	label
 	{
 		enabled "worldScreen == e:GetActiveEngine() and showJournal == 0"
-		area 2 55 72 55
+		area 2 110 72 55
 		bam CPEN
 		frame lua "timer:GetCurrentTime() % 24"
 	}
 	label
 	{
-		area 7 60 62 44
+		area 7 115 62 44
 		enabled "worldScreen == e:GetActiveEngine() and worldScreen:CheckIfPaused() and showJournal == 0"
 		rectangle 1
 		rectangle opacity 150
@@ -4560,7 +4604,7 @@ menu
 	button
 	{
 		enabled "worldScreen == e:GetActiveEngine() and showJournal == 0"
-		area 2 55 72 55
+		area 2 110 72 55
 		tooltip lua "worldScreen:GetCurrentTimeString()"
 		clickable lua "sidebarsGreyed ~= 1"
 		action
@@ -4569,6 +4613,22 @@ menu
 		"
 	}
 	--end clock
+}
+menu
+{
+	name 'LEFT_SIDEBAR_HIDDEN'
+	align left top
+	ignoreEsc
+	button
+	{
+		enabled "showSidebarToggle"
+		area 6 0 67 16
+		bam GUIPNL10
+		action
+		"
+			toggleSidebar('LEFT')
+		"
+	}
 }
 `
 mouseOverPortrait = -1
@@ -4597,7 +4657,12 @@ menu
 	ignoreEsc
 	onOpen
 	"
-		Infinity_PushMenu('RIGHT_SIDEBAR_BOTTOM')
+		if(sidebarVisible.RIGHT == 1) then
+			Infinity_PushMenu('RIGHT_SIDEBAR_BOTTOM')
+		else
+			Infinity_PopMenu('RIGHT_SIDEBAR')
+			Infinity_PushMenu('RIGHT_SIDEBAR_HIDDEN')
+		end
 		if(worldScreen == e:GetActiveEngine() and game:GetPartyAI()) then aiButtonToggle = 1 end
 		if(worldScreen == e:GetActiveEngine()) then Infinity_PushMenu('WORLD_LEVEL_UP_BUTTONS') end
 	"
@@ -4725,17 +4790,97 @@ menu
 		tooltip lua "Infinity_GetPortraitTooltip(5)"
 		clickable lua "sidebarsGreyed ~= 1"
 	}
+	button
+	{
+		enabled "showSidebarToggle"
+		area 10 0 67 16
+		bam GUIPNL10
+		action
+		"
+			toggleSidebar('RIGHT')
+		"
+	}
 }
 menu
 {
 	name 'RIGHT_SIDEBAR_BOTTOM'
 	align right bottom
-	offset -7 -14
+	offset -2 -14
 	ignoreEsc
 	button
 	{
-		area 0 0 30 44
-		enabled "worldScreen == e:GetActiveEngine() and showJournal == 0"
+		area 0 0 72 55
+		enabled "e:IsTouchUI() and worldScreen == e:GetActiveEngine() and showJournal == 0 and showHighlightButton and not rightSidebarSmallButton"
+		toggle selectionButtonToggle
+		bam GUILS10
+		sequence 14
+		tooltip lua "Infinity_FetchString(engine_mode == 0 and 31814 or 74262)"
+		clickable lua "sidebarsGreyed ~= 1"
+		action
+		"
+			worldScreen:OnSelectionButtonClick()
+		"
+	}
+	button
+	{
+		area 0 55 72 55
+		enabled "e:IsTouchUI() and worldScreen == e:GetActiveEngine() and showJournal == 0 and showHighlightButton == rightSidebarSmallButton"
+		toggle selectionButtonToggle
+		bam GUILS10
+		sequence 14
+		tooltip lua "Infinity_FetchString(engine_mode == 0 and 31814 or 74262)"
+		clickable lua "sidebarsGreyed ~= 1"
+		action
+		"
+			worldScreen:OnSelectionButtonClick()
+		"
+	}
+	button
+	{
+		area 0 110 72 55
+		enabled "e:IsTouchUI() and worldScreen == e:GetActiveEngine() and showJournal == 0 and not showHighlightButton and rightSidebarSmallButton"
+		toggle selectionButtonToggle
+		bam GUILS10
+		sequence 14
+		tooltip lua "Infinity_FetchString(engine_mode == 0 and 31814 or 74262)"
+		clickable lua "sidebarsGreyed ~= 1"
+		action
+		"
+			worldScreen:OnSelectionButtonClick()
+		"
+	}
+	button
+	{
+		area 0 55 72 55
+		enabled "worldScreen == e:GetActiveEngine() and showJournal == 0 and showHighlightButton and not rightSidebarSmallButton"
+		toggle highlightButtonToggle
+		bam GUILS10
+		sequence 11
+		tooltip lua "Infinity_FetchString(engine_mode == 0 and 32729 or 103144)"
+		clickable lua "sidebarsGreyed ~= 1"
+		action
+		"
+			worldScreen:SetHighlightEnabled(highlightButtonToggle == 1)
+		"
+	}
+	button
+	{
+		area 0 110 72 55
+		enabled "worldScreen == e:GetActiveEngine() and showJournal == 0 and showHighlightButton and rightSidebarSmallButton"
+		toggle highlightButtonToggle
+		bam GUILS10
+		sequence 11
+		tooltip lua "Infinity_FetchString(40879)"
+		clickable lua "sidebarsGreyed ~= 1"
+		action
+		"
+			worldScreen:SetHighlightEnabled(highlightButtonToggle == 1)
+		"
+	}
+	button
+	{
+		area 0 110 72 55
+		enabled "worldScreen == e:GetActiveEngine() and showJournal == 0 and not rightSidebarSmallButton"
 		toggle aiButtonToggle
 		bam GUILS10
 		sequence 10
@@ -4748,10 +4893,10 @@ menu
 	}
 	button
 	{
-		area 32 0 30 44
-		enabled "worldScreen == e:GetActiveEngine() and showJournal == 0"
+		area 0 165 72 55
+		enabled "worldScreen == e:GetActiveEngine() and showJournal == 0 and not rightSidebarSmallButton"
 		bam GUILS10
-		sequence 11
+		sequence 13
 		tooltip lua "Infinity_FetchString(10485)"
 		clickable lua "sidebarsGreyed ~= 1"
 		action
@@ -4761,6 +4906,57 @@ menu
 		actionDbl
 		"
 			game:CenterOnGroupLeader()
+		"
+	}
+	button
+	{
+		area 4 170 30 44
+		enabled "worldScreen == e:GetActiveEngine() and showJournal == 0 and rightSidebarSmallButton"
+		toggle aiButtonToggle
+		bam GUILS10
+		sequence 16
+		tooltip lua "getPartyAITooltip()"
+		clickable lua "sidebarsGreyed ~= 1"
+		action
+		"
+			game:ToggleAI()
+		"
+	}
+	button
+	{
+		area 36 170 30 44
+		enabled "worldScreen == e:GetActiveEngine() and showJournal == 0 and rightSidebarSmallButton"
+		bam GUILS10
+		sequence 17
+		tooltip lua "Infinity_FetchString(10485)"
+		clickable lua "sidebarsGreyed ~= 1"
+		action
+		"
+			game:SelectAll()
+		"
+		actionDbl
+		"
+			game:CenterOnGroupLeader()
+		"
+	}
+}
+menu
+{
+	name 'RIGHT_SIDEBAR_HIDDEN'
+	align right top
+	ignoreEsc
+	label
+	{
+		area 0 0 80 1
+	}
+	button
+	{
+		enabled "showSidebarToggle"
+		area 10 0 67 16
+		bam GUIPNL10
+		action
+		"
+			toggleSidebar('RIGHT')
 		"
 	}
 }
@@ -5353,6 +5549,12 @@ menu
 	slot {name "slot_inv_44"		area 461 578 52 52	bam STONSLOT	slotinfo "characters[id].equipment.group14"}
 	slot {name "slot_inv_45"		area 461 632 52 52	bam STONSLOT	slotinfo "characters[id].equipment.group15"}
 
+	button
+	{
+		area 580 578 235 108
+		actionScroll "scrollGroundItems()"
+	}
+
 	slot {name "slot_inv_68"		area 580 578 52 52	bam STONSLOT	slotinfo "characters[id].equipment.ground0"	actionScroll "scrollGroundItems()"}
 	slot {name "slot_inv_69"		area 633 578 52 52	bam STONSLOT	slotinfo "characters[id].equipment.ground1"	actionScroll "scrollGroundItems()"}
 	slot {name "slot_inv_70"		area 686 578 52 52	bam STONSLOT	slotinfo "characters[id].equipment.ground2"	actionScroll "scrollGroundItems()"}
@@ -5686,7 +5888,7 @@ function updateLuaHistory()
 	local i = 2
 	local tempTab = {}
 	tempTab[1] = luaEdit
-	while ( i <= luaEditMaxHistory ) do
+	while (i <= luaEditMaxHistory) do
 		tempTab[i] = luaEditHistory[i-1]
 		i = i + 1
 	end
@@ -5694,15 +5896,17 @@ function updateLuaHistory()
 end
 function loadLuaHistory()
 	local i = 1
-	while (i <= luaEditMaxHistory ) do
+	while (i <= luaEditMaxHistory) do
 		luaEditHistory[i] = Infinity_GetINIString("Lua Edit","String"..i-1, "")
 		i = i + 1
 	end
 end
 function saveLuaHistory()
 	local i = 1
-	while (i <= luaEditMaxHistory ) do
-		Infinity_SetINIValue("Lua Edit","String"..i-1, luaEditHistory[i])
+	while (i <= luaEditMaxHistory) do
+		if luaEditHistory[i] ~= "" then
+			Infinity_SetINIValue("Lua Edit","String"..i-1, luaEditHistory[i])
+		end
 		i = i + 1
 	end
 end
@@ -5861,9 +6065,10 @@ menu
 	"
 		Infinity_PushMenu('WORLD_MESSAGES')
 		Infinity_PushMenu('cheatMenu', 0, 0)
-		Infinity_FocusTextEdit('luaEditArea')
-		luaEdit = trim(luaEdit)
+		luaEdit = ''
+		luaEditShowHistoryList = 0
 		loadLuaHistory()
+		Infinity_FocusTextEdit('luaEditArea')
 	"
 	onClose
 	"
@@ -6443,7 +6648,7 @@ menu
 		align center center
 	}
 
-	text --bg (no sod)
+	button --bg (no sod)
 	{
 		enabled "engine_mode == 0 and const.START_CAMPAIGN_SOD == nil"
 		bam LOGOBG1
@@ -6471,7 +6676,7 @@ menu
 		area 190 494 240 50
 		mosaic TITLEBG
 	}
-	text --bg
+	button --bg
 	{
 		enabled "engine_mode == 0 and const.START_CAMPAIGN_SOD"
 		bam LOGOBG1
@@ -6499,7 +6704,7 @@ menu
 		area 92 494 240 50
 		mosaic TITLEBG
 	}
-	text --soa
+	button --soa
 	{
 		enabled "engine_mode == 1"
 		bam LOGOSOA
@@ -6527,7 +6732,7 @@ menu
 		area 92 494 240 50
 		mosaic TITLESOA
 	}
-	text --sod
+	button --sod
 	{
 		enabled "engine_mode == 0 and const.START_CAMPAIGN_SOD"
 		bam LOGOSOD
@@ -6555,7 +6760,7 @@ menu
 		area 388 480 250 48
 		mosaic TITLESOD
 	}
-	text --tob
+	button --tob
 	{
 		enabled "engine_mode == 1"
 		bam LOGOTOB
@@ -6583,7 +6788,7 @@ menu
 		area 388 486 250 48
 		mosaic TITLETOB
 	}
-	text --black pits (no sod)
+	button --black pits (no sod)
 	{
 		enabled "engine_mode == 0 and const.START_CAMPAIGN_SOD == nil"
 		bam LOGOTBP
@@ -6611,7 +6816,7 @@ menu
 		area 594 494 240 60
 		mosaic TITLEBP
 	}
-	text --black pits
+	button --black pits
 	{
 		enabled "engine_mode == 1 or const.START_CAMPAIGN_SOD"
 		bam LOGOTBP
@@ -7239,12 +7444,12 @@ end
 
 function unmemorizingMageSpell(resref)
 	createMageMemorizationSparkle(62 * (cellNumber - 1), 0, 62, 62, 'memorizedListMage', currentBottomSpell)
-	Infinity_PlaySound('GAM_44')
 end
 
 function removeMageSpell(idx)
 	showMageMemorizationFlash = false
 	mageScreen:UnmemorizeSpell(bottomSpells[idx].level, bottomSpells[idx].memorizedIndex)
+	Infinity_PlaySound('GAM_44')
 end
 
 function spellTooltip(spells, cellNumber)
@@ -9604,6 +9809,7 @@ menu
 			tooltip position 3
 			actionAlt
 			"
+				mapScreen:OnColorChoice(mapnoteSettings[instanceId].sequence)
 				mapScreen:OnUserNoteClick(instanceId, mapnoteSettings[instanceId].worldCoord.x, mapnoteSettings[instanceId].worldCoord.y)
 				Infinity_PushMenu('NOTE_ADD',0,0)
 			"
@@ -9626,7 +9832,17 @@ menu
 {
 	name 'NOTE_ADD'
 	align center center
-	onOpen "colorChoice = mapScreen:GetColorChoice()"
+	onOpen
+	"
+		if colorChoice == nil then
+			colorChoice = Infinity_FindUIItemByName('BUTTON_mapNoteColor_' .. mapScreen:GetColorChoice())
+		end
+		Infinity_ClickScreen()
+	"
+	onClose
+	"
+		colorChoice = nil
+	"
 	modal
 	label
 	{
@@ -9676,6 +9892,7 @@ menu
 
 	button
 	{
+		name "BUTTON_mapNoteColor_0"
 		area 14 170 45 42
 		bam FLAG1
 		highlightgroup colorChoice
@@ -9687,6 +9904,7 @@ menu
 	}
 	button
 	{
+		name "BUTTON_mapNoteColor_1"
 		area 62 170 45 42
 		bam FLAG1
 		highlightgroup colorChoice
@@ -9698,6 +9916,7 @@ menu
 	}
 	button
 	{
+		name "BUTTON_mapNoteColor_2"
 		area 110 170 45 42
 		bam FLAG1
 		highlightgroup colorChoice
@@ -9709,6 +9928,7 @@ menu
 	}
 	button
 	{
+		name "BUTTON_mapNoteColor_3"
 		area 158 170 45 42
 		bam FLAG1
 		highlightgroup colorChoice
@@ -9720,6 +9940,7 @@ menu
 	}
 	button
 	{
+		name "BUTTON_mapNoteColor_4"
 		area 206 170 45 42
 		bam FLAG1
 		highlightgroup colorChoice
@@ -9731,6 +9952,7 @@ menu
 	}
 	button
 	{
+		name "BUTTON_mapNoteColor_5"
 		area 254 170 45 42
 		bam FLAG1
 		highlightgroup colorChoice
@@ -9742,6 +9964,7 @@ menu
 	}
 	button
 	{
+		name "BUTTON_mapNoteColor_6"
 		area 302 170 45 42
 		bam FLAG1
 		highlightgroup colorChoice
@@ -9753,6 +9976,7 @@ menu
 	}
 	button
 	{
+		name "BUTTON_mapNoteColor_7"
 		area 350 170 45 42
 		bam FLAG1
 		highlightgroup colorChoice
@@ -9844,14 +10068,20 @@ chapterTitle = ""
 text_CHAPTERSCROLL = ""
 text_CHAPTERSCROLL_timeStart = 0
 text_CHAPTERSCROLL_auto = 1
+text_CHAPTERSCROLL_top = nil
 function UpdateChapterScroll(top, height, contentHeight)
 	textOpacity = 255
 	if(text_CHAPTERSCROLL_auto == 0) then
 		--defer to default scrolling
 		return nil
 	end
+	if text_CHAPTERSCROLL_top ~= nil and text_CHAPTERSCROLL_top ~= top then
+		text_CHAPTERSCROLL_auto = 0
+		return nil
+	end
 	local dT = Infinity_GetClockTicks() - text_CHAPTERSCROLL_timeStart
-	return (dT * -0.006) + height
+	text_CHAPTERSCROLL_top = math.floor((dT * -0.006) + height)
+	return text_CHAPTERSCROLL_top
 end
 function setChapterBackground(id)
 	chapter = math.max(0, Infinity_GetMaxChapterPage())
@@ -9869,6 +10099,7 @@ menu
 	ignoreEsc
 	onOpen
 	"
+		text_CHAPTERSCROLL_top = nil
 		textOpacity = 0
 		computeSplitPosition(text_CHAPTERSCROLL, 'chapterSplit')
 		Infinity_SetBackground('BACKGROUND')
@@ -9976,6 +10207,7 @@ menu
 		clickable lua "chapterScreen:IsReplayButtonClickable()"
 		action
 		"
+			text_CHAPTERSCROLL_top = nil
 			chapterScreen:OnReplayButtonClick()
 		"
 	}
@@ -9990,8 +10222,10 @@ menu
 	ignoreEsc
 	onOpen
 	"
+		text_CHAPTERSCROLL_top = nil
 		textOpacity = 0
 		computeSplitPosition(text_CHAPTERSCROLL, 'epilogueSplit')
+		Infinity_SetBackground('BACKGROUND')
 	"
 	label
 	{
@@ -10091,6 +10325,7 @@ menu
 		clickable lua "chapterScreen:IsReplayButtonClickable()"
 		action
 		"
+			text_CHAPTERSCROLL_top = nil
 			chapterScreen:OnReplayButtonClick()
 		"
 	}
@@ -10227,6 +10462,52 @@ menu
 		text style "normal"
 		align right center
 	}
+	button
+	{
+		enabled "storeScreen:IsContainer()"
+		area 330 566 32 32
+		bam "ROUNDBUT"
+		action
+		"
+			for k,v in ipairs(store.storeItems) do
+				if v.valid == 1 and v.highlight == 0 then
+					storeScreen:SelectStoreItem(k - 1, true)
+					local maxCount = v.maxCount
+					if maxCount > 1 then
+						storeScreen:SetStoreItemCount(k - 1, maxCount)
+					end
+					if not storeScreen:IsBuyItemButtonClickable() then
+						storeScreen:SelectStoreItem(k - 1, false)
+						break
+					end
+				end
+			end
+		"
+	}
+	button
+	{
+		area 564 566 32 32
+		bam "ROUNDBUT"
+		action
+		"
+			for k,v in ipairs(store.groupItems) do
+				if v.valid == 1 and v.highlight == 0 then
+					storeScreen:SelectGroupItem(k - 1, true)
+					local count = v.item.count
+					local stock = v.numInStock or 0
+					if count > 1 then
+						storeScreen:SetGroupItemCount(k - 1, count)
+					elseif stock > 1 then
+						storeScreen:SetGroupItemCount(k - 1, stock)
+					end
+					if not storeScreen:IsSellItemButtonClickable() then
+						storeScreen:SelectGroupItem(k - 1, false)
+						break
+					end
+				end
+			end
+		"
+	}
 
 	list
 	{
@@ -10289,6 +10570,7 @@ menu
 						storeScreen:SetStoreItemCount(storeItemsVar - 1, maxCount)
 					end
 				end
+				Infinity_PlaySound('GAM_09')
 			end
 		"
 		actionalt
@@ -10378,6 +10660,7 @@ menu
 							storeScreen:SetGroupItemCount(storeGroupItemsVar - 1, stock)
 						end
 					end
+					Infinity_PlaySound('GAM_09')
 				end
 			end
 		"
@@ -11166,8 +11449,10 @@ menu
 			local drink = store.drinks[storeDrinksVar]
 			if selectedDrinks == storeDrinksVar then
 				selectedDrinks = 0
+				Infinity_PlaySound('GAM_09')
 			elseif drink.valid == 1 and drink.value <= game:GetPartyGold() then
 				selectedDrinks = storeDrinksVar
+				Infinity_PlaySound('GAM_09')
 			end
 		"
 	}
@@ -13177,11 +13462,12 @@ menu
 	modal
 	onOpen
 	"
-		newSaveName = ''
 		if currentSave ~= 1 then
 			newSaveName = gameSaves.files[currentSave].slotName
+		else
+			newSaveName = ''
+			Infinity_FocusTextEdit('newSaveNameArea')
 		end
-		Infinity_FocusTextEdit('newSaveNameArea')
 	"
 	label
 	{
@@ -13296,7 +13582,7 @@ function dragMessagesY(newY)
 
 	--lower bound on height, sliced rects can't get too small and we don't want to make the message box invisible.
 	--also don't go too high because it looks bad.
-	if hNew > 54 and hNew < 432 then
+	if hNew > 50 and hNew < 450 then
 		adjustItemGroup({"messagesHandleY"},0,newY,0,0)
 		adjustItemGroup({"messagesRect","worldMessageBox"},0,newY,0,-newY)
 	end
@@ -13319,13 +13605,29 @@ menu
 	label
 	{
 		name 'messagesRect'
-		area 0 0 840 146
+		area 0 0 840 142
 		mosaic box5
 	}
 	label
 	{
 		area 0 142 840 4
 		mosaic box5B
+	}
+	button
+	{
+		on pageup
+		action
+		"
+			dragMessagesY(-20)
+		"
+	}
+	button
+	{
+		on pagedown
+		action
+		"
+			dragMessagesY(20)
+		"
 	}
 	text
 	{
@@ -13339,7 +13641,7 @@ menu
 	handle
 	{
 		name 'messagesHandleY'
-		area 0 0 840 22
+		area 0 0 840 20
 		actionDrag
 		"
 			dragMessagesY(motionY)
@@ -13347,39 +13649,49 @@ menu
 	}
 }
 `
-previousTop = nil
-scrolled = false
+step = 1
 worldNPCDialogText = ""
 worldPlayerDialogChoices = {}
 
 function dialogEntryGreyed()
 	return not worldScreen:GetInControlOfDialog()
 end
+
 function resizeDialog()
-	previousTop = nil
-	scrolled = false
+	buildResponsesList()
+	step = 1
 end
+
 function dialogScroll(top, height, contentHeight)
-	if scrolled then
-		if previousTop ~= nil and contentHeight > height then
-			local b = previousTop - contentHeight + 28
-			previousTop = nil
-			return b
-		end
+	if worldNPCDialogText == '' then
 		return nil
 	end
-	if top < -1 and previousTop ~= nil then
-		previousTop = top
-		return nil
+	
+	if step == 1 then
+		step = 2
+		return -contentHeight
 	end
-	if previousTop == -1 and top ~= previousTop then
-		scrolled = true
-		previousTop = math.max(height, contentHeight)
-		return 0
+
+	if -top > contentHeight - 500 then
+		return -(contentHeight - 500)
 	end
-	previousTop = -1
-	return -1
+
+	return nil
 end
+
+function dragDialogMessagesY(newY)
+	local x,y,w,hOld = Infinity_GetArea("worldDialogBackground")
+	h = hOld - newY
+	if h < 100 then
+		newY = hOld - 100
+	elseif h > 500 then
+		newY = hOld - 500
+	end
+
+	adjustItemGroup({"dialogHandleY","worldDialogPortraitArea"},0,newY,0,0)
+	adjustItemGroup({"worldDialogBackground","worldPlayerDialogChoicesList"},0,newY,0,-newY)
+end
+
 function getDialogEntryText(row)
 	local text = worldPlayerDialogChoices[row - 2].text
 	if (row == worldPlayerDialogSelection) then
@@ -13388,14 +13700,20 @@ function getDialogEntryText(row)
 	end
 	return text
 end
-function mergeDialog(t)
-	local dialog = {}
-	for key, value in pairs(t) do
-		dialog[key] = value
+
+function getDialogText()
+	local text = '\n' .. worldNPCDialogText:gsub('\n', ': ', 1)
+	if worldMessageBoxText:sub(-text:len()) == text then
+		return worldMessageBoxText:sub(1, worldMessageBoxText:len() - text:len())
 	end
-	table.insert(dialog, 1, '')
-	table.insert(dialog, 1, '')
-	return dialog
+	return worldMessageBoxText
+end
+
+function makeDialogTable()
+	if step == 1 then
+		return makeTable(1)
+	end
+	return makeTable(#worldPlayerDialogChoices + 2)
 end
 `
 menu
@@ -13407,20 +13725,40 @@ menu
 	onOpen
 	"
 		Infinity_PushMenu('WORLD_DIALOG_CONFIRM')
+		if(isTouchActionbar() and not dialogViewMode) then
+			Infinity_PushMenu('WORLD_DIALOG_LEFT')
+			Infinity_PushMenu('WORLD_DIALOG_RIGHT')
+		end
 		greySidebars()
-		previousTop = nil
-		scrolled = false
 	"
 	onClose
 	"
 		Infinity_PopMenu('WORLD_DIALOG_CONFIRM')
+		Infinity_PopMenu('WORLD_DIALOG_LEFT')
+		Infinity_PopMenu('WORLD_DIALOG_RIGHT')
 		ungreySidebars()
 	"
 	label
 	{
 		name "worldDialogBackground"
-		area 0 0 863 210
+		area 0 0 864 250
 		rectangle 4
+	}
+	button
+	{
+		on pageup
+		action
+		"
+			dragDialogMessagesY(-20)
+		"
+	}
+	button
+	{
+		on pagedown
+		action
+		"
+			dragDialogMessagesY(20)
+		"
 	}
 	label
 	{
@@ -13428,68 +13766,80 @@ menu
 		area 24 20 54 84
 		bitmap lua "worldNPCDialogPortrait"
 	}
+	handle
+	{
+		name "dialogHandleY"
+		area 0 0 864 20
+		actionDrag
+		"
+			dragDialogMessagesY(motionY)
+		"
+	}
 	list
 	{
 		column
 		{
 			width 100
-			label
-			{
-				area 0 0 -1 0
-				enabled "rowNumber == 1 and not scrolled"
-			}
 			text
 			{
+				enabled "rowNumber == 1"
+				opacity lua "step == 1 and 0 or 255"
 				area 0 0 -1 -1
-				pad 0 0 0 12
-				enabled "rowNumber == 2 and scrolled"
-				text lua "worldMessageBoxText"
+				text lua "getDialogText()"
 				text style "normal"
 			}
 			text
 			{
-				area 0 0 -1 -1
-				pad 0 0 0 12
-				enabled "rowNumber == 2 and not scrolled"
+				enabled "rowNumber == 2"
+				area 0 0 712 -1
+				pad 0 0 0 20
 				text lua "worldNPCDialogText:gsub('\n', ': ', 1)"
 				text style "normal"
 			}
 			label
 			{
-				area 0 0 -1 -1
-				pad 12 0 0 0
+				area 0 0 712 -1
 				enabled "rowNumber > 2 and dialogEntryGreyed()"
 				rectangle 1
 				rectangle opacity 100
 			}
 			text
 			{
-				area 0 0 -1 -1
-				pad 12 0 0 0
 				enabled "rowNumber > 2"
+				area 0 0 712 -1
 				text lua "getDialogEntryText(rowNumber)"
+				text style "normal"
+			}
+			text
+			{
+				enabled "rowNumber == #worldPlayerDialogChoices + 2"
+				area 0 0 712 500
 				text style "normal"
 			}
 		}
 		name "worldPlayerDialogChoicesList"
-		area 88 20 756 170
+		area 88 20 752 210
 		rowheight dynamic
 		hideHighlight
-		table "mergeDialog(worldPlayerDialogChoices)"
+		table "makeDialogTable()"
 		var "worldPlayerDialogSelection"
 		scrollbar 'GUISCRC'
 		scrollbar func "dialogScroll"
 		actionEnter
 		"
+			if(gameOptions.m_bConfirmDialog == true) then return end
 			worldPlayerDialogSelection = mouseoverRow
 		"
 		actionExit
 		"
+			if(gameOptions.m_bConfirmDialog == true) then return end
 			worldPlayerDialogSelection = 0
 		"
 		action
 		"
-			if (worldPlayerDialogChoices[worldPlayerDialogSelection - 2] == nil) then return end
+			--In confirm mode, just highlight the choice.
+			if(gameOptions.m_bConfirmDialog == true) then return end
+			if(worldPlayerDialogChoices[worldPlayerDialogSelection - 2] == nil) then return end
 			worldScreen:OnDialogReplyClick(worldPlayerDialogChoices[worldPlayerDialogSelection - 2].marker)
 			worldPlayerDialogSelection = 0
 		"
@@ -13999,6 +14349,7 @@ menu
 	ignoreesc
 	onOpen
 	"
+		Infinity_PlaySound('GAM_03')
 		portraitTable = {}
 		selPortrait = 1
 		local firstPortrait = createCharScreen:GetCurrentPortrait():upper()
@@ -14031,6 +14382,7 @@ menu
 	"
 	onClose
 	"
+		Infinity_PlaySound('GAM_04')
 		portraitTable = nil
 	"
 	label
@@ -14047,7 +14399,7 @@ menu
 	button
 	{
 		enabled "not CurrentlyInGame()"
-		area 122 545 77 68
+		area 122 542 77 68
 		bam GUIGEND1
 		frame lua "gender == 1 and 2 or 0"
 		sequence 0
@@ -14061,7 +14413,7 @@ menu
 	button
 	{
 		enabled "not CurrentlyInGame()"
-		area 226 545 77 68
+		area 226 542 77 68
 		bam GUIGEND1
 		frame lua "gender == 2 and 2 or 0"
 		sequence 1
@@ -14261,6 +14613,11 @@ menu
 	onOpen
 	"
 		currentChargenRace = nil
+		Infinity_PlaySound('GAM_03')
+	"
+	onClose
+	"
+		Infinity_PlaySound('GAM_04')
 	"
 	label
 	{
@@ -14386,6 +14743,11 @@ menu
 		end
 		currentChargenClass = nil
 		currentChargenKit = nil
+		Infinity_PlaySound('GAM_03')
+	"
+	onClose
+	"
+		Infinity_PlaySound('GAM_04')
 	"
 	label
 	{
@@ -14524,6 +14886,11 @@ menu
 			allChargenKits = chargen.kit
 		end
 		currentChargenKit = 1
+		Infinity_PlaySound('GAM_03')
+	"
+	onClose
+	"
+		Infinity_PlaySound('GAM_04')
 	"
 	label
 	{
@@ -14657,6 +15024,11 @@ menu
 			allChargenAlignments = chargen.alignment
 		end
 		currentChargenAlignment = nil
+		Infinity_PlaySound('GAM_03')
+	"
+	onClose
+	"
+		Infinity_PlaySound('GAM_04')
 	"
 	label
 	{
@@ -14793,6 +15165,11 @@ menu
 	"
 		ticksPassed = 0
 		ticksStarting = 0
+		Infinity_PlaySound('GAM_03')
+	"
+	onClose
+	"
+		Infinity_PlaySound('GAM_04')
 	"
 	label
 	{
@@ -15036,6 +15413,11 @@ menu
 		currentChargenThiefSkill = nil
 		ticksPassed = 0
 		ticksStarting = 0
+		Infinity_PlaySound('GAM_03')
+	"
+	onClose
+	"
+		Infinity_PlaySound('GAM_04')
 	"
 	label
 	{
@@ -15442,6 +15824,11 @@ menu
 			end
 		end
 		needSpecialist = false
+		Infinity_PlaySound('GAM_03')
+	"
+	onClose
+	"
+		Infinity_PlaySound('GAM_04')
 	"
 	label
 	{
@@ -15607,6 +15994,11 @@ menu
  		table.sort(chargen.choose_spell, sortByMageSpellName)
 		currentChargenMemorizeMageSpell = nil
 		needSpecialist = false
+		Infinity_PlaySound('GAM_03')
+	"
+	onClose
+	"
+		Infinity_PlaySound('GAM_04')
 	"
 	label
 	{
@@ -15760,6 +16152,11 @@ menu
 	"
 		table.sort(chargen.choose_spell, sortByPriestSpellName)
 		currentChargenMemorizePriestSpell = nil
+		Infinity_PlaySound('GAM_03')
+	"
+	onClose
+	"
+		Infinity_PlaySound('GAM_04')
 	"
 	label
 	{
@@ -15891,6 +16288,11 @@ menu
 	onOpen
 	"
 		currentChargenCustomSound = 1
+		Infinity_PlaySound('GAM_03')
+	"
+	onClose
+	"
+		Infinity_PlaySound('GAM_04')
 	"
 	label
 	{
@@ -15950,7 +16352,7 @@ menu
 	text
 	{
 		area 450 198 362 410
-		text 24437
+		text "SOUND_DESCRIPTION"
 		scrollbar 'GUISCRC'
 		text style normal
 		text color D
@@ -16014,6 +16416,11 @@ menu
 	onOpen
 	"
 		currentChargenHatedRace = nil
+		Infinity_PlaySound('GAM_03')
+	"
+	onClose
+	"
+		Infinity_PlaySound('GAM_04')
 	"
 	label
 	{
@@ -16118,14 +16525,19 @@ menu
 	modal
 	align center center
 	ignoreesc
-	onopen
+	onOpen
 	"
+		charNameEdit = ''
+		Infinity_PlaySound('GAM_03')
 		if chargen.name then
 			charNameEdit = chargen.name
-		else
-			charNameEdit = ''
 		end
 		Infinity_FocusTextEdit('charNameEditArea')
+		Infinity_ClickScreen()
+	"
+	onClose
+	"
+		Infinity_PlaySound('GAM_04')
 	"
 	label
 	{
@@ -16748,7 +17160,7 @@ menu
 currentHLASelection = nil
 function chargenHLADescription()
 	if currentHLASelection == nil then
-		return 63817
+		return engine_mode == 0 and 24323 or 63817
 	end
 	return chargen.HLAs[currentHLASelection].description
 end
@@ -18389,7 +18801,6 @@ function broadcastCharacterControlChange(slot, newPlayer)
 		local message = t("MULTIPLAYER_SLOT_"..slot.."_ASSIGNED_TO")
 		removeStringTokenLua("<PLAYER_NAME_1>")
 		removeStringTokenLua("<PLAYER_NAME_2>")
-		print(message)
 		Infinity_SendChatMessage(message, true)
 	end
 end
@@ -18402,7 +18813,6 @@ function broadcastCharacterAdded(slot)
 	local message = t("MULTIPLAYER_HAS_ADDED")
 	removeStringTokenLua("<PLAYER_NAME_1>")
 	removeStringTokenLua("<CHARACTER_NAME_1>")
-	print(message)
 	Infinity_SendChatMessage(message, true)
 end
 
@@ -18414,7 +18824,6 @@ function broadcastCharacterRemoved(slot)
 	local message = t("MULTIPLAYER_HAS_REMOVED")
 	removeStringTokenLua("<PLAYER_NAME_1>")
 	removeStringTokenLua("<CHARACTER_NAME_1>")
-	print(message)
 	Infinity_SendChatMessage(message, true)
 end
 
@@ -18423,7 +18832,6 @@ function broadcastCharacterReady(slot)
 	setStringTokenLua("<CHARACTER_NAME_1>",character)
 	local message = t("MULTIPLAYER_IS_READY_TO_START")
 	removeStringTokenLua("<CHARACTER_NAME_1>")
-	print(message)
 	Infinity_SendChatMessage(message, true)
 end
 
@@ -18432,7 +18840,6 @@ function broadcastCharacterNotReady(slot)
 	setStringTokenLua("<CHARACTER_NAME_1>",character)
 	local message = t("MULTIPLAYER_IS_NO_LONGER_READY")
 	removeStringTokenLua("<CHARACTER_NAME_1>")
-	print(message)
 	Infinity_SendChatMessage(message, true)
 end
 
@@ -18441,7 +18848,6 @@ function broadcastPlayerAdded(slot)
 	setStringTokenLua("<PLAYER_NAME_1>",player)
 	local message = t("MULTIPLAYER_HAS_JOINED_THE_GAME")
 	removeStringTokenLua("<PLAYER_NAME_1>")
-	print(message)
 	Infinity_SendChatMessage(message, true)
 end
 
@@ -18450,7 +18856,6 @@ function broadcastPlayerRemoved(slot)
 	setStringTokenLua("<PLAYER_NAME_1>",player)
 	local message = t("MULTIPLAYER_HAS_LEFT_THE_GAME")
 	removeStringTokenLua("<PLAYER_NAME_1>")
-	print(message)
 	Infinity_SendChatMessage(message, true)
 end
 
@@ -18696,6 +19101,10 @@ menu
 			elseif cellNumber == 4 then
 				cellNumber = nil
 			end
+		"
+		actionAlt
+		"
+			cellNumber = nil
 		"
 	}
 
@@ -19871,7 +20280,6 @@ function broadcastPermissionChange(player,permission,setting)
 	end
 	removeStringTokenLua("<PLAYER_NAME_1>")
 	removeStringTokenLua("<PERMISSION>")
-	print(message)
 	Infinity_SendChatMessage(message, true)
 end
 
@@ -20138,7 +20546,6 @@ function broadcastOptionChange(slot, onOff)
 			message = t("MULTIPLAYER_IMPORT_SETTINGS_CHANGE")
 			removeStringTokenLua("<IMPORT_RULES>")
 		end
-		print(message)
 		Infinity_SendChatMessage(message, true)
 	end
 end
@@ -20502,7 +20909,7 @@ menu
 	{
 		on return
 		area 52 262 300 38
-		text "DONE_BUTTON" -- done
+		text "DONE_BUTTON"
 		text style "button"
 		align center center
 		action
@@ -20581,80 +20988,112 @@ menu
 	}
 }
 `
-	function dragMPChat(newY)
-		--do a quick bounds check.
-		local area = {Infinity_GetArea("mpChatDisplayBackground")}
-		if(area[4] + newY <= 150) then newY = 150 - area[4] end
+function dragMPChat(newY)
+	--do a quick bounds check.
+	local area = {Infinity_GetArea("mpChatDisplayBackground")}
+	if(area[4] + newY <= 150) then newY = 150 - area[4] end
 
-		area = {Infinity_GetArea("mpChatHandle")}
-		local screenWidth, screenHeight = Infinity_GetScreenSize()
-		if(area[2] + area[4] + newY > screenHeight) then newY = screenHeight - area[2] - area[4] end
+	area = {Infinity_GetArea("mpChatHandle")}
+	local screenWidth, screenHeight = Infinity_GetScreenSize()
+	if(area[2] + area[4] + newY > screenHeight) then newY = screenHeight - area[2] - area[4] end
 
-		adjustItemGroup({"mpChatDisplayBackground","mpChatDisplay"}, 0, 0, 0, newY)
-		adjustItemGroup({"mpChatEditBackground","mpChatEdit","mpChatHandle"}, 0, newY, 0 , 0)
+	adjustItemGroup({"mpChatDisplayBackground","mpChatDisplay"}, 0, 0, 0, newY)
+	adjustItemGroup({"mpChatEditBackground","mpChatEdit","mpChatHandle"}, 0, newY, 0 , 0)
+end
+mpChatTable = {}
+showMpChat = 0
+function updateChatViewed()
+	if(showMpChat == 0) then chatViewed = 0 end
+end
+function updateMPChatPreview(message)
+	if(showMpChat == 0) then table.insert(mpChatTable,{text = message}) end
+end
+function getMPMessageOpacity()
+	local current = mpChatTable[#mpChatTable]
+	if(current == nil) then
+		return 0
 	end
-	mpChatTable = {}
-	showMpChat = 0
-	function updateChatViewed()
-		if(showMpChat == 0) then chatViewed = 0 end
-	end
-	function updateMPChatPreview(message)
-		if(showMpChat == 0) then table.insert(mpChatTable,{text = message}) end
-	end
-	function getMPMessageOpacity()
-		local current = mpChatTable[#mpChatTable]
-		if(current == nil) then
-			return 0
-		end
-		if(current.displayTime == nil) then
-			current.displayTime = 500
+	if(current.displayTime == nil) then
+		current.displayTime = 500
 
-			--set the box size
-			Infinity_ScaleToText("mpChatPreview")
+		--set the box size
+		Infinity_ScaleToText("mpChatPreview")
 
-			--give some extra room for the padding
-			adjustItemGroup({"mpChatPreview"},0,0,0,16)
-		end
-		if(current.displayTime > 0) then
-			current.displayTime = current.displayTime - 4
-		end
-		if(current.displayTime > 255) then
-			return 255
-		else
-			return current.displayTime
-		end
+		--give some extra room for the padding
+		adjustItemGroup({"mpChatPreview"},0,0,0,16)
 	end
-	function getMPMessage()
-		if(#mpChatTable > 0 and mpChatTable[#mpChatTable].displayTime ~= nil) then
-			return mpChatTable[#mpChatTable].text
-		end
+	if(current.displayTime > 0) then
+		current.displayTime = current.displayTime - 4
+	end
+	if(current.displayTime > 255) then
+		return 255
+	else
+		return current.displayTime
+	end
+end
+function getMPMessage()
+	if(#mpChatTable > 0 and mpChatTable[#mpChatTable].displayTime ~= nil) then
+		return mpChatTable[#mpChatTable].text
+	end
+	return nil
+end
+function getChatIconOpacity()
+	if(chatViewed == 1) then return 255 end
+	local sinWave = math.sin(Infinity_GetFrameCounter() / 15)
+	local sinWaveAdjusted = (sinWave / 2) + 0.5
+	return sinWaveAdjusted * 255
+end
+function getChatBarTooltip()
+	if(showMpChat == 0) then
+		return t("MULTIPLAYER_CHAT_BAR_COLLAPSED")
+	else
+		return t("MULTIPLAYER_CHAT_BAR_EXPANDED")
+	end
+end
+function resizeMpEditBox()
+	Infinity_ScaleToText('mpChatEdit')
+	local x,y,w,h = Infinity_GetArea('mpChatEdit')
+	local offset = 20
+	if(h + offset < 42) then h = (42 - offset) end
+
+	Infinity_SetArea('mpChatEdit',x,y,w,h)
+	Infinity_SetArea('mpChatEditBackground',nil,nil,nil,h + offset)
+	Infinity_SetArea('mpChatHandle',nil,y+h+(offset/2),nil,nil)
+end
+function mpChatboxScroll(top, height, contentHeight)
+	if(mpChatboxJumpToBottom and contentHeight > height) then
+		mpChatboxJumpToBottom = nil
+		return height-contentHeight
+	end
+	if(mpChatboxScrollToBottom == 0 and mpChatboxScrollLastHeight == contentHeight) then
+		--defer to default scrolling
+		return nil
+	elseif mpChatboxScrollToBottom == 0 then
+		mpChatboxScrollLastHeight = contentHeight
+		return height-contentHeight
+	end
+	if(contentHeight < height) then
+		--no scrolling required, content fits
+		mpChatboxScrollToBottom = nil
 		return nil
 	end
-	function getChatIconOpacity()
-		if(chatViewed == 1) then return 255 end
-		local sinWave = math.sin(Infinity_GetFrameCounter() / 15)
-		local sinWaveAdjusted = (sinWave / 2) + 0.5
-		return sinWaveAdjusted * 255
+	local dT = Infinity_GetClockTicks() - mpChatboxScrollTimeLast
+	mpChatboxScrollTimeLast = Infinity_GetClockTicks()
+	local newTop = (dT * -0.25) + top
+	if (newTop + contentHeight > height + 200) then
+		return (height - contentHeight + 200)
 	end
-	function getChatBarTooltip()
-		if(showMpChat == 0) then
-			return t("MULTIPLAYER_CHAT_BAR_COLLAPSED")
-		else
-			return t("MULTIPLAYER_CHAT_BAR_EXPANDED")
-		end
+	if(newTop + contentHeight < height) then
+		mpChatboxScrollToBottom = 0
+		return height - contentHeight
 	end
-	function resizeMpEditBox()
-		Infinity_ScaleToText('mpChatEdit')
-		local x,y,w,h = Infinity_GetArea('mpChatEdit')
-		local offset = 20
-		if(h + offset < 42) then h = (42 - offset) end
+	return newTop
+end
 
-
-		Infinity_SetArea('mpChatEdit',x,y,w,h)
-		Infinity_SetArea('mpChatEditBackground',nil,nil,nil,h + offset)
-		Infinity_SetArea('mpChatHandle',nil,y+h+(offset/2),nil,nil)
-	end
-	mpChatEditOverlay = ""
+mpChatboxScrollLastHeight = 0
+mpChatboxScrollToBottom = nil
+mpChatboxScrollTimeLast = 0
+mpChatEditOverlay = ""
 `
 menu
 {
@@ -20709,6 +21148,12 @@ menu
 		action
 		"
 			chatViewed = 1
+			mpChatboxScrollToBottom = 1
+			if showMpChat == 1 then
+				Infinity_FocusTextEdit('mpChatEdit')
+			else
+				Infinity_FocusTextEdit('')
+			end
 		"
 	}
 
@@ -20717,7 +21162,7 @@ menu
 		name "mpChatPreview"
 		enabled "showMpChat == 0"
 		opacity lua "getMPMessageOpacity()"
-		area 0 42 300 20
+		area 0 42 300 33
 		text style "normal"
 		text lua "getMPMessage()"
 		pad 8 8 8 8
@@ -20728,7 +21173,7 @@ menu
 	{
 		name "mpChatDisplay"
 		enabled "showMpChat"
-		area 18 54 264 268
+		area 18 46 264 276
 		text lua "mpChatText"
 		scrollbar 'GUISCRC'
 		scrollbar func "mpChatboxScroll"
@@ -20745,7 +21190,7 @@ menu
 	{
 		name		"mpChatEdit"
 		enabled 	"showMpChat"
-		area		10 334 290 24
+		area		10 334 290 22
 		var			mpChatEditOverlay
 		scrollbar	'GUISCRC'
 		text style	"edit"
@@ -20759,6 +21204,7 @@ menu
 					Infinity_PlaySound('WAL_19B')
 					mpChatEditOverlay=''
 					resizeMpEditBox()
+					mpChatboxScrollToBottom = 1
 					return -1
 				end
 			end
@@ -20783,9 +21229,32 @@ menu
 	}
 }
 `
+function reinitQuests()
+	for questIdx, quest in pairs(quests) do
+		local noquest = true
+		for objIdx,objective in pairs(quest.objectives) do
+			local noobjective = true
+			for entryIdx,entry in pairs(objective.entries) do
+				if quests[questIdx].objectives[objIdx].entries[entryIdx].stateType ~= const.ENTRY_TYPE_NONE and quests[questIdx].objectives[objIdx].entries[entryIdx].stateType ~= nil then
+					noobjective = false
+				end
+			end
+			if noobjective then
+				quests[questIdx].objectives[objIdx].stateType = const.ENTRY_TYPE_NONE
+			end
+			if quests[questIdx].objectives[objIdx].stateType ~= const.ENTRY_TYPE_NONE and quests[questIdx].objectives[objIdx].stateType ~= nil then
+				noquest = false
+			end
+		end
+		if noquest then
+			quests[questIdx].stateType = const.ENTRY_TYPE_NONE
+		end
+	end
+end
 function initQuests()
 	--instead of always searching the quests, just map entry ids to their quests
 	entryToQuest = {}
+	buildQuestsTable()
 	for questIdx, quest in pairs(quests) do
 		quests[questIdx].stateType = const.ENTRY_TYPE_NONE
 		for objIdx,objective in pairs(quest.objectives) do
@@ -20830,14 +21299,14 @@ function createEntry(questId, objectiveId, entryId, previousObjectives, subGroup
 	entry.text = ""
 	entry.previousObjectives = {} --this feature will be unused for now.
 	entry.id = entryId
-	
+
 	--set up this entry's subgroup
 	entry.subGroup = subGroup
 	if(subGroup) then
 		if(not subGroups[subGroup]) then subGroups[subGroup] = {} end
 		table.insert(subGroups[subGroup],entry)
 	end
-	
+
 	--This code is different if we're sod or BG
 	local lineCount = 1
 	local fullStr = Infinity_FetchString(entryId)
@@ -21137,6 +21606,7 @@ menu
 	modal
 	onOpen
 	"
+		reinitQuests()
 		buildQuestDisplay()
 		chapter = math.max(0, Infinity_GetMaxChapterPage())
 		journalMode = 0
@@ -21518,5 +21988,428 @@ menu
 		area 34 20 606 128
 		text lua "Infinity_FetchString(messageScreenText)"
 		text style "label"
+	}
+}
+`
+dialogTable = {}
+dialogOverflowTable = {}
+hasDialogResponse = nil
+
+chatboxScrollToBottom = nil
+chatboxScrollTimeLast = 0
+chatboxJumpToBottom = nil
+
+function buildResponsesList()
+	hasDialogResponse = nil
+	dialogResponses = {}
+	for k,v in pairs(worldPlayerDialogChoices) do
+		if v.marker then
+			table.insert(dialogResponses, v)
+			hasDialogResponse = 1
+		end
+	end
+end
+
+function canShowDialogButton(num)
+	-- Show the buttons if we have a response, and the dialog button is not enabled
+	return dialogResponses and dialogResponses[num] ~= nil and showDialogButtonChoices()
+end
+
+function showDialogButtonChoices()
+	return not (not hasDialogResponse or dialogViewMode or #dialogOverflowTable > 0)
+end
+
+function triggerChatboxScroll()
+	chatboxScrollToBottom = 1
+	chatboxScrollTimeLast = Infinity_GetClockTicks()
+end
+
+function chatboxScroll(top, height, contentHeight)
+	if(chatboxJumpToBottom and contentHeight > height) then
+		chatboxJumpToBottom = nil
+		return height-contentHeight
+	end
+	if(chatboxScrollToBottom == 0) then
+		--defer to default scrolling
+		return nil
+	end
+	if(contentHeight < height) then
+		--no scrolling required, content fits
+		chatboxScrollToBottom = nil
+		return nil
+	end
+	local dT = Infinity_GetClockTicks() - chatboxScrollTimeLast
+	chatboxScrollTimeLast = Infinity_GetClockTicks()
+	local newTop = (dT * -0.25) + top
+	if (newTop + contentHeight > height + 200) then
+		return (height - contentHeight + 200)
+	end
+	if(newTop + contentHeight < height) then
+		chatboxScrollToBottom = 0
+		return height - contentHeight
+	end
+	return newTop
+end
+function displayOverflowResponses()
+	for k,v in pairs(dialogOverflowTable) do
+		table.insert(dialogTable,v)
+	end
+	dialogOverflowTable = {}
+	triggerChatboxScroll()
+	buildResponsesList()
+end
+function onDialogButtonClick()
+	if(dialogViewMode) then
+		--In dialog view mode this button closes the menu.
+		worldScreen:StopDialogHistory()
+		return
+	end
+
+	if(#dialogOverflowTable > 0) then
+		displayOverflowResponses()
+		return
+	end
+
+	if(gameOptions.m_bConfirmDialog == true and hasDialogResponse) then
+		-- if confirm dialog and choices available.
+		worldScreen:OnDialogReplyClick(dialogTable[worldPlayerDialogSelection].marker)
+		worldPlayerDialogSelection = 0
+	else
+		-- no choices, just step.
+		worldScreen:StepDialog()
+	end
+end
+
+function isTouchActionbar()
+	--Make this read from an option to make it easy to switch out.
+	local default = 0
+	if(e:IsTouchUI()) then default = 1 end
+	local val = Infinity_GetINIValue('Program Options', 'Use Touch Actionbar', default)
+	return val ~= 0
+end
+`
+menu
+{
+	name 'WORLD_DIALOG_LEFT'
+	align left center
+	ignoreEsc
+	onOpen
+	"
+		Infinity_PushMenu('WORLD_DIALOG_LEFT_BUTTONS')
+	"
+	onClose
+	"
+		Infinity_PopMenu('WORLD_DIALOG_LEFT_BUTTONS')
+	"
+	label
+	{
+		area 0 0 80 1536
+		mosaic GUIWLSP
+	}
+}
+menu
+{
+	name 'WORLD_DIALOG_LEFT_BUTTONS'
+	align left center
+	ignoreEsc
+	button
+	{
+		area 12 25 54 54
+		bam CBUTT
+		text lua "'...'"
+		text style "button"
+		enabled "not showDialogButtonChoices()"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			onDialogButtonClick()
+		"
+	}
+
+	button
+	{
+		area 12 25 54 54
+		bam CBUTT
+		text lua "'1'"
+		text style "button"
+		enabled "canShowDialogButton(1)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[1].marker)
+		"
+	}
+	button
+	{
+		area 12 100 54 54
+		bam CBUTT
+		text lua "'2'"
+		text style "button"
+		enabled "canShowDialogButton(2)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[2].marker)
+		"
+	}
+	button
+	{
+		area 12 175 54 54
+		bam CBUTT
+		text lua "'3'"
+		text style "button"
+		enabled "canShowDialogButton(3)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[3].marker)
+		"
+	}
+	button
+	{
+		area 12 250 54 54
+		bam CBUTT
+		text lua "'4'"
+		text style "button"
+		enabled "canShowDialogButton(4)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[4].marker)
+		"
+	}
+	button
+	{
+		area 12 325 54 54
+		bam CBUTT
+		text lua "'5'"
+		text style "button"
+		enabled "canShowDialogButton(5)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[5].marker)
+		"
+	}
+	button
+	{
+		area 12 400 54 54
+		bam CBUTT
+		text lua "'6'"
+		text style "button"
+		enabled "canShowDialogButton(6)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[6].marker)
+		"
+	}
+	button
+	{
+		area 12 475 54 54
+		bam CBUTT
+		text lua "'7'"
+		text style "button"
+		enabled "canShowDialogButton(7)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[7].marker)
+		"
+	}
+	button
+	{
+		area 12 550 54 54
+		bam CBUTT
+		text lua "'8'"
+		text style "button"
+		enabled "canShowDialogButton(8)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[8].marker)
+		"
+	}
+	button
+	{
+		area 12 625 54 54
+		bam CBUTT
+		text lua "'9'"
+		text style "button"
+		enabled "canShowDialogButton(9)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[9].marker)
+		"
+	}
+	button
+	{
+		area 12 700 54 54
+		bam CBUTT
+		text lua "'10'"
+		text style "button"
+		enabled "canShowDialogButton(10)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[10].marker)
+		"
+	}
+}
+menu
+{
+	name 'WORLD_DIALOG_RIGHT'
+	align right center
+	ignoreEsc
+	onOpen
+	"
+		Infinity_PushMenu('WORLD_DIALOG_RIGHT_BUTTONS')
+	"
+	onClose
+	"
+		Infinity_PopMenu('WORLD_DIALOG_RIGHT_BUTTONS')
+	"
+	label
+	{
+		area 0 0 80 1536
+		mosaic GUIWRSP
+	}
+}
+menu
+{
+	name 'WORLD_DIALOG_RIGHT_BUTTONS'
+	align right center
+	ignoreEsc
+	enabled "canShowDialogButton(11)"
+	button
+	{
+		area 8 25 54 54
+		bam CBUTT
+		text lua "'11'"
+		text style "button"
+		enabled "canShowDialogButton(11)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[11].marker)
+		"
+	}
+	button
+	{
+		area 8 100 54 54
+		bam CBUTT
+		text lua "'12'"
+		text style "button"
+		enabled "canShowDialogButton(12)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[12].marker)
+		"
+	}
+	button
+	{
+		area 8 175 54 54
+		bam CBUTT
+		text lua "'13'"
+		text style "button"
+		enabled "canShowDialogButton(13)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[13].marker)
+		"
+	}
+	button
+	{
+		area 8 250 54 54
+		bam CBUTT
+		text lua "'14'"
+		text style "button"
+		enabled "canShowDialogButton(14)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[14].marker)
+		"
+	}
+	button
+	{
+		area 8 325 54 54
+		bam CBUTT
+		text lua "'15'"
+		text style "button"
+		enabled "canShowDialogButton(15)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[15].marker)
+		"
+	}
+	button
+	{
+		area 8 400 54 54
+		bam CBUTT
+		text lua "'16'"
+		text style "button"
+		enabled "canShowDialogButton(16)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[16].marker)
+		"
+	}
+	button
+	{
+		area 8 475 54 54
+		bam CBUTT
+		text lua "'17'"
+		text style "button"
+		enabled "canShowDialogButton(17)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[17].marker)
+		"
+	}
+	button
+	{
+		area 8 550 54 54
+		bam CBUTT
+		text lua "'18'"
+		text style "button"
+		enabled "canShowDialogButton(18)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[18].marker)
+		"
+	}
+	button
+	{
+		area 8 625 54 54
+		bam CBUTT
+		text lua "'19'"
+		text style "button"
+		enabled "canShowDialogButton(19)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[19].marker)
+		"
+	}
+	button
+	{
+		area 8 700 54 54
+		bam CBUTT
+		text lua "'20'"
+		text style "button"
+		enabled "canShowDialogButton(20)"
+		clickable lua "not dialogEntryGreyed()"
+		action
+		"
+			worldScreen:OnDialogReplyClick(dialogResponses[20].marker)
+		"
 	}
 }
