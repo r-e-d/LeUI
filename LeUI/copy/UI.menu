@@ -16527,13 +16527,13 @@ menu
 	ignoreesc
 	onOpen
 	"
-		charNameEdit = ''
 		Infinity_PlaySound('GAM_03')
 		if chargen.name then
 			charNameEdit = chargen.name
+		else
+			charNameEdit = ''
+			Infinity_FocusTextEdit('charNameEditArea')
 		end
-		Infinity_FocusTextEdit('charNameEditArea')
-		Infinity_ClickScreen()
 	"
 	onClose
 	"
@@ -16549,6 +16549,11 @@ menu
 		area 70 70 264 42
 		text "ENTER_NAME_LABEL"
 		text style "title"
+	}
+	label
+	{
+		area 72 174 256 34
+		fill 112 111 111 64
 	}
 	edit
 	{
