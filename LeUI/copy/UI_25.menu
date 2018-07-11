@@ -4566,7 +4566,11 @@ menu
 		clickable lua "sidebarsGreyed ~= 1"
 		action
 		"
-			worldScreen:OnQuickSaveButtonClick()
+			worldScreen:OnQuickSaveButtonClick(false)
+		"
+		actionAlt
+		"
+			worldScreen:OnQuickSaveButtonClick(true)
 		"
 	}
 	button
@@ -4698,7 +4702,7 @@ menu
 		portrait 0
 		bam GUIRSP10
 		enabled "Infinity_GetNumCharacters() > 0"
-		glow lua "draggedPortrait and draggedPortrait == 0"
+		glow lua "draggedPortrait and mouseOverPortrait == 0"
 		action "Infinity_OnPortraitLClick(0)"
 		actionAlt "onPortraitRClick(0)"
 		actionDbl "Infinity_OnPortraitDblClick(0)"
@@ -4716,7 +4720,7 @@ menu
 		portrait 1
 		bam GUIRSP10
 		enabled "Infinity_GetNumCharacters() > 1"
-		glow lua "draggedPortrait and draggedPortrait == 1"
+		glow lua "draggedPortrait and mouseOverPortrait == 1"
 		action "Infinity_OnPortraitLClick(1)"
 		actionAlt "onPortraitRClick(1)"
 		actionDbl "Infinity_OnPortraitDblClick(1)"
@@ -4734,7 +4738,7 @@ menu
 		portrait 2
 		bam GUIRSP10
 		enabled "Infinity_GetNumCharacters() > 2"
-		glow lua "draggedPortrait and draggedPortrait == 2"
+		glow lua "draggedPortrait and mouseOverPortrait == 2"
 		action "Infinity_OnPortraitLClick(2)"
 		actionAlt "onPortraitRClick(2)"
 		actionDbl "Infinity_OnPortraitDblClick(2)"
@@ -4752,7 +4756,7 @@ menu
 		portrait 3
 		bam GUIRSP10
 		enabled "Infinity_GetNumCharacters() > 3"
-		glow lua "draggedPortrait and draggedPortrait == 3"
+		glow lua "draggedPortrait and mouseOverPortrait == 3"
 		action "Infinity_OnPortraitLClick(3)"
 		actionAlt "onPortraitRClick(3)"
 		actionDbl "Infinity_OnPortraitDblClick(3)"
@@ -4770,7 +4774,7 @@ menu
 		portrait 4
 		bam GUIRSP10
 		enabled "Infinity_GetNumCharacters() > 4"
-		glow lua "draggedPortrait and draggedPortrait == 4"
+		glow lua "draggedPortrait and mouseOverPortrait == 4"
 		action "Infinity_OnPortraitLClick(4)"
 		actionAlt "onPortraitRClick(4)"
 		actionDbl "Infinity_OnPortraitDblClick(4)"
@@ -4788,7 +4792,7 @@ menu
 		portrait 5
 		bam GUIRSP10
 		enabled "Infinity_GetNumCharacters() > 5"
-		glow lua "draggedPortrait and draggedPortrait == 5"
+		glow lua "draggedPortrait and mouseOverPortrait == 5"
 		action "Infinity_OnPortraitLClick(5)"
 		actionAlt "onPortraitRClick(5)"
 		actionDbl "Infinity_OnPortraitDblClick(5)"
@@ -4880,7 +4884,7 @@ menu
 		toggle highlightButtonToggle
 		bam GUILS10
 		sequence 11
-		tooltip lua "Infinity_FetchString(40879)"
+		tooltip lua "Infinity_FetchString(engine_mode == 0 and 32729 or 103144)"
 		clickable lua "sidebarsGreyed ~= 1"
 		action
 		"
@@ -4977,7 +4981,7 @@ menu
 	ignoreesc
 	button
 	{
-		enabled "Infinity_CanLevelUp(0)"
+		enabled "draggedPortrait == nil and Infinity_CanLevelUp(0)"
 		area 11 14 64 90
 		sequence 0
 		action "Infinity_ActivateRecord(0)"
@@ -4986,7 +4990,7 @@ menu
 	}
 	button
 	{
-		enabled "Infinity_CanLevelUp(1)"
+		enabled "draggedPortrait == nil and Infinity_CanLevelUp(1)"
 		area 11 106 64 90
 		sequence 0
 		action "Infinity_ActivateRecord(1)"
@@ -4995,7 +4999,7 @@ menu
 	}
 	button
 	{
-		enabled "Infinity_CanLevelUp(2)"
+		enabled "draggedPortrait == nil and Infinity_CanLevelUp(2)"
 		area 11 198 64 90
 		sequence 0
 		action "Infinity_ActivateRecord(2)"
@@ -5004,7 +5008,7 @@ menu
 	}
 	button
 	{
-		enabled "Infinity_CanLevelUp(3)"
+		enabled "draggedPortrait == nil and Infinity_CanLevelUp(3)"
 		area 11 290 64 90
 		sequence 0
 		action "Infinity_ActivateRecord(3)"
@@ -5013,7 +5017,7 @@ menu
 	}
 	button
 	{
-		enabled "Infinity_CanLevelUp(4)"
+		enabled "draggedPortrait == nil and Infinity_CanLevelUp(4)"
 		area 11 382 64 90
 		sequence 0
 		action "Infinity_ActivateRecord(4)"
@@ -5022,7 +5026,7 @@ menu
 	}
 	button
 	{
-		enabled "Infinity_CanLevelUp(5)"
+		enabled "draggedPortrait == nil and Infinity_CanLevelUp(5)"
 		area 11 474 64 90
 		sequence 0
 		action "Infinity_ActivateRecord(5)"
@@ -6541,6 +6545,7 @@ function onCampaignButton(buttonNum)
 		startEngine:OnCampaignButtonClick('TUT',true)
 		Infinity_SetINIValue('Program Options','Active Campaign',const.START_CAMPAIGN_TUT)
 	else
+		buttonNum = const.START_CAMPAIGN_BG1
 		startEngine:OnCampaignButtonClick('BG1',true)
 		Infinity_SetINIValue('Program Options','Active Campaign',const.START_CAMPAIGN_BG1)
 	end
@@ -6603,14 +6608,15 @@ menu
 	onOpen
 	"
 		eetState = Infinity_GetINIValue('Program Options','EET Installation State')
+		if eetState == 0 and engine_name:find('Enhanced Edition Trilogy') ~= nil then
+			eetState = 2
+		end
+
 		if eetState == 1 then --EET_end not installed
 			Infinity_PushMenu('START_INSTALLATION_WARNING')
 		elseif eetState == 2 then --EET installed
 			if (start_doOnce == nil) then
-				currentCampaign = Infinity_GetINIValue('Program Options','Active Campaign')
-				if (currentCampaign == 0) then
-					currentCampaign = 1
-				end
+				currentCampaign = Infinity_GetINIValue('Program Options','Active Campaign',1)
 				onCampaignButton(currentCampaign)
 				highlightedCampaign = currentCampaign
 				start_doOnce = 1
@@ -13588,12 +13594,23 @@ menu
 			dragMessagesY(20)
 		"
 	}
-	text
+	list
 	{
+		column
+		{
+			width 100
+			label
+			{
+				area 0 0 816 -1
+				text lua "combatLog[rowNumber]"
+				text style "normal"
+			}
+		}
 		name "worldMessageBox"
 		area 12 8 816 130
-		text lua "worldMessageBoxText"
-		text style "normal"
+		rowheight dynamic
+		table "combatLog"
+		hideHighlight
 		scrollbar 'GUISCRC'
 		scrollbar func "chatboxScroll"
 		scrollbar skipReset
@@ -15705,6 +15722,14 @@ menu
 		text "BACK_BUTTON"
 		action
 		"
+			for k,v in pairs(chargen.proficiency) do
+				if not plusButtonClickable(k) then break end
+				createCharScreen:OnProficiencyPlusMinusButtonClick(v.id, true)
+			end
+			for k,v in pairs(chargen.thief_skill) do
+				if not createCharScreen:IsThiefSkillPlusMinusButtonClickable() then break end
+				createCharScreen:OnThiefSkillPlusMinusButtonClick(v.id, true)
+			end
 			createCharScreen:OnCancelButtonClick()
 		"
 	}
