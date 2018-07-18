@@ -22039,30 +22039,12 @@ function triggerChatboxScroll()
 end
 
 function chatboxScroll(top, height, contentHeight)
-	if(chatboxJumpToBottom and contentHeight > height) then
-		chatboxJumpToBottom = nil
+	if(chatboxScrollToBottom and contentHeight > height) then
+		chatboxScrollToBottom = nil
 		return height-contentHeight
 	end
-	if(chatboxScrollToBottom == 0) then
-		--defer to default scrolling
-		return nil
-	end
-	if(contentHeight < height) then
-		--no scrolling required, content fits
-		chatboxScrollToBottom = nil
-		return nil
-	end
-	local dT = Infinity_GetClockTicks() - chatboxScrollTimeLast
-	chatboxScrollTimeLast = Infinity_GetClockTicks()
-	local newTop = (dT * -0.25) + top
-	if (newTop + contentHeight > height + 200) then
-		return (height - contentHeight + 200)
-	end
-	if(newTop + contentHeight < height) then
-		chatboxScrollToBottom = 0
-		return height - contentHeight
-	end
-	return newTop
+	--defer to default
+	return nil
 end
 function displayOverflowResponses()
 	for k,v in pairs(dialogOverflowTable) do
