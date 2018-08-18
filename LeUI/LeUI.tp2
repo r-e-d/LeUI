@@ -1,6 +1,6 @@
 BACKUP ~LeUI/backup~
 AUTHOR ~lefreut@forum.baldursgate.com~
-VERSION ~3.5.1~
+VERSION ~3.6~
 LANGUAGE
 	~English~ ~en_US~ ~LeUI/lang/en_US/setup.tra~
 
@@ -62,3 +62,8 @@ BEGIN @10010
 	COPY_EXISTING ~UI.menu~ ~override~
 		REPLACE_TEXTUALLY CASE_SENSITIVE ~hidden~ ~expanded~
 		REPLACE_TEXTUALLY CASE_SENSITIVE ~not questDisplay~ ~questDisplay~
+
+BEGIN @10011
+	REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet sod~ @90000
+	COPY_EXISTING ~UI.menu~ ~override~
+		REPLACE_TEXTUALLY ~clickToLevelUp = false~ ~clickToLevelUp = true~
