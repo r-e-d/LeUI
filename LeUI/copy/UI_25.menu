@@ -5843,7 +5843,7 @@ menu
 	}
 	text
 	{
-		area 92 36 348 26
+		area 92 36 350 26
 		text lua "getSubtitleString()"
 		text style "label"
 		text align left top
@@ -5945,6 +5945,8 @@ menu
 {
 	name 'cheatMenu'
 	ignoreEsc
+	align center top
+	offset 0 10
 	onOpen
 	"
 		if game:GetMissionPackInfo() then
@@ -5960,7 +5962,7 @@ menu
 
 	label
 	{
-		area 100 0 808 300
+		area 0 0 808 300
 		bam GUWBTP30
 	}
 	list
@@ -5971,6 +5973,7 @@ menu
 			label
 			{
 				area 0 0 -1 -1
+				pad 4 4 4 4
 				text lua "cheatAreaDisplayList[rowNumber][1]"
 				text style "list"
 			}
@@ -5981,73 +5984,81 @@ menu
 			label
 			{
 				area 0 0 -1 -1
+				pad 4 4 4 4
 				text lua "cheatAreaDisplayList[rowNumber][2]"
 				text style "list"
 			}
 		}
-		area 122 6 492 240
-		rowheight	18
+
+		area 10 10 576 222
+		rowheight	dynamic
 		table		"cheatAreaDisplayList"
 		var		cheatTeleportArea
 		scrollbar	'GUISCRC'
 	}
 	button
 	{
-		area		122 246 140 42
-		bam			GUIOSTSM
+		area		592 30 200 44
+		bam			GUIOSTUM
 		text		"TRAVEL_BUTTON"
 		text style	"button"
 		action 		"C:MoveToArea(cheatAreaDisplayList[cheatTeleportArea][1])"
 	}
 	button
 	{
-		area		620 162 140 42
-		bam			GUIOSTSM
+		area		592 100 200 44
+		bam			GUIOSTUM
+		text		"EXPLORE_LABEL"
+		text style	"button"
+		action		"C:ExploreArea()"
+	}
+	button
+	{
+		area		592 170 200 44
+		bam			GUIOSTUM
 		text		"GODBOW_LABEL"
 		text style	"button"
 		action		"C:CreateItem('godbow')"
 	}
 	button
 	{
-		area		620 204 140 42
-		bam			GUIOSTSM
+		area		20 238 200 44
+		bam			GUIOSTUM
 		text		"GIVE_GOLD_LABEL"
 		text style	"button"
 		action		"C:AddGold(cheatGoldAmt)"
 	}
+	label
+	{
+		area 226 238 152 44
+		fill 112 111 111 64
+	}
 	edit
 	{
-		area		766 222 138 30
+		area		240 246 140 24
 		var		cheatGoldAmt
 		text style	"edit"
 		maxlines	1
-		fill		112 111 111 64
 	}
-
 	button
 	{
-		area		620 246 140 42
-		bam			GUIOSTSM
+		area		400 238 200 44
+		bam			GUIOSTUM
 		text		"GIVE_XP_LABEL"
 		text style	"button"
 		action		"C:SetCurrentXP(cheatXpAmt)"
 	}
+	label
+	{
+		area 606 238 152 44
+		fill 112 111 111 64
+	}
 	edit
 	{
-		area		766 258 138 30
+		area		620 246 140 24
 		var		cheatXpAmt
 		text style	"edit"
 		maxlines	1
-		fill		112 111 111 64
-	}
-
-	button
-	{
-		area		766 162 140 42
-		bam			GUIOSTSM
-		text		"EXPLORE_LABEL"
-		text style	"button"
-		action		"C:ExploreArea()"
 	}
 }
 menu
@@ -9881,13 +9892,18 @@ menu
 		area 0 0 406 415
 		mosaic GUIERR21
 	}
+	label
+	{
+		area 60 110 284 54
+		fill 112 111 111 64
+	}
 	edit
 	{
 		name "mapNoteEditArea"
-		area 66 112 272 44
+		area 66 116 272 44
 		var mapNoteEdit
-		scrollbar 'GUISCRC'
 		text style "edit"
+		scrollbar 'GUISCRC'
 	}
 	button
 	{
@@ -10900,13 +10916,24 @@ menu
 		clickable lua "storeScreen:IsIdentifyItemButtonClickable() and storeScreen:GetIdentifyCost() <= game:GetPartyGold()"
 		action
 		"
+			local keys = {}
+			for k,v in pairs(store.identifyItems) do
+				if v.highlight == 1 then
+					table.insert(keys, k)
+				end
+			end
 			storeScreen:OnIdentifyItemButtonClick()
+			for k,v in pairs(keys) do
+				local item = store.identifyItems[v].item
+				local str = '^0xFF000080' .. item.name .. '^-\n' .. item.description
+				identifyText = trim(identifyText .. '\n\n' .. str)
+			end
 		"
 	}
 	text
 	{
 		area 480 182 313 364
-		text lua "store.identifyText"
+		text lua "identifyText"
 		text style "normal_parchment"
 		scrollbar 'GUISBR'
 	}
@@ -11546,6 +11573,7 @@ menu
 	ignoreEsc
 	onOpen
 	"
+		identifyText = ''
 		local menuName = storeScreen:GetMenuName(storeCurMenuId)
 		Infinity_PushMenu(menuName)
 		pushSidebars()
@@ -15347,6 +15375,9 @@ function proficiencyOrGeneralHelp()
 	local prof = allChargenProficiencies[currentChargenProficiency]
 	local skill = chargen.thief_skill[currentChargenThiefSkill]
 	if prof and prof.desc ~= -1 then
+		if cannotFurtherSpecialize then
+			return Infinity_FetchString(15986)
+		end
 		return Infinity_FetchString(prof.desc)
 	elseif skill and skill.desc ~= -1 then
 		return Infinity_FetchString(skill.description)
@@ -15398,6 +15429,7 @@ menu
 		else
 			translateProficiencyRows()
 		end
+		cannotFurtherSpecialize = false
 		currentChargenProficiency = nil
 		currentChargenThiefSkill = nil
 		ticksPassed = 0
@@ -15430,6 +15462,7 @@ menu
 		action
 		"
 			currentChargenProficiency = nil
+			currentChargenThiefSkill = nil
 		"
 	}
 	label
@@ -15566,13 +15599,18 @@ menu
 		action
 		"
 			currentChargenThiefSkill = nil
+			if cellNumber ~= 7 and cellNumber ~= 8 then cannotFurtherSpecialize = false end
 			if ticksStarting <= 10 then
 				local isClickable1 = reverseButtonPosition and minusButtonClickable or plusButtonClickable
 				local isClickable2 = reverseButtonPosition and plusButtonClickable or minusButtonClickable
 				if cellNumber == 7 and isClickable1(currentChargenProficiency) then
+					local value = proficiencyValue(currentChargenProficiency)
 					createCharScreen:OnProficiencyPlusMinusButtonClick(allChargenProficiencies[currentChargenProficiency].id, not reverseButtonPosition)
+					cannotFurtherSpecialize = value == proficiencyValue(currentChargenProficiency)
 				elseif cellNumber == 8 and isClickable2(currentChargenProficiency) then
+					local value = proficiencyValue(currentChargenProficiency)
 					createCharScreen:OnProficiencyPlusMinusButtonClick(allChargenProficiencies[currentChargenProficiency].id, reverseButtonPosition)
+					cannotFurtherSpecialize = value == proficiencyValue(currentChargenProficiency)
 				end
 			end
 			cellNumber = nil
@@ -15588,9 +15626,13 @@ menu
 				local isClickable1 = reverseButtonPosition and minusButtonClickable or plusButtonClickable
 				local isClickable2 = reverseButtonPosition and plusButtonClickable or minusButtonClickable
 				if cellNumber == 7 and isClickable1(currentChargenProficiency) then
+					local value = proficiencyValue(currentChargenProficiency)
 					createCharScreen:OnProficiencyPlusMinusButtonClick(allChargenProficiencies[currentChargenProficiency].id, not reverseButtonPosition)
+					cannotFurtherSpecialize = value == proficiencyValue(currentChargenProficiency)
 				elseif cellNumber == 8 and isClickable2(currentChargenProficiency) then
+					local value = proficiencyValue(currentChargenProficiency)
 					createCharScreen:OnProficiencyPlusMinusButtonClick(allChargenProficiencies[currentChargenProficiency].id, reverseButtonPosition)
+					cannotFurtherSpecialize = value == proficiencyValue(currentChargenProficiency)
 				end
 			end
 		"
@@ -15731,12 +15773,18 @@ menu
 		action
 		"
 			for k,v in pairs(chargen.proficiency) do
-				if not plusButtonClickable(k) then break end
-				createCharScreen:OnProficiencyPlusMinusButtonClick(v.id, true)
+				while plusButtonClickable(k) do
+					local points = chargen.extraProficiencySlots
+					createCharScreen:OnProficiencyPlusMinusButtonClick(v.id, true)
+					if points == chargen.extraProficiencySlots then break end
+				end
 			end
 			for k,v in pairs(chargen.thief_skill) do
-				if not createCharScreen:IsThiefSkillPlusMinusButtonClickable() then break end
-				createCharScreen:OnThiefSkillPlusMinusButtonClick(v.id, true)
+				while createCharScreen:IsThiefSkillPlusMinusButtonClickable() do
+					local points = chargen.extraSkillPoints
+					createCharScreen:OnThiefSkillPlusMinusButtonClick(v.id, true)
+					if points == chargen.extraSkillPoints then break end
+				end
 			end
 			createCharScreen:OnCancelButtonClick()
 		"
@@ -16525,12 +16573,8 @@ menu
 	onOpen
 	"
 		Infinity_PlaySound('GAM_03')
-		if chargen.name then
-			charNameEdit = chargen.name
-		else
-			charNameEdit = ''
-			Infinity_FocusTextEdit('charNameEditArea')
-		end
+		charNameEdit = chargen.name or ''
+		Infinity_FocusTextEdit('charNameEditArea')
 	"
 	onClose
 	"
