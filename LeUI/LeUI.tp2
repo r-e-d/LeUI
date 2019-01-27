@@ -7,10 +7,6 @@ LANGUAGE
 BEGIN @10000
 	REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet sod~ @90000
 	COPY ~LeUI/copy~ ~override~
-	ACTION_IF FILE_EXISTS_IN_GAME ~BITS.IDS~ THEN
-	BEGIN
-		COPY ~LeUI/copy/UI_25.menu~ ~override/UI.menu~
-	END
 
 BEGIN @10001
 	REQUIRE_PREDICATE GAME_IS ~bgee bg2ee eet sod~ @90000
