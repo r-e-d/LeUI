@@ -7407,7 +7407,6 @@ function findFirstDifferenceInSpellList(oldList, newList)
 	return ret
 end
 
-selectedSpell = nil
 showMageMemorizationFlash = false
 
 function refreshMageBook()
@@ -7440,7 +7439,6 @@ function setMageBookLevel(num, noSound)
 		Infinity_PlaySound('GAM_05')
 	end
 	mageScreen:SetSpellLevel(num - 1)
-	selectedSpell = nil
 	refreshMageBook()
 end
 
@@ -7504,6 +7502,14 @@ function spellTooltip(spells, cellNumber)
 	return ''
 end
 
+function showSpellDetails(spell)
+	if(spell.isPlaceholder) then
+		return
+	end
+	currentSpell = spell
+	Infinity_PushMenu("SPELL_DESCRIPTION")
+end
+
 memorizationFlashes =
 {
 	{false, 0, false},
@@ -7527,7 +7533,6 @@ menu
 	onOpen
 	"
 		showMageMemorizationFlash = false
-		selectedSpell = nil
 		setMageBookLevel(1, true)
 		currentAnimationID = 1
 		updateCounterMemorizationSparkles = 1
@@ -7752,13 +7757,12 @@ menu
 				showMageMemorizationFlash = true
 				mageScreen:MemorizeSpell(bookSpells[idx].level, bookSpells[idx].index)
 			end
-			selectedSpell = nil
 		"
 		actionAlt
 		"
 			local idx = 4 * (currentBookSpell - 1) + cellNumber
 			if bookSpells[idx] then
-				selectedSpell = bookSpells[idx]
+				showSpellDetails(bookSpells[idx])
 			end
 		"
 		actionEnter	"currentBookSpell = mouseoverRow"
@@ -7911,30 +7915,10 @@ menu
 
 	text
 	{
-		enabled "selectedSpell == nil"
 		area 450 180 256 22
 		text lua "Infinity_FetchString(11944)"
 		text style "normal_parchment"
 		text align right top
-	}
-	text
-	{
-		enabled "selectedSpell ~= nil"
-		area 690 180 22 22
-		text lua "'X'"
-		text style "normal_parchment"
-		action
-		"
-			selectedSpell = nil
-		"
-	}
-	text
-	{
-		enabled "selectedSpell ~= nil"
-		area 446 212 264 364
-		text lua "Infinity_FetchString(selectedSpell.description)"
-		text style "parchment"
-		scrollbar 'GUISBR'
 	}
 	list
 	{
@@ -8016,7 +8000,6 @@ menu
 		}
 		area 450 204 266 372
 		name "memorizedListMage"
-		enabled "selectedSpell == nil"
 		scrollbar 'GUISBR'
 		rowheight 62
 		hidehighlight
@@ -8031,6 +8014,13 @@ menu
 				else
 					popup2Button(11824, 'DELETE_BUTTON', function() removeMageSpell(idx) end)
 				end
+			end
+		"
+		actionAlt
+		"
+			local idx = 4 * (currentBottomSpell - 1) + cellNumber
+			if bottomSpells[idx] then
+				showSpellDetails(bottomSpells[idx])
 			end
 		"
 		actionEnter	"currentBookSpell = mouseoverRow"
@@ -8195,15 +8185,6 @@ menu
 		text "CONTINGENCY_BUTTON"
 		text style "button"
 		action "Infinity_PushMenu('MAGE_CONTINGENCY')"
-	}
-	button
-	{
-		area 584 611 234 44
-		enabled "characters[id].hasSorcererBook == false and selectedSpell ~= nil"
-		bam GUIOSTLR
-		text "REMOVE_BUTTON"
-		text style "button"
-		action "popup2Button(engine_mode == 0 and 24485 or 63745, 'REMOVE_BUTTON', function() mageScreen:EraseKnownSpell(selectedSpell.resref); selectedSpell = nil end)"
 	}
 }
 `
@@ -8529,6 +8510,213 @@ menu
 	}
 }
 `
+function incrSpellDescriptionKnown(incr)
+	local nextSpell = bookSpells[currentSpell.index + incr + 1]
+
+	if(nextSpell ~= nil) then
+		currentSpell = nextSpell
+		return
+	end
+
+	if(incr > 0) then
+		currentSpell = bookSpells[1]
+	else
+		currentSpell = bookSpells[#bookSpells]
+	end
+end
+function getNextDifferentMemorizedSpell(incr, startIdx, matchIdx)
+	local k = startIdx
+	while (k > 0 and k <= #bottomSpells) do
+		local v = bottomSpells[k]
+		if(v.memorizedIndex ~= matchIdx and not v.isPlaceholder) then
+			return v
+		end
+		k = k + incr
+	end
+	return nil
+end
+function incrSpellDescriptionMemorized(incr)
+	local nextSpell = getNextDifferentMemorizedSpell(incr, currentSpell.memorizedDisplayIdx, currentSpell.memorizedIndex)
+
+	if(nextSpell ~= nil) then
+		currentSpell = nextSpell
+		return
+	end
+
+	if(incr > 0) then
+		currentSpell = getNextDifferentMemorizedSpell(incr, 1, -1)
+	else
+		currentSpell = getNextDifferentMemorizedSpell(incr, #bottomSpells, -1)
+	end
+end
+function incrSpellDescription(incr)
+	if(currentSpell.memorizedDisplayIdx == nil) then
+		incrSpellDescriptionKnown(incr)
+	else
+		incrSpellDescriptionMemorized(incr)
+	end
+	computeSplitPosition(Infinity_FetchString(currentSpell.description), 'spellDescriptionSplit')
+end
+function isWizSpellMode()
+	return e:GetActiveEngine() == e:GetEngineWizSpell()
+end
+function inSpellBook()
+	return e:GetActiveEngine() == e:GetEngineWizSpell() or e:GetActiveEngine() == e:GetEnginePriestSpell()
+end
+
+showEraseButton = true
+`
+menu
+{
+	name "SPELL_DESCRIPTION"
+	align center center
+	modal
+	onOpen
+	"
+		if(e:GetActiveEngine() == worldScreen) then
+			worldScreenWasPaused = worldScreen:CheckIfPaused()
+			if worldScreenWasPaused == false then
+				worldScreen:TogglePauseGame(true)
+			end
+		end
+		showEraseButton = true
+		if characters[id].hasSorcererBook then
+			showEraseButton = false
+		end
+		computeSplitPosition(Infinity_FetchString(currentSpell.description), 'spellDescriptionSplit')
+	"
+	onClose
+	"
+		if(e:GetActiveEngine() == worldScreen) then
+			if worldScreenWasPaused == false then
+				worldScreen:TogglePauseGame(true)
+			end
+			worldScreenWasPaused = false
+		end
+	"
+	label
+	{
+		area 0 0 864 710
+		mosaic GUIINVHI
+	}
+	label
+	{
+		area 81 11 700 44
+		text 16189
+		text style "title"
+	}
+	label
+	{
+		area 95 70 52 52
+		bam STONSLOT
+	}
+	label
+	{
+		area 95 70 52 52
+		icon lua "currentSpell.icon:sub(1, -2) .. 'B'"
+		sequence 0
+		align center center
+	}
+	button
+	{
+		enabled "inSpellBook()"
+		area 250 74 45 42
+		bam GUIOSW
+		sequence 1
+		action
+		"
+			incrSpellDescription(-1)
+		"
+	}
+	button
+	{
+		enabled "inSpellBook()"
+		area 570 74 45 42
+		bam GUIOSW
+		sequence 0
+		action
+		"
+			incrSpellDescription(1)
+		"
+	}
+	label
+	{
+		area 282 67 300 50
+		text lua "Infinity_FetchString(currentSpell.name)"
+		text align center center
+		text style "label"
+	}
+	label
+	{
+		name "spellDescriptionSplit"
+		enabled "false"
+		area 0 0 665 -1
+		text lua "Infinity_FetchString(currentSpell.description):sub(startPos, curPos)"
+		text style "parchment"
+		scrollbar 'GUISBR'
+	}
+	list
+	{
+		column
+		{
+			width 100
+			label
+			{
+				enabled "rowNumber == 1"
+				area 0 0 40 38
+				bam INITIALS
+				sequence lua "Infinity_FetchString(currentSpell.description):byte(startPos - 1) - 1"
+			}
+			label
+			{
+				enabled "rowNumber == 1"
+				area 44 0 -1 -1
+				text lua "Infinity_FetchString(currentSpell.description):sub(startPos, splitPos - 1)"
+				text style "parchment"
+			}
+			label
+			{
+				enabled "rowNumber == 2"
+				area 0 0 -1 -1
+				text lua "Infinity_FetchString(currentSpell.description):sub(splitPos + 1)"
+				text style "parchment"
+			}
+		}
+		enabled "splitPos ~= -1"
+		rowheight dynamic
+		hidehighlight
+		table "makeTable(2)"
+		area 71 185 715 340
+		scrollbar 'GUISBR'
+	}
+	text
+	{
+		enabled "splitPos == -1"
+		area 71 185 715 340
+		text lua "Infinity_FetchString(currentSpell.description)"
+		text style "parchment"
+		scrollbar 'GUISCRC'
+	}
+	button
+	{
+		on escape
+		area 327 638 201 44
+		bam GUIOSTUM
+		text "DONE_BUTTON"
+		text style "button"
+		action "Infinity_PopMenu('SPELL_DESCRIPTION')"
+	}
+	button
+	{
+		enabled "isWizSpellMode() and showEraseButton"
+		area 572 638 234 44
+		text "REMOVE_BUTTON"
+		text style "button"
+		bam GUIOSTUR
+		action "popup2Button(engine_mode == 0 and 24485 or 63745, 'REMOVE_BUTTON', function() mageScreen:EraseKnownSpell(currentSpell.resref); Infinity_PopMenu('SPELL_DESCRIPTION') end)"
+	}
+}
+`
 function refreshMageContingency()
 	preparedSpells = {}
 	for k, v in pairs(characters[id].contingencySpells) do
@@ -8828,10 +9016,16 @@ function refreshPriestBook()
 		currentSpellLevel = 1
 	end
 	if characters[id].hasClericBook then
+		bookSpells = characters[id].priestSpells[currentSpellLevel]
 		newBottomSpells = filterMemorizedPriestSpells()
 		bottomSpells = newBottomSpells
 		bottomSpellsPlaceHolder = makeBlankTable(characters[id].priestDetails[currentSpellLevel].maxMemorized)
+	elseif characters[id].hasShamanBook then
+		bookSpells = characters[id].priestSpells[currentSpellLevel]
+		bottomSpells = {}
+		bottomSpellsPlaceHolder = {}
 	else
+		bookSpells = {}
 		bottomSpells = {}
 		bottomSpellsPlaceHolder = {}
 	end
@@ -8840,7 +9034,6 @@ end
 function setPriestBookLevel(num, noSound)
 	currentBookSpell = 0
 	currentSpellLevel = num
-	selectedSpell = nil
 	if noSound ~= true then
 		Infinity_PlaySound('GAM_06')
 	end
@@ -8876,7 +9069,6 @@ menu
 	onopen
 	"
 		showPriestMemorizationFlash = false
-		selectedSpell = nil
 		pushSidebars()
 		setPriestBookLevel(1, true)
 		currentAnimationID = 1
@@ -9083,13 +9275,12 @@ menu
 				showPriestMemorizationFlash = true
 				priestScreen:MemorizeSpell(characters[id].priestSpells[currentSpellLevel][idx].level, characters[id].priestSpells[currentSpellLevel][idx].index)
 			end
-			selectedSpell = nil
 		"
 		actionAlt
 		"
 			local idx = 4 * (currentBookSpell - 1) + cellNumber
 			if characters[id].priestSpells[currentSpellLevel][idx] then
-				selectedSpell = characters[id].priestSpells[currentSpellLevel][idx]
+				showSpellDetails(characters[id].priestSpells[currentSpellLevel][idx])
 			end
 		"
 		actionEnter	"currentBookSpell = mouseoverRow"
@@ -9242,30 +9433,10 @@ menu
 
 	text
 	{
-		enabled "selectedSpell == nil"
 		area 460 178 256 22
 		text lua "Infinity_FetchString(11944)"
 		text style "normal_parchment"
 		text align right top
-	}
-	text
-	{
-		enabled "selectedSpell ~= nil"
-		area 704 174 22 22
-		text lua "'X'"
-		text style "normal_parchment"
-		action
-		"
-			selectedSpell = nil
-		"
-	}
-	text
-	{
-		enabled "selectedSpell ~= nil"
-		area 420 196 306 362
-		text lua "Infinity_FetchString(selectedSpell.description)"
-		text style "parchment"
-		scrollbar 'GUISBR'
 	}
 	list
 	{
@@ -9347,7 +9518,6 @@ menu
 		}
 		area 460 200 266 372
 		name "memorizedListPriest"
-		enabled "selectedSpell == nil"
 		scrollbar 'GUISBR'
 		rowheight 62
 		hidehighlight
@@ -9362,6 +9532,13 @@ menu
 				else
 					popup2Button(11824, 'DELETE_BUTTON', function() removePriestSpell(idx) end)
 				end
+			end
+		"
+		actionAlt
+		"
+			local idx = 4 * (currentBottomSpell - 1) + cellNumber
+			if bottomSpells[idx] then
+				showSpellDetails(bottomSpells[idx])
 			end
 		"
 		actionEnter	"currentBookSpell = mouseoverRow"
