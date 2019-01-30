@@ -14839,9 +14839,8 @@ function raceOrGeneralHelp()
 	race = chargen.races[currentChargenRace]
 	if race then
 		return Infinity_FetchString(race.desc)
-	else
-		return Infinity_FetchString(17237)
 	end
+	return Infinity_FetchString(17237)
 end
 `
 menu
@@ -14877,43 +14876,28 @@ menu
 			width 100
 			label
 			{
-				enabled "rowNumber ~= currentChargenRace and rowNumber ~= hoverChargenRace"
-				area 8 0 340 44
-				text lua "Infinity_FetchString(chargen.races[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color D
+				area 0 0 356 32
+				bam GUICHLNG
+				frame lua "rowNumber == currentChargenRace and 2 or 0"
 			}
 			label
 			{
-				enabled "rowNumber == currentChargenRace and rowNumber ~= hoverChargenRace"
-				area 8 0 340 44
+				area 0 0 340 32
 				text lua "Infinity_FetchString(chargen.races[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color S
-			}
-			label
-			{
-				enabled "rowNumber == hoverChargenRace"
-				area 8 0 340 44
-				text lua "Infinity_FetchString(chargen.races[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color H
+				text style "button"
+				pad 8 8 8 8
 			}
 		}
 		action
 		"
 			if chargen.races[currentChargenRace] then
+				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnRaceSelectButtonClick(chargen.races[currentChargenRace].id)
 			end
 		"
-		actionEnter	"hoverChargenRace = mouseoverRow"
-		actionExit	"hoverChargenRace = 0"
-		rowheight 44
+		rowheight 34
 		hidehighlight
-		area 42 192 340 414
+		area 41 192 356 414
 		table "chargen.races"
 		var currentChargenRace
 		scrollbar 'GUISCRC'
@@ -14958,10 +14942,9 @@ function classOrGeneralHelp()
 	class = allChargenClasses[currentChargenClass]
 	if class then
 		return Infinity_FetchString(class.desc)
-	else
-		--only bit that may need to change for dual class! :)
-		return Infinity_FetchString(17242)
 	end
+	--only bit that may need to change for dual class! :)
+	return Infinity_FetchString(17242)
 end
 function classDisabled(id)
 	if type(getClassDisabled) == 'function' then
@@ -15005,56 +14988,35 @@ menu
 		column
 		{
 			width 100
-			label
+			button
 			{
-				enabled "classDisabled(allChargenClasses[rowNumber].id)"
-				opacity lua "50"
-				area 8 0 340 44
-				text lua "Infinity_FetchString(allChargenClasses[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color D
+				clickable lua "not classDisabled(allChargenClasses[rowNumber].id)"
+				area 0 0 356 32
+				bam GUICHLNG
+				frame lua "rowNumber == currentChargenClass and 2 or 0"
 			}
-			label
+			button
 			{
-				enabled "rowNumber ~= currentChargenClass and rowNumber ~= hoverChargenClass and not classDisabled(allChargenClasses[rowNumber].id)"
-				area 8 0 340 44
+				clickable lua "not classDisabled(allChargenClasses[rowNumber].id)"
+				area 0 0 340 32
 				text lua "Infinity_FetchString(allChargenClasses[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color D
-			}
-			label
-			{
-				enabled "rowNumber == currentChargenClass and rowNumber ~= hoverChargenClass and not classDisabled(allChargenClasses[rowNumber].id)"
-				area 8 0 340 44
-				text lua "Infinity_FetchString(allChargenClasses[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color S
-			}
-			label
-			{
-				enabled "rowNumber == hoverChargenClass and not classDisabled(allChargenClasses[rowNumber].id)"
-				area 8 0 340 44
-				text lua "Infinity_FetchString(allChargenClasses[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color H
+				text style "button"
+				pad 8 8 8 8
 			}
 		}
 		action
 		"
 			createCharScreen:OnClassSelectButtonClick(0)
 			if allChargenClasses[currentChargenClass] and not classDisabled(allChargenClasses[currentChargenClass].id) then
+				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnClassSelectButtonClick(allChargenClasses[currentChargenClass].id)
+			else
+				currentChargenClass = nil
 			end
 		"
-		actionEnter	"hoverChargenClass = mouseoverRow"
-		actionExit	"hoverChargenClass = 0"
-		rowheight 44
+		rowheight 34
 		hidehighlight
-		area 42 192 340 414
+		area 41 192 356 414
 		table "allChargenClasses"
 		var currentChargenClass
 		scrollbar 'GUISCRC'
@@ -15101,9 +15063,8 @@ function kitOrGeneralHelp()
 	kit = allChargenKits[currentChargenKit]
 	if kit then
 		return Infinity_FetchString(kit.desc)
-	else
-		return Infinity_FetchString(17242)
 	end
+	return Infinity_FetchString(17242)
 end
 function kitDisabled(id)
 	if type(getKitDisabled) == 'function' then
@@ -15148,55 +15109,34 @@ menu
 		column
 		{
 			width 100
-			label
+			button
 			{
-				enabled "kitDisabled(allChargenKits[rowNumber].id)"
-				opacity lua "50"
-				area 8 0 340 44
-				text lua "Infinity_FetchString(allChargenKits[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color D
+				clickable lua "not kitDisabled(allChargenKits[rowNumber].id)"
+				area 0 0 356 32
+				bam GUICHLNG
+				frame lua "rowNumber == currentChargenKit and 2 or 0"
 			}
-			label
+			button
 			{
-				enabled "rowNumber ~= currentChargenKit and rowNumber ~= hoverChargenKit and not kitDisabled(allChargenKits[rowNumber].id)"
-				area 8 0 340 44
+				clickable lua "not kitDisabled(allChargenKits[rowNumber].id)"
+				area 0 0 340 32
 				text lua "Infinity_FetchString(allChargenKits[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color D
-			}
-			label
-			{
-				enabled "rowNumber == currentChargenKit and rowNumber ~= hoverChargenKit and not kitDisabled(allChargenKits[rowNumber].id)"
-				area 8 0 340 44
-				text lua "Infinity_FetchString(allChargenKits[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color S
-			}
-			label
-			{
-				enabled "rowNumber == hoverChargenKit and not kitDisabled(allChargenKits[rowNumber].id)"
-				area 8 0 340 44
-				text lua "Infinity_FetchString(allChargenKits[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color H
+				text style "button"
+				pad 8 8 8 8
 			}
 		}
 		action
 		"
 			if allChargenKits[currentChargenKit] and not kitDisabled(allChargenKits[currentChargenKit].id) then
+				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnKitSelectButtonClick(allChargenKits[currentChargenKit].id)
+			else
+				currentChargenKit = nil
 			end
 		"
-		actionEnter	"hoverChargenKit = mouseoverRow"
-		actionExit	"hoverChargenKit = 0"
-		rowheight 44
+		rowheight 34
 		hidehighlight
-		area 42 192 340 414
+		area 41 192 356 414
 		table "allChargenKits"
 		var currentChargenKit
 		scrollbar 'GUISCRC'
@@ -15241,9 +15181,8 @@ function alignmentOrGeneralHelp()
 	alignment = allChargenAlignments[currentChargenAlignment]
 	if alignment then
 		return Infinity_FetchString(alignment.desc)
-	else
-		return Infinity_FetchString(9602)
 	end
+	return Infinity_FetchString(9602)
 end
 function alignmentDisabled(id)
 	if type(getAlignmentDisabled) == 'function' then
@@ -15286,56 +15225,35 @@ menu
 		column
 		{
 			width 100
-			label
+			button
 			{
-				enabled "alignmentDisabled(allChargenAlignments[rowNumber].id)"
-				opacity lua "50"
-				area 8 0 340 44
-				text lua "Infinity_FetchString(allChargenAlignments[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color D
+				clickable lua "not alignmentDisabled(allChargenAlignments[rowNumber].id)"
+				area 0 0 356 32
+				bam GUICHLNG
+				frame lua "rowNumber == currentChargenAlignment and 2 or 0"
 			}
-			label
+			button
 			{
-				enabled "rowNumber ~= currentChargenAlignment and rowNumber ~= hoverChargenAlignment and not alignmentDisabled(allChargenAlignments[rowNumber].id)"
-				area 8 0 340 44
+				clickable lua "not alignmentDisabled(allChargenAlignments[rowNumber].id)"
+				area 0 0 340 32
 				text lua "Infinity_FetchString(allChargenAlignments[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color D
-			}
-			label
-			{
-				enabled "rowNumber == currentChargenAlignment and rowNumber ~= hoverChargenAlignment and not alignmentDisabled(allChargenAlignments[rowNumber].id)"
-				area 8 0 340 44
-				text lua "Infinity_FetchString(allChargenAlignments[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color S
-			}
-			label
-			{
-				enabled "rowNumber == hoverChargenAlignment and not alignmentDisabled(allChargenAlignments[rowNumber].id)"
-				area 8 0 340 44
-				text lua "Infinity_FetchString(allChargenAlignments[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color H
+				text style "button"
+				pad 8 8 8 8
 			}
 		}
 		action
 		"
 			createCharScreen:OnAlignmentSelectButtonClick(0)
 			if allChargenAlignments[currentChargenAlignment] and not alignmentDisabled(allChargenAlignments[currentChargenAlignment].id) then
+				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnAlignmentSelectButtonClick(allChargenAlignments[currentChargenAlignment].id)
+			else
+				currentChargenAlignment = nil
 			end
 		"
-		actionEnter	"hoverChargenAlignment = mouseoverRow"
-		actionExit	"hoverChargenAlignment = 0"
-		rowheight 44
+		rowheight 34
 		hidehighlight
-		area 42 192 340 414
+		area 41 192 356 414
 		table "allChargenAlignments"
 		var currentChargenAlignment
 		scrollbar 'GUISCRC'
@@ -15390,9 +15308,8 @@ function abilityOrGeneralHelp()
 	if ability and ability.desc ~= -1 then
 		createCharScreen:SetAbilityHelpInfo(currentChargenAbility)
 		return Infinity_FetchString(ability.desc)
-	else
-		return Infinity_FetchString(17247)
 	end
+	return Infinity_FetchString(17247)
 end
 `
 menu
@@ -16670,9 +16587,8 @@ function hatedRaceOrGeneralHelp()
 	race = chargen.hatedRace[currentChargenHatedRace]
 	if race then
 		return Infinity_FetchString(race.desc)
-	else
-		return Infinity_FetchString(17256)
 	end
+	return Infinity_FetchString(17256)
 end
 `
 menu
@@ -16708,43 +16624,28 @@ menu
 			width 100
 			label
 			{
-				enabled "rowNumber ~= currentChargenHatedRace and rowNumber ~= hoverChargenHatedRace"
-				area 8 0 340 44
-				text lua "Infinity_FetchString(chargen.hatedRace[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color D
+				area 0 0 356 32
+				bam GUICHLNG
+				frame lua "rowNumber == currentChargenHatedRace and 2 or 0"
 			}
 			label
 			{
-				enabled "rowNumber == currentChargenHatedRace and rowNumber ~= hoverChargenHatedRace"
-				area 8 0 340 44
+				area 0 0 340 32
 				text lua "Infinity_FetchString(chargen.hatedRace[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color S
-			}
-			label
-			{
-				enabled "rowNumber == hoverChargenHatedRace"
-				area 8 0 340 44
-				text lua "Infinity_FetchString(chargen.hatedRace[rowNumber].name)"
-				text style "list"
-				text align center center
-				text color H
+				text style "button"
+				pad 8 8 8 8
 			}
 		}
 		action
 		"
 			if chargen.hatedRace[currentChargenHatedRace] then
+				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnRacialEnemySelectButtonClick(chargen.hatedRace[currentChargenHatedRace].id)
 			end
 		"
-		actionEnter	"hoverChargenHatedRace = mouseoverRow"
-		actionExit	"hoverChargenHatedRace = 0"
-		rowheight 44
+		rowheight 34
 		hidehighlight
-		area 42 192 340 414
+		area 41 192 356 414
 		table "chargen.hatedRace"
 		var currentChargenHatedRace
 		scrollbar	'GUISCRC'
