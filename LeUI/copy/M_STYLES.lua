@@ -35,13 +35,3 @@ styles['gold']['point'] = 12
 styles['title']['font'] = 'SHERWOOD'
 styles['title']['point'] = 20
 styles['title']['color'] = 'H'
-
-styles['onepixel'] =
-{
-	color = 'B',
-	font = 'POSTANTI',
-	point = 1,
-	useFontZoom = 0,
-	valign = 'top',
-	halign = 'left',
-}
