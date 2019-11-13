@@ -1,4 +1,4 @@
-function wrapper(journalId, recvTime, stateType, chapter, timeStamp)
+local function wrapper(journalId, recvTime, stateType, chapter, timeStamp)
 	-- "Murder Most Foul" should be an "Info".
 	local id = engine_mode == 0 and 27084 or 227084
 	if journalId == id then
@@ -14,7 +14,7 @@ function wrapper(journalId, recvTime, stateType, chapter, timeStamp)
 	savedUpdateJournalEntry(journalId, recvTime, stateType, chapter, timeStamp)
 end
 
-function inject()
+local function inject()
 	savedUpdateJournalEntry = updateJournalEntry
 	updateJournalEntry = wrapper
 
