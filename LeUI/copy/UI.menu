@@ -10629,7 +10629,7 @@ function checkContainerText(normalStr, containerStr)
 end
 function getItemUsages()
 	local item = store.storeItems[rowNumber].item
-	if(item.usages ~= nil) then
+	if(item.usages > 0) then
 		return item.usages
 	end
 	if(item.stackSize > 1) then
