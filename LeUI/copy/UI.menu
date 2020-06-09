@@ -15564,11 +15564,11 @@ function proficiencyEnabled(row)
 	return true
 end
 
-function proficiencyValue(row)
-	if type(getTranslatedProficiencyValue) == 'function' then
-		return getTranslatedProficiencyValue(row)
+function getProficiency(row)
+	if type(getTranslatedProficiency) == 'function' then
+		return getTranslatedProficiency(row)
 	end
-	return chargen.proficiency[row].value
+	return chargen.proficiency[row]
 end
 
 function getProficienciesTitle()
@@ -15685,7 +15685,7 @@ menu
 				area 0 16 16 22
 				frame 4
 				align center center
-				enabled "proficiencyValue(rowNumber) > 4"
+				enabled "getProficiency(rowNumber).value > 4"
 			}
 		}
 		column
@@ -15697,7 +15697,7 @@ menu
 				area 0 16 16 22
 				frame 4
 				align center center
-				enabled "proficiencyValue(rowNumber) > 3"
+				enabled "getProficiency(rowNumber).value > 3"
 			}
 		}
 		column
@@ -15709,7 +15709,7 @@ menu
 				area 0 16 16 22
 				frame 4
 				align center center
-				enabled "proficiencyValue(rowNumber) > 2"
+				enabled "getProficiency(rowNumber).value > 2"
 			}
 		}
 		column
@@ -15721,7 +15721,7 @@ menu
 				area 0 16 16 22
 				frame 4
 				align center center
-				enabled "proficiencyValue(rowNumber) > 1"
+				enabled "getProficiency(rowNumber).value > 1"
 			}
 		}
 		column
@@ -15733,7 +15733,7 @@ menu
 				area 0 16 16 22
 				frame 4
 				align center center
-				enabled "proficiencyValue(rowNumber) > 0"
+				enabled "getProficiency(rowNumber).value > 0"
 			}
 		}
 		column
@@ -15768,13 +15768,13 @@ menu
 				local isClickable1 = reverseButtonPosition and minusButtonClickable or plusButtonClickable
 				local isClickable2 = reverseButtonPosition and plusButtonClickable or minusButtonClickable
 				if cellNumber == 7 and isClickable1(currentChargenProficiency) then
-					local value = proficiencyValue(currentChargenProficiency)
+					local value = getProficiency(currentChargenProficiency).value
 					createCharScreen:OnProficiencyPlusMinusButtonClick(allChargenProficiencies[currentChargenProficiency].id, not reverseButtonPosition)
-					cannotFurtherSpecialize = value == proficiencyValue(currentChargenProficiency)
+					cannotFurtherSpecialize = value == getProficiency(currentChargenProficiency).value
 				elseif cellNumber == 8 and isClickable2(currentChargenProficiency) then
-					local value = proficiencyValue(currentChargenProficiency)
+					local value = getProficiency(currentChargenProficiency).value
 					createCharScreen:OnProficiencyPlusMinusButtonClick(allChargenProficiencies[currentChargenProficiency].id, reverseButtonPosition)
-					cannotFurtherSpecialize = value == proficiencyValue(currentChargenProficiency)
+					cannotFurtherSpecialize = value == getProficiency(currentChargenProficiency).value
 				end
 			end
 			cellNumber = nil
@@ -15790,13 +15790,13 @@ menu
 				local isClickable1 = reverseButtonPosition and minusButtonClickable or plusButtonClickable
 				local isClickable2 = reverseButtonPosition and plusButtonClickable or minusButtonClickable
 				if cellNumber == 7 and isClickable1(currentChargenProficiency) then
-					local value = proficiencyValue(currentChargenProficiency)
+					local value = getProficiency(currentChargenProficiency).value
 					createCharScreen:OnProficiencyPlusMinusButtonClick(allChargenProficiencies[currentChargenProficiency].id, not reverseButtonPosition)
-					cannotFurtherSpecialize = value == proficiencyValue(currentChargenProficiency)
+					cannotFurtherSpecialize = value == getProficiency(currentChargenProficiency).value
 				elseif cellNumber == 8 and isClickable2(currentChargenProficiency) then
-					local value = proficiencyValue(currentChargenProficiency)
+					local value = getProficiency(currentChargenProficiency).value
 					createCharScreen:OnProficiencyPlusMinusButtonClick(allChargenProficiencies[currentChargenProficiency].id, reverseButtonPosition)
-					cannotFurtherSpecialize = value == proficiencyValue(currentChargenProficiency)
+					cannotFurtherSpecialize = value == getProficiency(currentChargenProficiency).value
 				end
 			end
 		"
