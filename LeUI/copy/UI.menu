@@ -13858,7 +13858,7 @@ end
 function getDialogPaddingText()
 	local x,y,w,h = Infinity_GetArea("worldPlayerDialogChoicesList")
 	local zoom = tonumber(Infinity_GetINIValue('Fonts','Zoom','100'))
-	local dialogHeight = Infinity_GetContentHeight(styles.normal.font, w, worldNPCDialogText:gsub('\n', ': ', 1), styles.normal.point * zoom / 100, 0, styles.normal.useFontZoom) + 12
+	local dialogHeight = Infinity_GetContentHeight(styles.normal.font, w, getDialogText(2), styles.normal.point * zoom / 100, 0, styles.normal.useFontZoom) + 12
 	local i = 1
 	while i <= #worldPlayerDialogChoices do
 		dialogHeight = dialogHeight + Infinity_GetContentHeight(styles.normal.font, w, worldPlayerDialogChoices[i].text, styles.normal.point * zoom / 100, 0, styles.normal.useFontZoom)
@@ -13913,12 +13913,36 @@ function getDialogEntryText(row)
 	return text
 end
 
-function getDialogText()
-	local text = '\n' .. worldNPCDialogText:gsub('\n', ': ', 1)
-	if worldMessageBoxText:sub(-text:len()) == text then
-		return worldMessageBoxText:sub(1, worldMessageBoxText:len() - text:len())
+function getDialogText(row)
+	local idx1 = worldMessageBoxText:len()
+	local idx2 = worldNPCDialogText:len()
+
+	while idx2 > 0 do
+		local c1 = worldMessageBoxText:byte(idx1)
+		local c2 = worldNPCDialogText:byte(idx2)
+
+		if c1 ~= c2 then
+			if c1 == 58 and worldMessageBoxText:byte(idx1 - 1) == c2 then
+				idx1 = idx1 - 1
+				c1 = worldMessageBoxText:byte(idx1)
+			elseif c2 == 10 and worldNPCDialogText:byte(idx2 - 1) == c1 then
+				idx2 = idx2 - 1
+				c2 = worldNPCDialogText:byte(idx2)
+			elseif c1 == 32 and c2 == 10 and worldMessageBoxText:byte(idx1 - 1) == 58 then
+				idx1 = idx1 - 1
+				c1 = 10
+			end
+		end
+
+		if c1 ~= c2 then
+			break
+		end
+
+		idx1 = idx1 - 1
+		idx2 = idx2 - 1
 	end
-	return worldMessageBoxText
+
+	return trim(row == 1 and worldMessageBoxText:sub(1, idx1) or worldMessageBoxText:sub(idx1 + 1))
 end
 
 function makeDialogTable()
@@ -13997,7 +14021,7 @@ menu
 				enabled "rowNumber == 1"
 				opacity lua "step == 1 and 0 or 255"
 				area 0 0 -1 -1
-				text lua "getDialogText()"
+				text lua "getDialogText(1)"
 				text style "normal"
 			}
 			text
@@ -14005,7 +14029,7 @@ menu
 				enabled "rowNumber == 2"
 				area 0 0 -1 -1
 				pad 0 0 0 12
-				text lua "worldNPCDialogText:gsub('\n', ': ', 1)"
+				text lua "getDialogText(2)"
 				text style "normal"
 			}
 			label
