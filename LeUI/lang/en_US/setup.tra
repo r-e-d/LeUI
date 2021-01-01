@@ -2,14 +2,5 @@
 @10000 = ~lefreut's Enhanced UI - Core component~
 @10001 = ~lefreut's Enhanced UI - BG2 vanilla bams for spells~
 @10002 = ~lefreut's Enhanced UI - BG2 vanilla fonts for descriptions~
-@10003 = ~lefreut's Enhanced UI - Disable item comparison feature~
-@10004 = ~lefreut's Enhanced UI - Reverse +/- buttons position~
-@10005 = ~lefreut's Enhanced UI - Single Click to Map Travel~
-@10006 = ~lefreut's Enhanced UI - Show Sidebar toggle button~
-@10007 = ~lefreut's Enhanced UI - Show Quicksave button~
-@10008 = ~lefreut's Enhanced UI - Show Highlight button~
-@10009 = ~lefreut's Enhanced UI - Small right sidebar buttons~
-@10010 = ~lefreut's Enhanced UI - Quests in journal collapsed by default~
-@10011 = ~lefreut's Enhanced UI - Left click on portrait to level up~
 //messages during installation
 @90000 = ~This mod requires BG1:EE, SoD, BG2:EE or EET~

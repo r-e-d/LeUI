@@ -12,11 +12,24 @@ currentPanelID = 0
 listMetaInfo = {}
 combatLog = {}
 
-showSidebarToggle = false
-showQuickSaveButton = false
-showHighlightButton = false
-rightSidebarSmallButton = false
+--LeUI defaults
+showSidebarToggle = true
+showQuickSaveButton = true
+showHighlightButton = true
+rightSidebarSmallButton = true
 clickToLevelUp = false
+itemComparison = false
+reverseButtonPosition = true
+singleClickTravel = false
+journalCollapsed = true
+
+function LeUIquestDisplay(index)
+	if journalCollapsed then
+		return questDisplay[index].expanded
+	else
+		return not questDisplay[index].hidden
+	end
+end
 
 function updateAttrTable()
 	if (characters[currentID] ~= nil) then
@@ -2051,7 +2064,66 @@ graphicsToggles = {
 {'SHOW_HEALTHBAR_LABEL',engine_mode == 0 and 32718 or 103192, 65, 0, 0, 0},
 {'SHOW_BLACK_SPACE_LABEL','SHOW_BLACK_SPACE_DESCRIPTION', 69, 0, 0, 0},
 {'NEAREST_NEIGHBOUR_LABEL','NEAREST_NEIGHBOUR_DESCRIPTION', 70, 0, 0, 0},
+{'LEUI_SIDEBAR_TOGGLE_LABEL','LEUI_SIDEBAR_TOGGLE_DESCRIPTION', 100, 0, 0, 0},
+{'LEUI_QUICKSAVE_LABEL','LEUI_QUICKSAVE_DESCRIPTION', 101, 0, 0, 0},
+{'LEUI_HIGHLIGHT_LABEL','LEUI_HIGHLIGHT_DESCRIPTION', 102, 0, 0, 0},
+{'LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_LABEL','LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_DESCRIPTION', 103, 0, 0, 0},
+{'LEUI_CLICK_TO_LEVEL_UP_LABEL','LEUI_CLICK_TO_LEVEL_UP_DESCRIPTION', 104, 0, 0, 0},
+{'LEUI_ITEM_COMPARISION_LABEL','LEUI_ITEM_COMPARISION_DESCRIPTION', 105, 0, 0, 0},
+{'LEUI_REVERSE_BUTTON_POSITIONS_LABEL','LEUI_REVERSE_BUTTON_POSITIONS_DESCRIPTION', 106, 0, 0, 0},
+{'LEUI_SINGLE_CLICK_TRAVEL_LABEL','LEUI_SINGLE_CLICK_TRAVEL_DESCRIPTION', 107, 0, 0, 0},
+{'LEUI_JOURNAL_COLLAPSED_LABEL','LEUI_JOURNAL_COLLAPSED_DESCRIPTION', 108, 0, 0, 0},
 }
+
+LeUI_uiStrings = {
+  LEUI_SIDEBAR_TOGGLE_LABEL = "Sidebar Toggle Buttons",
+  LEUI_SIDEBAR_TOGGLE_DESCRIPTION = "Enable this option to show Toggle Buttons on left and right sidebars",
+  LEUI_QUICKSAVE_LABEL = "Show Quicksave Button",
+  LEUI_QUICKSAVE_DESCRIPTION = "Enable this option to show Quick Save button on left sidebar",
+  LEUI_HIGHLIGHT_LABEL = "Show Highlight Button",
+  LEUI_HIGHLIGHT_DESCRIPTION = "Enable this option to show Reveal Details button on right sidebar",
+  LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_LABEL = "Small Sidebar Buttons",
+  LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_DESCRIPTION = "Enable this option for small AI Toggle and Select All buttons on right sidebar",
+  LEUI_CLICK_TO_LEVEL_UP_LABEL = "Left Click to Level Up",
+  LEUI_CLICK_TO_LEVEL_UP_DESCRIPTION = "Enable this option for level up your character by clicking on portrait",
+  LEUI_ITEM_COMPARISION_LABEL = "Item Comparision",
+  LEUI_ITEM_COMPARISION_DESCRIPTION = "Enable this option for enable item comparision in inventory",
+  LEUI_REVERSE_BUTTON_POSITIONS_LABEL = "Reverse +/- Buttons Positions",
+  LEUI_REVERSE_BUTTON_POSITIONS_DESCRIPTION = "Enable this option for reversing +/- buttons positions",
+  LEUI_SINGLE_CLICK_TRAVEL_LABEL = "Single Click Travel",
+  LEUI_SINGLE_CLICK_TRAVEL_DESCRIPTION = "Enable this option for map traveling with single click",
+  LEUI_JOURNAL_COLLAPSED_LABEL = "Journal Collapsed",
+  LEUI_JOURNAL_COLLAPSED_DESCRIPTION = "Enable this option for journal be collapsed by default",
+}
+
+if options['LeUI'] == nil then
+	options['LeUI'] = {}
+end
+
+function LeUIGetOption(item, value)
+	if options['LeUI'][item] ~= nil then
+		return options['LeUI'][item] == '1' and true or false
+	else
+		options['LeUI'][item] = value and '1' or '0'
+		return value
+	end
+end
+
+showSidebarToggle = LeUIGetOption(LeUI_uiStrings.LEUI_SIDEBAR_TOGGLE_LABEL, showSidebarToggle)
+showQuickSaveButton = LeUIGetOption(LeUI_uiStrings.LEUI_QUICKSAVE_LABEL, showQuickSaveButton)
+showHighlightButton = LeUIGetOption(LeUI_uiStrings.LEUI_HIGHLIGHT_LABEL, showHighlightButton)
+rightSidebarSmallButton = LeUIGetOption(LeUI_uiStrings.LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_LABEL, rightSidebarSmallButton)
+clickToLevelUp = LeUIGetOption(LeUI_uiStrings.LEUI_CLICK_TO_LEVEL_UP_LABEL, clickToLevelUp)
+itemComparison = LeUIGetOption(LeUI_uiStrings.LEUI_ITEM_COMPARISION_LABEL, itemComparison)
+reverseButtonPosition = LeUIGetOption(LeUI_uiStrings.LEUI_REVERSE_BUTTON_POSITIONS_LABEL, reverseButtonPosition)
+singleClickTravel = LeUIGetOption(LeUI_uiStrings.LEUI_SINGLE_CLICK_TRAVEL_LABEL, singleClickTravel)
+journalCollapsed = LeUIGetOption(LeUI_uiStrings.LEUI_JOURNAL_COLLAPSED_LABEL, journalCollapsed)
+
+function appendNewOptions()
+	for n, v in pairs(LeUI_uiStrings) do
+		uiStrings[n] = v
+	end
+end
 
 addedDirectx = false
 function appendDirectXOption()
@@ -2079,6 +2151,7 @@ menu
 		if e:HasDirectX() then
 			appendDirectXOption()
 		end
+		appendNewOptions()
 		panelID = 6
 		helpString = 18038
 		selectedGraphicOpt = 0
@@ -2086,7 +2159,27 @@ menu
 		fontSizeCancel = Infinity_GetOption(22, panelID)
 
 		for index, var in pairs(graphicsToggles) do
-			var[5] = Infinity_GetOption(var[3], panelID)
+			if var[3] == 100 then
+				var[5] = showSidebarToggle and 1 or 0
+			elseif var[3] == 101 then
+				var[5] = showQuickSaveButton and 1 or 0
+			elseif var[3] == 102 then
+				var[5] = showHighlightButton and 1 or 0
+			elseif var[3] == 103 then
+				var[5] = rightSidebarSmallButton and 1 or 0
+			elseif var[3] == 104 then
+				var[5] = clickToLevelUp and 1 or 0
+			elseif var[3] == 105 then
+				var[5] = itemComparison and 1 or 0
+			elseif var[3] == 106 then
+				var[5] = reverseButtonPosition and 1 or 0
+			elseif var[3] == 107 then
+				var[5] = singleClickTravel and 1 or 0
+			elseif var[3] == 108 then
+				var[5] = journalCollapsed and 1 or 0
+			else
+				var[5] = Infinity_GetOption(var[3], panelID)
+			end
 			var[6] = 0
 			if var[5] == 0 then
 				var[4] = 0
@@ -2211,7 +2304,36 @@ menu
 			Infinity_ChangeOption(22, fontSizeSLDR, panelID)
 			for index, var in pairs(graphicsToggles) do
 				if var[6] == 1 then
-					Infinity_ChangeOption(var[3], var[5], panelID)
+					if var[3] == 100 then
+						showSidebarToggle = var[5] == 1 and true or false
+						options['LeUI'][LeUI_uiStrings.LEUI_SIDEBAR_TOGGLE_LABEL] = var[5] == 1 and '1' or '0'
+					elseif var[3] == 101 then
+						showQuickSaveButton = var[5] == 1 and true or false
+						options['LeUI'][LeUI_uiStrings.LEUI_QUICKSAVE_LABEL] = var[5] == 1 and '1' or '0'
+					elseif var[3] == 102 then
+						showHighlightButton = var[5] == 1 and true or false
+						options['LeUI'][LeUI_uiStrings.LEUI_HIGHLIGHT_LABEL] = var[5] == 1 and '1' or '0'
+					elseif var[3] == 103 then
+						rightSidebarSmallButton = var[5] == 1 and true or false
+						options['LeUI'][LeUI_uiStrings.LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_LABEL] = var[5] == 1 and '1' or '0'
+					elseif var[3] == 104 then
+						clickToLevelUp = var[5] == 1 and true or false
+						options['LeUI'][LeUI_uiStrings.LEUI_CLICK_TO_LEVEL_UP_LABEL] = var[5] == 1 and '1' or '0'
+					elseif var[3] == 105 then
+						itemComparison = var[5] == 1 and true or false
+						options['LeUI'][LeUI_uiStrings.LEUI_ITEM_COMPARISION_LABEL] = var[5] == 1 and '1' or '0'
+					elseif var[3] == 106 then
+						reverseButtonPosition = var[5] == 1 and true or false
+						options['LeUI'][LeUI_uiStrings.LEUI_REVERSE_BUTTON_POSITIONS_LABEL] = var[5] == 1 and '1' or '0'
+					elseif var[3] == 107 then
+						singleClickTravel = var[5] == 1 and true or false
+						options['LeUI'][LeUI_uiStrings.LEUI_SINGLE_CLICK_TRAVEL_LABEL] = var[5] == 1 and '1' or '0'
+					elseif var[3] == 108 then
+						journalCollapsed = var[5] == 1 and true or false
+						options['LeUI'][LeUI_uiStrings.LEUI_JOURNAL_COLLAPSED_LABEL] = var[5] == 1 and '1' or '0'
+					else
+						Infinity_ChangeOption(var[3], var[5], panelID)
+					end
 				end
 			end
 			Infinity_PopMenu()
@@ -3598,7 +3720,6 @@ function requesterPlusMinusButtonClick(minus)
 	itemRequestAmt = amt + delta
 end
 
-reverseButtonPosition = false
 requester = {}
 requester.requesterMax = 0
 requester.requesterFunc = nil
@@ -5072,7 +5193,6 @@ inventoryStats = {}
 inventoryShow = {1,1,1,1,1,1}
 savedID = 0
 savedHeight = 0
-itemComparison = true
 forceGroundScroll = false
 
 function resetStatsDisplay()
@@ -10221,7 +10341,6 @@ menu
 }
 `
 fromAreaMap = false
-singleClickTravel = false
 `
 menu
 {
@@ -21771,7 +21890,7 @@ end
 function objectiveEnabled(row)
 	local rowTab =  questDisplay[row]
 	if(rowTab == nil or rowTab.objective == nil or not containsChapter(rowTab.chapters,chapter)) then return nil end
-	if(questEnabled(rowTab.parent) and not questDisplay[rowTab.parent].hidden) then return 1 else return nil end
+	if(questEnabled(rowTab.parent) and LeUIquestDisplay(rowTab.parent)) then return 1 else return nil end
 end
 function getObjectiveText(row)
 	local rowTab =  questDisplay[row]
@@ -21917,7 +22036,7 @@ menu
 			{
 				enabled "questEnabled(rowNumber) and getFinished(rowNumber) == journalMode"
 				area 0 0 -1 -1
-				text lua "not questDisplay[rowNumber].hidden and '-' or '+'"
+				text lua "LeUIquestDisplay(rowNumber) and '-' or '+'"
 				text style "edit"
 				text color 5
 			}
@@ -21932,7 +22051,7 @@ menu
 			}
 			label
 			{
-				enabled "questEnabled(rowNumber) and getFinished(rowNumber) == journalMode and not questDisplay[rowNumber].hidden"
+				enabled "questEnabled(rowNumber) and getFinished(rowNumber) == journalMode and LeUIquestDisplay(rowNumber)"
 				area 16 24 536 2
 				fill 0 0 0 180
 			}
@@ -21962,10 +22081,18 @@ menu
 		action
 		"
 			if questDisplay[selectedQuest].quest then
-				if(questDisplay[selectedQuest].hidden) then
-					questDisplay[selectedQuest].hidden = nil
+				if journalCollapsed then
+					if(questDisplay[selectedQuest].expanded) then
+						questDisplay[selectedQuest].expanded = nil
+					else
+						questDisplay[selectedQuest].expanded = 1
+					end
 				else
-					questDisplay[selectedQuest].hidden = 1
+					if(questDisplay[selectedQuest].hidden) then
+						questDisplay[selectedQuest].hidden = nil
+					else
+						questDisplay[selectedQuest].hidden = 1
+					end
 				end
 			end
 		"
