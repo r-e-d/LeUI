@@ -12,25 +12,6 @@ currentPanelID = 0
 listMetaInfo = {}
 combatLog = {}
 
---LeUI defaults
-showSidebarToggle = true
-showQuickSaveButton = true
-showHighlightButton = true
-rightSidebarSmallButton = true
-clickToLevelUp = false
-itemComparison = false
-reverseButtonPosition = true
-singleClickTravel = false
-journalCollapsed = true
-
-function LeUIquestDisplay(index)
-	if journalCollapsed then
-		return questDisplay[index].expanded
-	else
-		return not questDisplay[index].hidden
-	end
-end
-
 function updateAttrTable()
 	if (characters[currentID] ~= nil) then
 		attributeItems = {
@@ -2100,6 +2081,14 @@ if options['LeUI'] == nil then
 	options['LeUI'] = {}
 end
 
+function LeUIquestDisplay(index)
+	if journalCollapsed then
+		return questDisplay[index].expanded
+	else
+		return not questDisplay[index].hidden
+	end
+end
+
 function LeUIGetOption(item, value)
 	if options['LeUI'][item] ~= nil then
 		return options['LeUI'][item] == '1' and true or false
@@ -2109,15 +2098,15 @@ function LeUIGetOption(item, value)
 	end
 end
 
-showSidebarToggle = LeUIGetOption(LeUI_uiStrings.LEUI_SIDEBAR_TOGGLE_LABEL, showSidebarToggle)
-showQuickSaveButton = LeUIGetOption(LeUI_uiStrings.LEUI_QUICKSAVE_LABEL, showQuickSaveButton)
-showHighlightButton = LeUIGetOption(LeUI_uiStrings.LEUI_HIGHLIGHT_LABEL, showHighlightButton)
-rightSidebarSmallButton = LeUIGetOption(LeUI_uiStrings.LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_LABEL, rightSidebarSmallButton)
-clickToLevelUp = LeUIGetOption(LeUI_uiStrings.LEUI_CLICK_TO_LEVEL_UP_LABEL, clickToLevelUp)
-itemComparison = LeUIGetOption(LeUI_uiStrings.LEUI_ITEM_COMPARISION_LABEL, itemComparison)
-reverseButtonPosition = LeUIGetOption(LeUI_uiStrings.LEUI_REVERSE_BUTTON_POSITIONS_LABEL, reverseButtonPosition)
-singleClickTravel = LeUIGetOption(LeUI_uiStrings.LEUI_SINGLE_CLICK_TRAVEL_LABEL, singleClickTravel)
-journalCollapsed = LeUIGetOption(LeUI_uiStrings.LEUI_JOURNAL_COLLAPSED_LABEL, journalCollapsed)
+showSidebarToggle = LeUIGetOption(LeUI_uiStrings.LEUI_SIDEBAR_TOGGLE_LABEL, true)
+showQuickSaveButton = LeUIGetOption(LeUI_uiStrings.LEUI_QUICKSAVE_LABEL, true)
+showHighlightButton = LeUIGetOption(LeUI_uiStrings.LEUI_HIGHLIGHT_LABEL, true)
+rightSidebarSmallButton = LeUIGetOption(LeUI_uiStrings.LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_LABEL, false)
+clickToLevelUp = LeUIGetOption(LeUI_uiStrings.LEUI_CLICK_TO_LEVEL_UP_LABEL, false)
+itemComparison = LeUIGetOption(LeUI_uiStrings.LEUI_ITEM_COMPARISION_LABEL, true)
+reverseButtonPosition = LeUIGetOption(LeUI_uiStrings.LEUI_REVERSE_BUTTON_POSITIONS_LABEL, true)
+singleClickTravel = LeUIGetOption(LeUI_uiStrings.LEUI_SINGLE_CLICK_TRAVEL_LABEL, false)
+journalCollapsed = LeUIGetOption(LeUI_uiStrings.LEUI_JOURNAL_COLLAPSED_LABEL, false)
 
 function appendNewOptions()
 	for n, v in pairs(LeUI_uiStrings) do
