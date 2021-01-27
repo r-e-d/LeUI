@@ -14036,6 +14036,9 @@ function getDialogText(row)
 			elseif c2 == 10 and worldNPCDialogText:byte(idx2 - 1) == c1 then
 				idx2 = idx2 - 1
 				c2 = worldNPCDialogText:byte(idx2)
+			elseif c2 == 10 and worldNPCDialogText:byte(idx2 - 1) == 10 and worldNPCDialogText:byte(idx2 - 2) == c1 then
+				idx2 = idx2 - 2
+				c2 = worldNPCDialogText:byte(idx2)
 			elseif c1 == 32 and c2 == 10 and worldMessageBoxText:byte(idx1 - 1) == 58 then
 				idx1 = idx1 - 1
 				c1 = 10
