@@ -13990,7 +13990,7 @@ function dialogScroll(top, height, contentHeight)
 	if worldNPCDialogText == '' then
 		return nil
 	end
-	
+
 	if step == 1 then
 		step = 2
 		return -contentHeight
@@ -14131,14 +14131,14 @@ menu
 			{
 				enabled "rowNumber == 1"
 				opacity lua "step == 1 and 0 or 255"
-				area 0 0 -1 -1
+				area 0 0 752 -1
 				text lua "getDialogText(1)"
 				text style "normal"
 			}
 			text
 			{
 				enabled "rowNumber == 2"
-				area 0 0 -1 -1
+				area 0 0 752 -1
 				pad 0 0 0 12
 				text lua "getDialogText(2)"
 				text style "normal"
