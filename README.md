@@ -2,6 +2,12 @@
 
 The goal of this mod is to provide an unified and improved UI for Baldur's Gate Enhanced Edition games. It allows you to play the whole saga with the same UI.
 
+## Compatibility
+
+For EE version 2.6, use the v4.4 version of this mod.
+
+For EE version 2.5, use the v4.3.2 version of this mod.
+
 ## Installation
 
 ### Windows

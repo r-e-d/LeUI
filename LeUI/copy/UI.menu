@@ -1106,8 +1106,6 @@ menu
 		"
 			if scriptList[scriptList_idx] == ' ' or scriptList_idx == -1 then
 				scriptList_idx = scriptList_savedIdx
-			else
-				Infinity_PlaySound('GAM_09')
 			end
 
 			Infinity_OnScriptItemSelect(scriptList_idx - 1)
@@ -1173,7 +1171,6 @@ menu
 		"
 			scriptDescription = t(scriptOptions[selScriptOpt][2])
 			if(cellNumber == 2) then
-				Infinity_PlaySound('GAM_09')
 				handleScriptOptionChange(selScriptOpt)
 			end
 		"
@@ -1340,6 +1337,46 @@ menu
 		"
 	}
 }
+`
+list_GUIREC_20_5_idx = 0
+function compareCustomSound(s1, s2)
+	-- DEFAULT, then normal alphabetically, then AoN alphabetically (result must be strictly less than)
+	if (s1.sound == "DEFAULT") then
+		return s2.sound ~= "DEFAULT";
+	elseif (string.sub(s1.sound, 1, 4) == "BDTP") then
+		if (string.sub(s2.sound, 1, 4) ~= "BDTP") then
+			return false;
+		end
+	elseif (string.sub(s2.sound, 1, 4) == "BDTP") then
+		return true;
+	end
+	return s1.sound < s2.sound;
+end
+
+function prepareSounds(soundTable)
+	-- preserve original indices to return as selection
+	local i;
+	for i = 1, #soundTable, 1 do
+		local s = soundTable[i];
+		if (type(s) == "string") then
+			soundTable[i] = {
+				index = i,
+				sound = s
+			}
+		end
+	end
+	
+	table.sort(soundTable, compareCustomSound)
+end
+
+function getSoundStringRef(rowNumber, tab)
+	if ( filenames_stringrefs[tab[rowNumber].sound] ~= nil ) then
+		return Infinity_FetchString(filenames_stringrefs[tab[rowNumber].sound][1])
+	else
+		return tab[rowNumber].sound
+	end
+end
+`
 menu
 {
 	name 'CHARACTER_SOUND'
@@ -1349,6 +1386,7 @@ menu
 	"
 		currentPanelID = const.SOUND_ID
 		Infinity_OnSoundItemSelect(0)
+		prepareSounds(list_GUIREC_20_5)
 	"
 	label
 	{
@@ -1366,40 +1404,30 @@ menu
 		column
 		{
 			width 100
-			label
+			button
 			{
-				enabled "rowNumber ~= list_GUIREC_20_5_idx and rowNumber ~= list_GUIREC_20_5_hover"
-				area 0 0 -1 -1
-				text lua "getFileNameStringRef(rowNumber, list_GUIREC_20_5)"
-				text style "normal"
-				text color D
+				area 0 0 356 32
+				bam GUICHLNG
+				frame lua "rowNumber == list_GUIREC_20_5_idx and 2 or 0"
 			}
-			label
+			button
 			{
-				enabled "rowNumber == list_GUIREC_20_5_idx and rowNumber ~= list_GUIREC_20_5_hover"
-				area 0 0 -1 -1
-				text lua "getFileNameStringRef(rowNumber, list_GUIREC_20_5)"
-				text style "normal"
-				text color S
-			}
-			label
-			{
-				enabled "rowNumber == list_GUIREC_20_5_hover"
-				area 0 0 -1 -1
-				text lua "getFileNameStringRef(rowNumber, list_GUIREC_20_5)"
-				text style "normal"
-				text color H
+				area 0 0 340 32
+				text lua "getSoundStringRef(rowNumber, list_GUIREC_20_5)"
+				text style "button"
+				pad 8 8 8 8
 			}
 		}
-		area 46 198 356 410
-		rowheight	dynamic
+		area 41 192 358 414
+		rowheight 34
 		hidehighlight
 		table		"list_GUIREC_20_5"
 		var			"list_GUIREC_20_5_idx"
 		scrollbar	'GUISCRC'
 		action
 		"
-			Infinity_OnSoundItemSelect(list_GUIREC_20_5_idx - 1)
+			Infinity_OnSoundItemSelect(list_GUIREC_20_5[list_GUIREC_20_5_idx].index - 1)
+			characterScreen:OnPlayButtonClick()
 		"
 		actionEnter	"list_GUIREC_20_5_hover = mouseoverRow"
 		actionExit	"list_GUIREC_20_5_hover = 0"
@@ -1411,18 +1439,6 @@ menu
 		scrollbar 'GUISCRC'
 		text style normal
 		text color D
-	}
-	button
-	{
-		clickable lua "list_GUIREC_20_5_idx"
-		bam GUIOSTCL
-		area 272 120 300 44
-		text style "button"
-		text "PLAY_SOUND_BUTTON"
-		action
-		"
-			characterScreen:OnPlayButtonClick()
-		"
 	}
 	button
 	{
@@ -1514,7 +1530,8 @@ toggleTitles = {
 {"CLASSIC_MARKERS_LABEL",				"CLASSIC_MARKERS_HELP", 			45, 0, 0},
 {"ENABLE_CONFIRMATION_LABEL",			"ENABLE_CONFIRMATION_HELP", 		41, 0, 0},
 {"DISABLE_COSMETIC_ATTACKS_LABEL",		"DISABLE_COSMETIC_ATTACKS_HELP", 	43, 0, 0},
-{"JOURNAL_POPUPS_LABEL",				"JOURNAL_POPUPS_HELP", 				44, 0, 0}
+{"JOURNAL_POPUPS_LABEL",				"JOURNAL_POPUPS_HELP", 				44, 0, 0},
+{'EQUIPMENT_COMPARISON_LABEL',			'EQUIPMENT_COMPARISON_DESCRIPTION',	46, 0, 0}
 }
 
 selectedOpt = 0
@@ -1613,7 +1630,6 @@ menu
 			helpString = toggleTitles[selectedOpt][2]
 
 			if(cellNumber == 2) then
-				Infinity_PlaySound('GAM_09')
 				toggleTitles[selectedOpt][4] = toggleFrame(toggleTitles[selectedOpt][4])
 				if toggleTitles[selectedOpt][4] == 0 then
 					toggleTitles[selectedOpt][5] = 0
@@ -1870,6 +1886,7 @@ menu
 			selOptAP = 0
 			selOptAPC = 1
 			autopauseString = characterPauseToggles[selOptAPC][2]
+			Infinity_PlaySound('GAM_09')
 		"
 	}
 	text
@@ -1883,7 +1900,6 @@ menu
 			selOptAP = 0
 			selOptAPC = 1
 			autopauseString = characterPauseToggles[selOptAPC][2]
-
 			Infinity_PlaySound('GAM_09')
 			characterPauseToggles[selOptAPC][4] = toggleFrame(characterPauseToggles[selOptAPC][4])
 			if characterPauseToggles[selOptAPC][4] == 0 then
@@ -1931,7 +1947,6 @@ menu
 			autopauseString = characterPauseToggles[selOptAPC][2]
 
 			if(cellNumber == 2) then
-				Infinity_PlaySound('GAM_09')
 				characterPauseToggles[selOptAPC][4] = toggleFrame(characterPauseToggles[selOptAPC][4])
 				if characterPauseToggles[selOptAPC][4] == 0 then
 					characterPauseToggles[selOptAPC][5] = 0
@@ -1977,7 +1992,6 @@ menu
 			autopauseString = autoPauseToggles[selOptAP][2]
 
 			if(cellNumber == 2) then
-				Infinity_PlaySound('GAM_09')
 				autoPauseToggles[selOptAP][4] = toggleFrame(autoPauseToggles[selOptAP][4])
 				if autoPauseToggles[selOptAP][4] == 0 then
 					autoPauseToggles[selOptAP][5] = 0
@@ -2045,12 +2059,12 @@ graphicsToggles = {
 {'SHOW_HEALTHBAR_LABEL',engine_mode == 0 and 32718 or 103192, 65, 0, 0, 0},
 {'SHOW_BLACK_SPACE_LABEL','SHOW_BLACK_SPACE_DESCRIPTION', 69, 0, 0, 0},
 {'NEAREST_NEIGHBOUR_LABEL','NEAREST_NEIGHBOUR_DESCRIPTION', 70, 0, 0, 0},
+{'AREA_MAP_ZOOM_TRANSITION_LABEL','AREA_MAP_ZOOM_TRANSITION_DESCRIPTION', 71, 0, 0, 0},
 {'LEUI_SIDEBAR_TOGGLE_LABEL','LEUI_SIDEBAR_TOGGLE_DESCRIPTION', 100, 0, 0, 0},
 {'LEUI_QUICKSAVE_LABEL','LEUI_QUICKSAVE_DESCRIPTION', 101, 0, 0, 0},
 {'LEUI_HIGHLIGHT_LABEL','LEUI_HIGHLIGHT_DESCRIPTION', 102, 0, 0, 0},
 {'LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_LABEL','LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_DESCRIPTION', 103, 0, 0, 0},
 {'LEUI_CLICK_TO_LEVEL_UP_LABEL','LEUI_CLICK_TO_LEVEL_UP_DESCRIPTION', 104, 0, 0, 0},
-{'LEUI_ITEM_COMPARISION_LABEL','LEUI_ITEM_COMPARISION_DESCRIPTION', 105, 0, 0, 0},
 {'LEUI_REVERSE_BUTTON_POSITIONS_LABEL','LEUI_REVERSE_BUTTON_POSITIONS_DESCRIPTION', 106, 0, 0, 0},
 {'LEUI_SINGLE_CLICK_TRAVEL_LABEL','LEUI_SINGLE_CLICK_TRAVEL_DESCRIPTION', 107, 0, 0, 0},
 {'LEUI_JOURNAL_COLLAPSED_LABEL','LEUI_JOURNAL_COLLAPSED_DESCRIPTION', 108, 0, 0, 0},
@@ -2067,8 +2081,6 @@ LeUI_uiStrings = {
   LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_DESCRIPTION = "Enable this option for small AI Toggle and Select All buttons on right sidebar",
   LEUI_CLICK_TO_LEVEL_UP_LABEL = "Left Click to Level Up",
   LEUI_CLICK_TO_LEVEL_UP_DESCRIPTION = "Enable this option for level up your character by clicking on portrait",
-  LEUI_ITEM_COMPARISION_LABEL = "Item Comparision",
-  LEUI_ITEM_COMPARISION_DESCRIPTION = "Enable this option for enable item comparision in inventory",
   LEUI_REVERSE_BUTTON_POSITIONS_LABEL = "Reverse +/- Buttons Positions",
   LEUI_REVERSE_BUTTON_POSITIONS_DESCRIPTION = "Enable this option for reversing +/- buttons positions",
   LEUI_SINGLE_CLICK_TRAVEL_LABEL = "Single Click Travel",
@@ -2103,7 +2115,6 @@ showQuickSaveButton = LeUIGetOption(LeUI_uiStrings.LEUI_QUICKSAVE_LABEL, true)
 showHighlightButton = LeUIGetOption(LeUI_uiStrings.LEUI_HIGHLIGHT_LABEL, true)
 rightSidebarSmallButton = LeUIGetOption(LeUI_uiStrings.LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_LABEL, false)
 clickToLevelUp = LeUIGetOption(LeUI_uiStrings.LEUI_CLICK_TO_LEVEL_UP_LABEL, false)
-itemComparison = LeUIGetOption(LeUI_uiStrings.LEUI_ITEM_COMPARISION_LABEL, true)
 reverseButtonPosition = LeUIGetOption(LeUI_uiStrings.LEUI_REVERSE_BUTTON_POSITIONS_LABEL, true)
 singleClickTravel = LeUIGetOption(LeUI_uiStrings.LEUI_SINGLE_CLICK_TRAVEL_LABEL, false)
 journalCollapsed = LeUIGetOption(LeUI_uiStrings.LEUI_JOURNAL_COLLAPSED_LABEL, false)
@@ -2158,8 +2169,6 @@ menu
 				var[5] = rightSidebarSmallButton and 1 or 0
 			elseif var[3] == 104 then
 				var[5] = clickToLevelUp and 1 or 0
-			elseif var[3] == 105 then
-				var[5] = itemComparison and 1 or 0
 			elseif var[3] == 106 then
 				var[5] = reverseButtonPosition and 1 or 0
 			elseif var[3] == 107 then
@@ -2225,7 +2234,6 @@ menu
 		"
 			helpString = graphicsToggles[selectedGraphicOpt][2]
 			if(cellNumber == 2) then
-				Infinity_PlaySound('GAM_09')
 				graphicsToggles[selectedGraphicOpt][4] = toggleFrame(graphicsToggles[selectedGraphicOpt][4])
 				if graphicsToggles[selectedGraphicOpt][4] == 0 then
 					graphicsToggles[selectedGraphicOpt][5] = 0
@@ -2308,9 +2316,6 @@ menu
 					elseif var[3] == 104 then
 						clickToLevelUp = var[5] == 1 and true or false
 						options['LeUI'][LeUI_uiStrings.LEUI_CLICK_TO_LEVEL_UP_LABEL] = var[5] == 1 and '1' or '0'
-					elseif var[3] == 105 then
-						itemComparison = var[5] == 1 and true or false
-						options['LeUI'][LeUI_uiStrings.LEUI_ITEM_COMPARISION_LABEL] = var[5] == 1 and '1' or '0'
 					elseif var[3] == 106 then
 						reverseButtonPosition = var[5] == 1 and true or false
 						options['LeUI'][LeUI_uiStrings.LEUI_REVERSE_BUTTON_POSITIONS_LABEL] = var[5] == 1 and '1' or '0'
@@ -2761,7 +2766,6 @@ menu
 			command[2][4] = 0
 			command[3][4] = 0
 			command[commandSel][4] = 2
-			Infinity_PlaySound('GAM_09')
 		"
 	}
 
@@ -2812,7 +2816,6 @@ menu
 			selectOpt[2][4] = 0
 			selectOpt[3][4] = 0
 			selectOpt[selectSel][4] = 2
-			Infinity_PlaySound('GAM_09')
 		"
 	}
 
@@ -3225,6 +3228,12 @@ function displayHelp()
 	end
 	return keyString
 end
+function formatKeyCode(number)
+	if number < 127 and number > 32 then
+		return string.format('%c', keybindings[keyCategory][rowNumber][6])
+	end
+	return t("SDL_" .. string.format('%d', keybindings[keyCategory][rowNumber][6]))
+end
 function getHotkeyName(category,number)
 	local key = keybindings[category][number][4]
 	if category < 5 then
@@ -3346,7 +3355,6 @@ menu
 		action
 		"
 			keyString = ''
-			Infinity_PlaySound('GAM_09')
 			Infinity_StopKeybind()
 			key = 0
 		"
@@ -3378,7 +3386,7 @@ menu
 			label
 			{
 				area 280 0 72 70
-				text lua "keyboardMap[keybindings[keyCategory][rowNumber][6]]"
+				text lua "formatKeyCode(keybindings[keyCategory][rowNumber][6])"
 				text style "normal"
 				text upper
 				text align right center
@@ -3395,7 +3403,6 @@ menu
 		action
 		"
 			keyString = ''
-			Infinity_PlaySound('GAM_09')
 			if keybindings[keyCategory][key] ~= nil then
 				Infinity_StartKeybind(key)
 			end
@@ -4320,14 +4327,14 @@ menu
 			label
 			{
 				enabled "rowNumber == 1"
-				area 44 0 -1 -1
+				area 44 0 386 -1
 				text lua "itemDesc.item.description:sub(startPos, splitPos - 1)"
 				text style "parchment"
 			}
 			label
 			{
 				enabled "rowNumber == 2"
-				area 0 0 -1 -1
+				area 0 0 430 -1
 				text lua "itemDesc.item.description:sub(splitPos + 1)"
 				text style "parchment"
 			}
@@ -5270,7 +5277,7 @@ end
 function buildInventoryStats()
 	inventoryStats = {}
 
-	if(itemComparison and tempStats[id] ~= nil) then
+	if(tempStats[id] ~= nil) then
 		getTempStat(characters[id].AC.current,'AC',t("ARMOR_CLASS_LABEL"),-1)
 		getTempStat(characters[id].HP.max,'maxHP',t("HIT_POINTS_LABEL"),1)
 		getTempStat(characters[id].THAC0.current,'THAC0',t("THAC0_LABEL"),-1)
@@ -5551,7 +5558,7 @@ menu
 			}
 			label
 			{
-				area		8 0 262 -1
+				area		8 0 250 -1
 				enabled		"inventoryStats[rowNumber][1] == 2 or inventoryStats[rowNumber][1] == 3"
 				text		lua "inventoryStats[rowNumber][2]"
 				text style  'normal'
@@ -5610,7 +5617,7 @@ menu
 			}
 			label
 			{
-				area		8 0 262 -1
+				area		8 0 250 -1
 				enabled		"inventoryStats[rowNumber][1] == 2 or inventoryStats[rowNumber][1] == 3"
 				text		lua "inventoryStats[rowNumber][2]"
 				text style  'normal'
@@ -5618,7 +5625,7 @@ menu
 			}
 			label
 			{
-				area		8 0 262 -1
+				area		8 0 250 -1
 				enabled		"inventoryStats[rowNumber][1] == 3"
 				text		lua "inventoryStats[rowNumber][3]"
 				text style  'normal'
@@ -6877,7 +6884,7 @@ menu
 		area 92 494 240 50
 		mosaic TITLEBG
 	}
-	button --soa
+	text --soa
 	{
 		enabled "engine_mode == 1"
 		bam LOGOSOA
@@ -6905,7 +6912,7 @@ menu
 		area 92 494 240 50
 		mosaic TITLESOA
 	}
-	button --sod
+	text --sod
 	{
 		enabled "engine_mode == 0 and const.START_CAMPAIGN_SOD"
 		bam LOGOSOD
@@ -6933,7 +6940,7 @@ menu
 		area 388 480 250 48
 		mosaic TITLESOD
 	}
-	button --tob
+	text --tob
 	{
 		enabled "engine_mode == 1"
 		bam LOGOTOB
@@ -6961,7 +6968,7 @@ menu
 		area 388 486 250 48
 		mosaic TITLETOB
 	}
-	button --black pits (no sod)
+	text --black pits (no sod)
 	{
 		enabled "engine_mode == 0 and const.START_CAMPAIGN_SOD == nil"
 		bam LOGOTBP
@@ -6989,7 +6996,7 @@ menu
 		area 594 494 240 60
 		mosaic TITLEBP
 	}
-	button --black pits
+	text --black pits
 	{
 		enabled "engine_mode == 1 or const.START_CAMPAIGN_SOD"
 		bam LOGOTBP
@@ -7261,6 +7268,7 @@ menu
 		action
 		"
 			e:GetObjectGame():SetCampaign('')
+			startEngine:SetEngineState(3)
 			Infinity_PopMenu()
 		"
 	}
@@ -8786,14 +8794,14 @@ menu
 			label
 			{
 				enabled "rowNumber == 1"
-				area 44 0 -1 -1
+				area 44 0 671 -1
 				text lua "Infinity_FetchString(currentSpell.description):sub(startPos, splitPos - 1)"
 				text style "parchment"
 			}
 			label
 			{
 				enabled "rowNumber == 2"
-				area 0 0 -1 -1
+				area 0 0 715 -1
 				text lua "Infinity_FetchString(currentSpell.description):sub(splitPos + 1)"
 				text style "parchment"
 			}
@@ -8981,7 +8989,11 @@ menu
 		action
 		"
 			if cellNumber == 7 and preparedSpells[currentContingencySpell].dispellable then
-				popup2Button(engine_mode == 0 and 24398 or 32665, 'YES_BUTTON', function() mageScreen:OnDispellButtonClick(currentContingencySpell) end, 'NO_BUTTON')
+				if Infinity_GetOption(41, 9) == 1 then
+					popup2Button(engine_mode == 0 and 24398 or 32665, 'YES_BUTTON', function() mageScreen:OnDispellButtonClick(currentContingencySpell) end, 'NO_BUTTON')
+				else
+					mageScreen:OnDispellButtonClick(currentContingencySpell)
+				end
 			end
 		"
 	}
@@ -9059,14 +9071,14 @@ menu
 			label
 			{
 				enabled "rowNumber == 1"
-				area 44 0 -1 -1
+				area 44 0 671 -1
 				text lua "Infinity_FetchString(PopupDetails.description):sub(startPos, splitPos - 1)"
 				text style "parchment"
 			}
 			label
 			{
 				enabled "rowNumber == 2"
-				area 0 0 -1 -1
+				area 0 0 715 -1
 				text lua "Infinity_FetchString(PopupDetails.description):sub(splitPos + 1)"
 				text style "parchment"
 			}
@@ -10485,7 +10497,7 @@ menu
 			{
 				enabled "rowNumber == 1"
 				opacity lua "textOpacity"
-				area 44 0 -1 -1
+				area 44 0 788 -1
 				text lua "text_CHAPTERSCROLL:sub(startPos, splitPos - 1)"
 				text style normal
 			}
@@ -10493,7 +10505,7 @@ menu
 			{
 				enabled "rowNumber == 2"
 				opacity lua "textOpacity"
-				area 0 0 -1 -1
+				area 0 0 832 -1
 				text lua "text_CHAPTERSCROLL:sub(splitPos + 1)"
 				text style normal
 			}
@@ -10603,7 +10615,7 @@ menu
 			{
 				enabled "rowNumber == 1"
 				opacity lua "textOpacity"
-				area 44 0 -1 -1
+				area 44 0 496 -1
 				text lua "text_CHAPTERSCROLL:sub(startPos, splitPos - 1)"
 				text style normal
 			}
@@ -10611,7 +10623,7 @@ menu
 			{
 				enabled "rowNumber == 2"
 				opacity lua "textOpacity"
-				area 0 0 -1 -1
+				area 0 0 540 -1
 				text lua "text_CHAPTERSCROLL:sub(splitPos + 1)"
 				text style normal
 			}
@@ -10910,7 +10922,6 @@ menu
 						storeScreen:SetStoreItemCount(storeItemsVar - 1, maxCount)
 					end
 				end
-				Infinity_PlaySound('GAM_09')
 			end
 		"
 		actionalt
@@ -11000,7 +11011,6 @@ menu
 							storeScreen:SetGroupItemCount(storeGroupItemsVar - 1, stock)
 						end
 					end
-					Infinity_PlaySound('GAM_09')
 				end
 			end
 		"
@@ -11800,10 +11810,8 @@ menu
 			local drink = store.drinks[storeDrinksVar]
 			if selectedDrinks == storeDrinksVar then
 				selectedDrinks = 0
-				Infinity_PlaySound('GAM_09')
 			elseif drink.valid == 1 and drink.value <= game:GetPartyGold() then
 				selectedDrinks = storeDrinksVar
-				Infinity_PlaySound('GAM_09')
 			end
 		"
 	}
@@ -14071,6 +14079,8 @@ menu
 	ignoreEsc
 	onOpen
 	"
+		Infinity_PopMenu('ITEM_DESCRIPTION')
+		Infinity_PopMenu('POPUP_DETAILS')
 		Infinity_PushMenu('WORLD_DIALOG_CONFIRM')
 		if(isTouchActionbar() and not dialogViewMode) then
 			Infinity_PushMenu('WORLD_DIALOG_LEFT')
@@ -14186,7 +14196,7 @@ menu
 		action
 		"
 			--In confirm mode, just highlight the choice.
-			if(gameOptions.m_bConfirmDialog == true) then return end
+			if((gameOptions.m_bConfirmDialog == true) or (worldPlayerDialogSelection <= 0)) then return end
 			if(worldPlayerDialogChoices[worldPlayerDialogSelection - 2] == nil) then return end
 			worldScreen:OnDialogReplyClick(worldPlayerDialogChoices[worldPlayerDialogSelection - 2].marker)
 			worldPlayerDialogSelection = 0
@@ -15023,13 +15033,12 @@ menu
 		action
 		"
 			if chargen.races[currentChargenRace] then
-				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnRaceSelectButtonClick(chargen.races[currentChargenRace].id)
 			end
 		"
+		area 41 192 358 414
 		rowheight 34
 		hidehighlight
-		area 41 192 356 414
 		table "chargen.races"
 		var currentChargenRace
 		scrollbar 'GUISCRC'
@@ -15038,7 +15047,8 @@ menu
 	{
 		area 436 128 382 478
 		text lua "raceOrGeneralHelp()"
-		text style "normal"
+		text style normal
+		text color D
 		scrollbar 'GUISCRC'
 	}
 	button
@@ -15140,7 +15150,6 @@ menu
 		"
 			createCharScreen:OnClassSelectButtonClick(0)
 			if allChargenClasses[currentChargenClass] and not classDisabled(allChargenClasses[currentChargenClass].id) then
-				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnClassSelectButtonClick(allChargenClasses[currentChargenClass].id)
 			else
 				currentChargenClass = nil
@@ -15260,7 +15269,6 @@ menu
 		action
 		"
 			if allChargenKits[currentChargenKit] and not kitDisabled(allChargenKits[currentChargenKit].id) then
-				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnKitSelectButtonClick(allChargenKits[currentChargenKit].id)
 			else
 				currentChargenKit = nil
@@ -15377,7 +15385,6 @@ menu
 		"
 			createCharScreen:OnAlignmentSelectButtonClick(0)
 			if allChargenAlignments[currentChargenAlignment] and not alignmentDisabled(allChargenAlignments[currentChargenAlignment].id) then
-				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnAlignmentSelectButtonClick(allChargenAlignments[currentChargenAlignment].id)
 			else
 				currentChargenAlignment = nil
@@ -15533,7 +15540,6 @@ menu
 		actionUpdate
 		"
 			ticksStarting = ticksStarting + 1
-			if ticksStarting == 1 and (cellNumber == 3 or cellNumber == 4) then Infinity_PlaySound('GAM_09') end
 			if ticksStarting > 10 then
 				if cellNumber == 3 then
 					createCharScreen:OnAbilityPlusMinusButtonClick(currentChargenAbility, not reverseButtonPosition)
@@ -15893,7 +15899,6 @@ menu
 		"
 			currentChargenThiefSkill = nil
 			ticksStarting = ticksStarting + 1
-			if ticksStarting == 1 and (cellNumber == 7 or cellNumber == 8) and proficiencyEnabled(currentChargenProficiency) then Infinity_PlaySound('GAM_09') end
 			if ticksStarting > 10 then
 				local isClickable1 = reverseButtonPosition and minusButtonClickable or plusButtonClickable
 				local isClickable2 = reverseButtonPosition and plusButtonClickable or minusButtonClickable
@@ -15986,7 +15991,6 @@ menu
 			currentChargenProficiency = nil
 			if createCharScreen:IsThiefSkillPlusMinusButtonClickable() then
 				ticksStarting = ticksStarting + 1
-				if ticksStarting == 1 and (cellNumber == 3 or cellNumber == 4) then Infinity_PlaySound('GAM_09') end
 				if ticksStarting > 10 then
 					local plusCell = reverseButtonPosition and 4 or 3
 					local minusCell = reverseButtonPosition and 3 or 4
@@ -16391,10 +16395,8 @@ menu
 		"
 			local delta = reverseButtonPosition and -1 or 1
 			if cellNumber == 3 and getMageFrame(currentChargenMemorizeMageSpell, reverseButtonPosition) then
-				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnMemorizeMageSpellButtonClick(currentChargenMemorizeMageSpell, delta)
 			elseif cellNumber == 4 and getMageFrame(currentChargenMemorizeMageSpell, not reverseButtonPosition) then
-				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnMemorizeMageSpellButtonClick(currentChargenMemorizeMageSpell, -delta)
 			end
 			cellNumber = nil
@@ -16549,10 +16551,8 @@ menu
 		"
 			local delta = reverseButtonPosition and -1 or 1
 			if cellNumber == 3 and getPriestFrame(currentChargenMemorizePriestSpell, reverseButtonPosition) then
-				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnMemorizePriestSpellButtonClick(currentChargenMemorizePriestSpell, delta)
 			elseif cellNumber == 4 and getPriestFrame(currentChargenMemorizePriestSpell, not reverseButtonPosition) then
-				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnMemorizePriestSpellButtonClick(currentChargenMemorizePriestSpell, -delta)
 			end
 			cellNumber = nil
@@ -16609,6 +16609,7 @@ menu
 	onOpen
 	"
 		currentChargenCustomSound = 1
+		prepareSounds(chargen.customSound)
 		Infinity_PlaySound('GAM_03')
 	"
 	onClose
@@ -16631,40 +16632,30 @@ menu
 		column
 		{
 			width 100
-			label
+			button
 			{
-				enabled "rowNumber ~= currentChargenCustomSound and rowNumber ~= hoverChargenCustomSound"
-				area 0 0 -1 -1
-				text lua "getFileNameStringRef(rowNumber, chargen.customSound)"
-				text style "normal"
-				text color D
+				area 0 0 356 32
+				bam GUICHLNG
+				frame lua "rowNumber == currentChargenCustomSound and 2 or 0"
 			}
-			label
+			button
 			{
-				enabled "rowNumber == currentChargenCustomSound and rowNumber ~= hoverChargenCustomSound"
-				area 0 0 -1 -1
-				text lua "getFileNameStringRef(rowNumber, chargen.customSound)"
-				text style "normal"
-				text color S
-			}
-			label
-			{
-				enabled "rowNumber == hoverChargenCustomSound"
-				area 0 0 -1 -1
-				text lua "getFileNameStringRef(rowNumber, chargen.customSound)"
-				text style "normal"
-				text color H
+				area 0 0 340 32
+				text lua "getSoundStringRef(rowNumber, chargen.customSound)"
+				text style "button"
+				pad 8 8 8 8
 			}
 		}
-		area 46 198 356 410
-		rowheight	dynamic
+		area 41 192 358 414
+		rowheight 34
 		hidehighlight
 		table		"chargen.customSound"
 		var			"currentChargenCustomSound"
 		scrollbar	'GUISCRC'
 		action
 		"
-			createCharScreen:OnSoundItemSelect(currentChargenCustomSound-1)
+			createCharScreen:OnSoundItemSelect(chargen.customSound[currentChargenCustomSound].index-1)
+			createCharScreen:OnPlayButtonClick()
 		"
 		actionEnter	"hoverChargenCustomSound = mouseoverRow"
 		actionExit	"hoverChargenCustomSound = 0"
@@ -16677,18 +16668,6 @@ menu
 		scrollbar 'GUISCRC'
 		text style normal
 		text color D
-	}
-	button
-	{
-		clickable lua "currentChargenCustomSound"
-		bam GUIOSTCL
-		area 272 120 300 44
-		text style "button"
-		text "PLAY_SOUND_BUTTON"
-		action
-		"
-			createCharScreen:OnPlayButtonClick()
-		"
 	}
 	button
 	{
@@ -16745,7 +16724,7 @@ menu
 	label
 	{
 		area 0 0 864 710
-		mosaic GUICUSTB
+		mosaic GUICHISD
 	}
 	label
 	{
@@ -16775,22 +16754,22 @@ menu
 		action
 		"
 			if chargen.hatedRace[currentChargenHatedRace] then
-				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnRacialEnemySelectButtonClick(chargen.hatedRace[currentChargenHatedRace].id)
 			end
 		"
+		area 41 192 358 414
 		rowheight 34
 		hidehighlight
-		area 41 192 356 414
 		table "chargen.hatedRace"
 		var currentChargenHatedRace
 		scrollbar	'GUISCRC'
 	}
 	text
 	{
-		area 436 128 382 478
+		area 450 198 362 410
 		text lua "hatedRaceOrGeneralHelp()"
-		text style "normal"
+		text style normal
+		text color D
 		scrollbar 'GUISCRC'
 	}
 	button
@@ -17579,10 +17558,8 @@ menu
 		"
 			local delta = reverseButtonPosition and -1 or 1
 			if cellNumber == 3 and chargenHLAPlusMinusFrame(reverseButtonPosition, 3, currentHLASelection) ~= 3 then
-				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnHLAButtonClick(currentHLASelection, delta)
 			elseif cellNumber == 4 and chargenHLAPlusMinusFrame(not reverseButtonPosition, 4, currentHLASelection) ~= 3 then
-				Infinity_PlaySound('GAM_09')
 				createCharScreen:OnHLAButtonClick(currentHLASelection, -delta)
 			end
 			cellNumber = nil
@@ -22236,8 +22213,9 @@ menu
 	onOpen
 	"
 		editMode = 1
+		Infinity_FocusTextEdit('journalNoteEditArea')
 	"
-	onOpen
+	onClose
 	"
 		editMode = 0
 	"
@@ -22256,6 +22234,7 @@ menu
 
 	edit
 	{
+		name "journalNoteEditArea"
 		area 152 236 582 346
 		text style "edit_parchment"
 		var journalNoteEdit
