@@ -11566,7 +11566,7 @@ menu
 		bam GUIOSTUM
 		text "RENT_BUTTON"
 		text style "button"
-		clickable lua "storeScreen:GetRoomCost() > 0 and storeScreen:GetRoomCost() <= game:GetPartyGold()"
+		clickable lua "storeScreen:GetRoomType() > 0 and storeScreen:GetRoomCost() <= game:GetPartyGold()"
 		action
 		"
 			storeScreen:OnRentRoomButtonClick()
