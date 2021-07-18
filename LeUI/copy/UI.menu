@@ -1341,16 +1341,16 @@ menu
 list_GUIREC_20_5_idx = 0
 function compareCustomSound(s1, s2)
 	-- DEFAULT, then normal alphabetically, then AoN alphabetically (result must be strictly less than)
-	if (s1.sound == "DEFAULT") then
-		return s2.sound ~= "DEFAULT";
-	elseif (string.sub(s1.sound, 1, 4) == "BDTP") then
-		if (string.sub(s2.sound, 1, 4) ~= "BDTP") then
-			return false;
-		end
-	elseif (string.sub(s2.sound, 1, 4) == "BDTP") then
+	if (s1.sound == "DEFAULT" and s2.sound ~= "DEFAULT") then
+		return true
+	elseif (s2.sound == "DEFAULT" and s1.sound ~= "DEFAULT") then
+		return false
+	elseif (string.sub(s1.sound, 1, 4) == "BDTP" and string.sub(s2.sound, 1, 4) ~= "BDTP") then
+		return false;
+	elseif (string.sub(s2.sound, 1, 4) == "BDTP" and string.sub(s1.sound, 1, 4) ~= "BDTP") then
 		return true;
 	end
-	return s1.sound < s2.sound;
+	return s1.sound < s2.sound
 end
 
 function prepareSounds(soundTable)
