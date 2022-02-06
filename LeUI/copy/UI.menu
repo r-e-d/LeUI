@@ -14034,21 +14034,21 @@ end
 function dragDialogMessagesY(newY)
 	local x,y,w,hOld = Infinity_GetArea("worldDialogBackground")
 	h = hOld - newY
-	if h < 100 then
-		newY = hOld - 100
-	elseif h > 500 then
-		newY = hOld - 500
+	if h < 210 then
+		newY = hOld - 210
+	elseif h > 700 then
+		newY = hOld - 700
 	end
 
 	adjustItemGroup({"dialogHandleY","worldDialogPortraitArea"},0,newY,0,0)
-	adjustItemGroup({"worldDialogBackground","worldPlayerDialogChoicesList"},0,newY,0,-newY)
+	adjustItemGroup({"worldDialogBackground","worldPlayerDialogChoicesList","worldPlayerDialogFake"},0,newY,0,-newY)
 end
 
 function getDialogEntryText(row)
-	local text = worldPlayerDialogChoices[row - 2].text
+	local text = worldPlayerDialogChoices[row].text
 	if (row == worldPlayerDialogSelection) then
 		--Color the text white when selected
-		text = string.gsub(text, "%^0xff212eff", "^0xFFFFFFFF")
+		text = string.gsub(text, "%^0xff212eff", "^0xffffffff")
 	end
 	return text
 end
@@ -14088,11 +14088,50 @@ function getDialogText(row)
 	return trim(row == 1 and worldMessageBoxText:sub(1, idx1) or worldMessageBoxText:sub(idx1 + 1))
 end
 
-function makeDialogTable()
-	if step == 1 then
-		return makeTable(1)
+function B3Split(inputstr, sep)
+	sep = sep or "%s"
+	local t = {}
+	for field, s in string.gmatch(inputstr, "([^"..sep.."]*)("..sep.."?)") do
+		table.insert(t, field)
+		if s == "" then
+			return t
+		end
 	end
-	return makeTable(#worldPlayerDialogChoices + 3)
+end
+
+B3DialogTable = {}
+B3DialogTextI = -1
+B3DialogResponsesStart = -1
+B3DialogResponsesEnd = -1
+
+function makeDialogTable()
+	B3DialogTable = B3Split(getDialogText(1), "\n")
+	B3DialogTextI = #B3DialogTable + 1
+	B3DialogResponsesStart = B3DialogTextI + 1
+	B3DialogResponsesEnd = B3DialogResponsesStart + #worldPlayerDialogChoices - 1
+	if step == 2 then
+		table.insert(B3DialogTable, getDialogText(2))
+		for _, v in pairs(worldPlayerDialogChoices) do
+			table.insert(B3DialogTable, v.text)
+		end
+		local paddingText = getDialogPaddingText()
+		table.insert(B3DialogTable, paddingText)
+	end
+	return B3DialogTable
+end
+
+function getDialogPortrait()
+	if worldNPCDialogPortrait == nil or worldNPCDialogPortrait == 'NONE' then
+		return 'NOPORTLS'
+	end
+	if worldNPCDialogPortrait:sub(-1) == 'S' then
+		for _, entry in ipairs(Infinity_GetFilesOfType("BMP")) do
+			if entry[1] == worldNPCDialogPortrait:sub(1, -2) .. 'M' then
+				return entry[1]
+			end
+		end
+	end
+	return worldNPCDialogPortrait
 end
 `
 menu
@@ -14103,6 +14142,7 @@ menu
 	ignoreEsc
 	onOpen
 	"
+		step = 1
 		Infinity_PopMenu('ITEM_DESCRIPTION')
 		Infinity_PopMenu('POPUP_DETAILS')
 		Infinity_PushMenu('WORLD_DIALOG_CONFIRM')
@@ -14122,7 +14162,7 @@ menu
 	label
 	{
 		name "worldDialogBackground"
-		area 0 0 864 250
+		area 0 0 864 350
 		rectangle 4
 	}
 	button
@@ -14144,8 +14184,8 @@ menu
 	label
 	{
 		name "worldDialogPortraitArea"
-		area 24 20 54 84
-		bitmap lua "worldNPCDialogPortrait"
+		area 20 20 110 170
+		bitmap lua "getDialogPortrait()"
 	}
 	handle
 	{
@@ -14156,6 +14196,14 @@ menu
 			dragDialogMessagesY(motionY)
 		"
 	}
+	text
+	{
+		name "worldPlayerDialogFake"
+		enabled "step == 1"
+		area 138 20 702 210
+		text lua "getDialogText(2)"
+		text style "normal"
+	}
 	list
 	{
 		column
@@ -14163,44 +14211,44 @@ menu
 			width 100
 			text
 			{
-				enabled "rowNumber == 1"
+				enabled "rowNumber < B3DialogTextI"
 				opacity lua "step == 1 and 0 or 255"
-				area 0 0 736 -1
-				text lua "getDialogText(1)"
+				area 0 0 -1 -1
+				text lua 'B3DialogTable[rowNumber]'
 				text style "normal"
 			}
 			text
 			{
-				enabled "rowNumber == 2"
-				area 0 0 736 -1
+				enabled "rowNumber == B3DialogTextI"
+				area 0 0 -1 -1
 				pad 0 0 0 12
-				text lua "getDialogText(2)"
+				text lua "B3DialogTable[rowNumber]"
 				text style "normal"
 			}
 			label
 			{
+				enabled "rowNumber >= B3DialogResponsesStart and rowNumber <= B3DialogResponsesEnd and dialogEntryGreyed()"
 				area 0 0 -1 -1
-				enabled "rowNumber > 2 and rowNumber < #worldPlayerDialogChoices + 3 and dialogEntryGreyed()"
 				rectangle 1
 				rectangle opacity 100
 			}
 			text
 			{
-				enabled "rowNumber > 2 and rowNumber < #worldPlayerDialogChoices + 3"
+				enabled "rowNumber >= B3DialogResponsesStart and rowNumber <= B3DialogResponsesEnd"
 				area 0 0 -1 -1
-				text lua "getDialogEntryText(rowNumber)"
+				text lua "getDialogEntryText(rowNumber - B3DialogResponsesStart + 1)"
 				text style "normal"
 			}
 			text
 			{
-				enabled "rowNumber == #worldPlayerDialogChoices + 3"
+				enabled "rowNumber > B3DialogResponsesEnd"
 				area 0 0 -1 -1
-				text lua "getDialogPaddingText()"
+				text lua 'B3DialogTable[rowNumber]'
 				text style "normal"
 			}
 		}
 		name "worldPlayerDialogChoicesList"
-		area 88 20 752 210
+		area 138 20 702 310
 		rowheight dynamic
 		hideHighlight
 		table "makeDialogTable()"
@@ -14210,7 +14258,7 @@ menu
 		actionEnter
 		"
 			if(gameOptions.m_bConfirmDialog == true) then return end
-			worldPlayerDialogSelection = mouseoverRow
+			worldPlayerDialogSelection = mouseoverRow - B3DialogResponsesStart + 1
 		"
 		actionExit
 		"
@@ -14219,10 +14267,10 @@ menu
 		"
 		action
 		"
+			worldPlayerDialogSelection = mouseoverRow - B3DialogResponsesStart + 1
 			--In confirm mode, just highlight the choice.
-			if((gameOptions.m_bConfirmDialog == true) or (worldPlayerDialogSelection <= 0)) then return end
-			if(worldPlayerDialogChoices[worldPlayerDialogSelection - 2] == nil) then return end
-			worldScreen:OnDialogReplyClick(worldPlayerDialogChoices[worldPlayerDialogSelection - 2].marker)
+			if((gameOptions.m_bConfirmDialog == true) or (worldPlayerDialogSelection <= 0) or (worldPlayerDialogSelection > #worldPlayerDialogChoices)) then return end
+			worldScreen:OnDialogReplyClick(worldPlayerDialogChoices[worldPlayerDialogSelection].marker)
 			worldPlayerDialogSelection = 0
 		"
 	}
@@ -14238,7 +14286,7 @@ end
 
 function getDialogButtonClickable()
 	if(gameOptions.m_bConfirmDialog == true) then
-		return (#worldPlayerDialogChoices == 0) or (worldPlayerDialogSelection and worldPlayerDialogSelection > 2) --no choices, or we've selected a choice.
+		return (#worldPlayerDialogChoices == 0) or (worldPlayerDialogSelection > 0 and worldPlayerDialogSelection <= #worldPlayerDialogChoices) --no choices, or we've selected a choice.
 	else
 		return true
 	end
@@ -14260,9 +14308,9 @@ menu
 		text style "button"
 		action
 		"
-			if(gameOptions.m_bConfirmDialog == true and (#worldPlayerDialogChoices > 0)) then
+			if(gameOptions.m_bConfirmDialog == true and #worldPlayerDialogChoices > 0) then
 				-- if confirm dialog and choices available.
-				worldScreen:OnDialogReplyClick(worldPlayerDialogChoices[worldPlayerDialogSelection - 2].marker)
+				worldScreen:OnDialogReplyClick(worldPlayerDialogChoices[worldPlayerDialogSelection].marker)
 				worldPlayerDialogSelection = 0
 			else
 				-- no choices, just step.
