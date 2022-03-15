@@ -14121,10 +14121,7 @@ function makeDialogTable()
 end
 
 function getDialogPortrait()
-	if worldNPCDialogPortrait == nil or worldNPCDialogPortrait == 'NONE' then
-		return 'NOPORTLS'
-	end
-	if worldNPCDialogPortrait:sub(-1) == 'S' then
+	if worldNPCDialogPortrait ~= nil and worldNPCDialogPortrait:sub(-1) == 'S' then
 		for _, entry in ipairs(Infinity_GetFilesOfType("BMP")) do
 			if entry[1] == worldNPCDialogPortrait:sub(1, -2) .. 'M' then
 				return entry[1]
@@ -21759,8 +21756,13 @@ function updateJournalEntry(journalId, recvTime, stateType, chapter, timeStamp)
 	--NOTE this can be placed in a loop if there needs to be more than quest to an entry
 	--this would just mean entryToQuest returns a table that we iterate over
 	local questId = entryToQuest[journalId]
-	if questId == nil then
+	if questId == nil or stateType == const.ENTRY_TYPE_INFO then
 		--add loose entries into the looseEntries table so they still get displayed.
+		for _,entry in pairs(looseEntries) do
+			if entry.text == journalId then
+				return
+			end
+		end
 		local entry = buildEntry(journalId, recvTime, stateType, chapter, timeStamp)
 		table.insert(looseEntries,entry)
 
@@ -21830,12 +21832,6 @@ function updateJournalEntry(journalId, recvTime, stateType, chapter, timeStamp)
 	end
 	--sort the objectives.
 	table.sort(quest.objectives,compareByRecvTime)
-
-	if stateType == const.ENTRY_TYPE_INFO then
-		--add loose entries into the looseEntries table so they still get displayed.
-		local entry = buildEntry(journalId, recvTime, stateType, chapter, timeStamp)
-		table.insert(looseEntries,entry)
-	end
 
 	--update display data
 	buildQuestDisplay()
