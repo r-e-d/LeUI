@@ -5659,28 +5659,28 @@ menu
 		"
 	}
 
-	slot {name "slot_inv_1"		area 26 243 52 52	bam STONSLOT	slotinfo "characters[id].equipment.weapon0"}
-	slot {name "slot_inv_2"		area 78 243 52 52	bam STONSLOT	slotinfo "characters[id].equipment.weapon1"}
-	slot {name "slot_inv_3"		area 130 243 52 52	bam STONSLOT	slotinfo "characters[id].equipment.weapon2"}
-	slot {name "slot_inv_4"		area 182 243 52 52	bam STONSLOT	slotinfo "characters[id].equipment.weapon3"}
+	slot {name "slot_inv_1"		area 27 243 52 52	bam STONSLOT	slotinfo "characters[id].equipment.weapon0"}
+	slot {name "slot_inv_2"		area 80 243 52 52	bam STONSLOT	slotinfo "characters[id].equipment.weapon1"}
+	slot {name "slot_inv_3"		area 133 243 52 52	bam STONSLOT	slotinfo "characters[id].equipment.weapon2"}
+	slot {name "slot_inv_4"		area 186 243 52 52	bam STONSLOT	slotinfo "characters[id].equipment.weapon3"}
 
 	slot {name "slot_inv_5"		area 27 347 52 52	bam STONSLOT	slotinfo "characters[id].equipment.personal0"}
 	slot {name "slot_inv_6"		area 80 347 52 52	bam STONSLOT	slotinfo "characters[id].equipment.personal1"}
 	slot {name "slot_inv_7"		area 133 347 52 52	bam STONSLOT	slotinfo "characters[id].equipment.personal2"}
 
-	slot {name "slot_inv_11"		area 243 98 52 52	bam STONSLOT	slotinfo "characters[id].equipment.armor"}
-	slot {name "slot_inv_12"		area 297 98 52 52	bam STONSLOT	slotinfo "characters[id].equipment.gauntlets"}
-	slot {name "slot_inv_13"		area 351 98 52 52	bam STONSLOT	slotinfo "characters[id].equipment.helmet"}
-	slot {name "slot_inv_14"		area 405 98 52 52	bam STONSLOT	slotinfo "characters[id].equipment.amulet"}
+	slot {name "slot_inv_11"		area 243 97 52 52	bam STONSLOT	slotinfo "characters[id].equipment.armor"}
+	slot {name "slot_inv_12"		area 296 97 52 52	bam STONSLOT	slotinfo "characters[id].equipment.gauntlets"}
+	slot {name "slot_inv_13"		area 349 97 52 52	bam STONSLOT	slotinfo "characters[id].equipment.helmet"}
+	slot {name "slot_inv_14"		area 402 97 52 52	bam STONSLOT	slotinfo "characters[id].equipment.amulet"}
 	slot {name "slot_inv_15"		area 76 138 52 52	bam STONSLOT	slotinfo "characters[id].equipment.quiver0"}
 	slot {name "slot_inv_16"		area 129 138 52 52	bam STONSLOT	slotinfo "characters[id].equipment.quiver1"}
 	slot {name "slot_inv_17"		area 182 138 52 52	bam STONSLOT	slotinfo "characters[id].equipment.quiver2"}
 	slot {name "slot_inv_21"		area 393 361 52 52	bam STONSLOT	slotinfo "characters[id].equipment.belt"}
 	slot {name "slot_inv_22"		area 218 302 52 52	bam STONSLOT	slotinfo "characters[id].equipment.ringleft"}
 	slot {name "slot_inv_23"		area 462 302 52 52	bam STONSLOT	slotinfo "characters[id].equipment.ringright"}
-	slot {name "slot_inv_24"		area 282 361 52 52	bam STONSLOT	slotinfo "characters[id].equipment.cloak"}
-	slot {name "slot_inv_25"		area 338 361 52 52	bam STONSLOT	slotinfo "characters[id].equipment.boots"}
-	slot {name "slot_inv_26"		area 461 244 52 52	bam STONSLOT	slotinfo "characters[id].equipment.shield"}
+	slot {name "slot_inv_24"		area 287 361 52 52	bam STONSLOT	slotinfo "characters[id].equipment.cloak"}
+	slot {name "slot_inv_25"		area 340 361 52 52	bam STONSLOT	slotinfo "characters[id].equipment.boots"}
+	slot {name "slot_inv_26"		area 462 244 52 52	bam STONSLOT	slotinfo "characters[id].equipment.shield"}
 
 	slot {name "slot_inv_30"		area 90 578 52 52	bam STONSLOT	slotinfo "characters[id].equipment.group0"}
 	slot {name "slot_inv_31"		area 90 632 52 52	bam STONSLOT	slotinfo "characters[id].equipment.group1"}
@@ -5738,7 +5738,7 @@ menu
 	}
 	button
 	{
-		area 464 153 52 52
+		area 464 154 52 52
 		bam INVBUT
 		colordisplay 1
 		action
@@ -7763,7 +7763,7 @@ menu
 	}
 	button
 	{
-		area		464 110 54 54
+		area		463 110 54 54
 		bam		GUIPRTC
 		frame lua "getSpellHighlight(6)"
 		sequence	5
@@ -7772,7 +7772,7 @@ menu
 	}
 	button
 	{
-		area		523 110 54 54
+		area		522 110 54 54
 		bam		GUIPRTC
 		frame lua "getSpellHighlight(7)"
 		sequence	6
@@ -7781,7 +7781,7 @@ menu
 	}
 	button
 	{
-		area		583 110 54 54
+		area		582 110 54 54
 		bam		GUIPRTC
 		frame lua "getSpellHighlight(8)"
 		sequence	7
@@ -7790,7 +7790,7 @@ menu
 	}
 	button
 	{
-		area		644 110 54 54
+		area		642 110 54 54
 		bam		GUIPRTC
 		frame lua "getSpellHighlight(9)"
 		sequence	8
@@ -9264,7 +9264,7 @@ menu
 	}
 	button
 	{
-		area		246 110 54 54
+		area		247 110 54 54
 		bam		GUIPRTC
 		frame lua "getSpellHighlight(2)"
 		sequence	1
@@ -9273,7 +9273,7 @@ menu
 	}
 	button
 	{
-		area		328 110 54 54
+		area		326 110 54 54
 		bam		GUIPRTC
 		frame lua "getSpellHighlight(3)"
 		sequence	2
@@ -9282,7 +9282,7 @@ menu
 	}
 	button
 	{
-		area		403 110 54 54
+		area		405 110 54 54
 		bam		GUIPRTC
 		frame lua "getSpellHighlight(4)"
 		sequence	3
@@ -9300,7 +9300,7 @@ menu
 	}
 	button
 	{
-		area		566 110 54 54
+		area		563 110 54 54
 		bam		GUIPRTC
 		frame lua "getSpellHighlight(6)"
 		sequence	5
