@@ -13916,6 +13916,14 @@ function dragMessagesY(newY)
 	setQuickLootOffset()
 	chatboxScrollToBottom = 1
 end
+
+function clean(str)
+	-- remove extra space in front of innate abilities
+	str = str:gsub('(%^%-: %^0x%x%x%x%x%x%x%x%x) ', '%1')
+	-- remove empty name
+	str = str:gsub('%^0x%x%x%x%x%x%x%x%x %^%-: ', '')
+	return str
+end
 `
 menu
 {
@@ -13963,7 +13971,7 @@ menu
 			label
 			{
 				area 0 0 816 -1
-				text lua "combatLog[rowNumber]"
+				text lua "clean(combatLog[rowNumber])"
 				text style "normal"
 			}
 		}
@@ -14085,7 +14093,7 @@ function getDialogText(row)
 		idx2 = idx2 - 1
 	end
 
-	return trim(row == 1 and worldMessageBoxText:sub(1, idx1) or worldMessageBoxText:sub(idx1 + 1))
+	return clean(trim(row == 1 and worldMessageBoxText:sub(1, idx1) or worldMessageBoxText:sub(idx1 + 1)))
 end
 
 function B3Split(inputstr, sep)
@@ -16147,7 +16155,10 @@ function specialistFrame(num)
 	return 0
 end
 function specialistOrSelectedFrame(num)
-	if chargen.choose_spell[rowNumber].enabled or chargen.choose_spell[rowNumber].known then
+	if chargen.choose_spell[rowNumber].known then
+		return 4
+	end
+	if chargen.choose_spell[rowNumber].enabled then
 		return 2
 	end
 	return specialistFrame(num)
@@ -21692,25 +21703,23 @@ function createEntry(questId, objectiveId, entryId, previousObjectives, subGroup
 		table.insert(subGroups[subGroup],entry)
 	end
 
-	--This code is different if we're sod or BG
 	local lineCount = 1
 	local fullStr = Infinity_FetchString(entryId)
 	for line in string.gmatch(fullStr, "[^\r\n]+") do
 		if(lineCount == 1) then
 			--objective text is first line.
 			objective.text = line
-		end
-		if(lineCount > 1) then
+		else
 			--entry text is everything after first
 			entry.text = entry.text .. line .. "\n"
 		end
 		lineCount = lineCount + 1
+		if(line:sub(-1) == ".") then break end
 	end
 	if(lineCount == 2) then
 		--it looks like sometimes entries are just an unbroken paragraph
 		--in this case the entry should get the paragraph and the objective gets nothing
-		--note lineCount == 2 is a bit misleading, there's only one line in this case.
-		entry.text = objective.text
+		entry.text = fullStr
 		objective.text = Infinity_FetchString(quest.text)
 	end
 	objective.entries = {entry}
