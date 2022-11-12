@@ -1346,9 +1346,9 @@ function compareCustomSound(s1, s2)
 	elseif (s2.sound == "DEFAULT" and s1.sound ~= "DEFAULT") then
 		return false
 	elseif (string.sub(s1.sound, 1, 4) == "BDTP" and string.sub(s2.sound, 1, 4) ~= "BDTP") then
-		return false;
+		return false
 	elseif (string.sub(s2.sound, 1, 4) == "BDTP" and string.sub(s1.sound, 1, 4) ~= "BDTP") then
-		return true;
+		return true
 	end
 	return s1.sound < s2.sound
 end
@@ -4038,7 +4038,7 @@ menu
 	}
 	label
 	{
-		area 70 80 264 120
+		area 82 74 242 124
 		text lua "getStringFromAmbiguousSource(Popup3Button.info)"
 		text style "normal"
 		text color D
@@ -4091,22 +4091,22 @@ menu
 	modal
 	label
 	{
-		area 0 0 900 234
+		area 0 0 406 415
 		mosaic GUIERR7
 	}
 	label
 	{
-		area 55 21 789 126
+		area 82 74 242 88
 		text lua "getStringFromAmbiguousSource(Popup4Button.info)"
-		text style	"label"
+		text style "normal"
+		text color D
 		text align center center
 	}
 	button
 	{
-		area 656 170 201 44
-		bam		GUIOSTLM
+		area 52 182 300 38
 		text lua "t(Popup4Button.farRightText)"
-		text style	"button"
+		text style "button"
 		action
 		"
 			Infinity_PopMenu()
@@ -4117,10 +4117,9 @@ menu
 	}
 	button
 	{
-		area 448 170 201 44
-		bam		GUIOSTLM
-		text style	"button"
+		area 52 222 300 38
 		text lua "t(Popup4Button.rightText)"
+		text style "button"
 		action
 		"
 			Infinity_PopMenu()
@@ -4131,10 +4130,9 @@ menu
 	}
 	button
 	{
-		area 242 170 201 44
-		bam		GUIOSTLM
-		text style	"button"
+		area 52 262 300 38
 		text lua "t(Popup4Button.leftText)"
+		text style "button"
 		action
 		"
 			Infinity_PopMenu()
@@ -4145,10 +4143,9 @@ menu
 	}
 	button
 	{
-		area 38 170 201 44
-		bam		GUIOSTLM
-		text style	"button"
+		area 52 304 300 38
 		text lua "t(Popup4Button.farLeftText)"
+		text style "button"
 		action
 		"
 			Infinity_PopMenu()
@@ -9958,11 +9955,20 @@ menu
 		text "QUIT_GAME_BUTTON"
 		action
 		"
-			popup3Button(16456,
-			'CANCEL_BUTTON', nil,
-			'MAIN_MENU_BUTTON', function() optionsScreen:QuitGame() end,
-			'SAVE_BUTTON', function() optionsScreen:SaveGame(0) end
-			)
+			if e:IsTouchUI() then
+				popup3Button(16456,
+				'CANCEL_BUTTON', nil,
+				'MAIN_MENU_BUTTON', function() optionsScreen:QuitGame() end,
+				'SAVE_BUTTON', function() optionsScreen:SaveGame(0) end
+				)
+			else
+				popup4Button(16456, 
+				'CANCEL_BUTTON', nil, 
+				'QUIT_BUTTON', function() Infinity_ShutdownGame() end,
+				'MAIN_MENU_BUTTON', function() optionsScreen:QuitGame() end,
+				'SAVE_BUTTON', function() optionsScreen:SaveGame(0) end
+				)
+			end
 		"
 	}
 	button
@@ -12564,7 +12570,7 @@ function showGroundItemDescription(slotId)
 end
 function setQuickLootOffset()
 	local x,y,w,h = Infinity_GetArea('messagesRect')
-	local offset = h + 78
+	local offset = h + 66
 	Infinity_SetOffset('WORLD_QUICKLOOT', 0, -offset)
 end
 `
@@ -12573,7 +12579,6 @@ menu
 	enabled "showJournal == 0"
 	name 'WORLD_QUICKLOOT'
 	align center bottom
-	offset 0 -192
 	ignoreEsc
 	onOpen
 	"
@@ -13929,7 +13934,7 @@ menu
 {
 	enabled "showJournal == 0"
 	name 'WORLD_MESSAGES'
-	offset 0 -66
+	offset 0 -58
 	align center bottom
 	ignoreEsc
 	onOpen
@@ -13944,7 +13949,7 @@ menu
 	}
 	label
 	{
-		area 0 142 840 4
+		area 0 142 840 6
 		mosaic box5B
 	}
 	button
@@ -14042,10 +14047,10 @@ end
 function dragDialogMessagesY(newY)
 	local x,y,w,hOld = Infinity_GetArea("worldDialogBackground")
 	h = hOld - newY
-	if h < 210 then
-		newY = hOld - 210
-	elseif h > 700 then
-		newY = hOld - 700
+	if h < 184 then
+		newY = hOld - 184
+	elseif h > 454 then
+		newY = hOld - 454
 	end
 
 	adjustItemGroup({"dialogHandleY","worldDialogPortraitArea"},0,newY,0,0)
@@ -14167,8 +14172,13 @@ menu
 	label
 	{
 		name "worldDialogBackground"
-		area 0 0 864 350
-		rectangle 4
+		area 0 0 840 340
+		mosaic box5
+	}
+	label
+	{
+		area 0 340 840 6
+		mosaic box5B
 	}
 	button
 	{
@@ -14189,13 +14199,13 @@ menu
 	label
 	{
 		name "worldDialogPortraitArea"
-		area 20 20 110 170
+		area 12 8 110 170
 		bitmap lua "getDialogPortrait()"
 	}
 	handle
 	{
 		name "dialogHandleY"
-		area 0 0 864 20
+		area 0 0 840 20
 		actionDrag
 		"
 			dragDialogMessagesY(motionY)
@@ -14205,7 +14215,7 @@ menu
 	{
 		name "worldPlayerDialogFake"
 		enabled "step == 1"
-		area 138 20 702 210
+		area 130 8 698 328
 		text lua "getDialogText(2)"
 		text style "normal"
 	}
@@ -14253,7 +14263,7 @@ menu
 			}
 		}
 		name "worldPlayerDialogChoicesList"
-		area 138 20 702 310
+		area 130 8 698 328
 		rowheight dynamic
 		hideHighlight
 		table "makeDialogTable()"
@@ -14302,7 +14312,7 @@ menu
 	name 'WORLD_DIALOG_CONFIRM'
 	align center bottom
 	ignoreEsc
-	offset 0 -10
+	offset 0 -6
 	button
 	{
 		area 0 0 300 44
@@ -15787,6 +15797,7 @@ menu
 		cannotFurtherSpecialize = false
 		currentChargenProficiency = nil
 		currentChargenThiefSkill = nil
+		levelUpInfoToggle = 0
 		ticksPassed = 0
 		ticksStarting = 0
 		Infinity_PlaySound('GAM_03')

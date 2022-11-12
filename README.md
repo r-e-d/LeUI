@@ -4,7 +4,7 @@ The goal of this mod is to provide an unified and improved UI for Baldur's Gate 
 
 ## Compatibility
 
-For EE version 2.6, use the v4.5 version of this mod.
+For EE version 2.6, use the v4.6 version of this mod.
 
 For EE version 2.5, use the v4.3.2 version of this mod.
 

@@ -6,8 +6,8 @@ styles['normal']['font'] = 'NORMAL'
 styles['normal']['point'] = 12
 styles['normal_parchment']['font'] = 'POSTANTI'
 styles['normal_parchment']['point'] = 12
-styles['parchment']['font'] = 'POSTANTI'
-styles['parchment']['point'] = 12
+styles['parchment']['font'] = 'TOOLFONT'
+styles['parchment']['point'] = 13
 
 styles['button']['font'] = 'STONESML'
 styles['button']['point'] = 10
