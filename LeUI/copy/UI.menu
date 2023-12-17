@@ -98,7 +98,7 @@ function buildRecordStats()
 		table.insert(recordStats, {2,s:sub(1, pos - 1),s:sub(pos + 2)})
 	end
 end
-function empty(t)
+function isEmpty(t)
 	if next(t) == nil then
 		return true
 	end
@@ -122,7 +122,7 @@ function buildRecordInfos()
 		table.insert(recordInfos, {1,characters[currentID].classlevel.third.details})
 	end
 
-	if not empty(characters[currentID].statusEffects) then
+	if not isEmpty(characters[currentID].statusEffects) then
 		table.insert(recordInfos, {1,""})
 		for k, v in pairs(characters[currentID].statusEffects) do
 			table.insert(recordInfos, {2,v})
@@ -138,7 +138,7 @@ function buildRecordInfos()
 	local script = t("CURRENT_SCRIPT_LABEL") .. ": " ..  characters[currentID].proficiencies.currentScript
 	table.insert(recordInfos, {1,script})
 
-	if not empty(characters[currentID].proficiencies.class_skills) then
+	if not isEmpty(characters[currentID].proficiencies.class_skills) then
 		table.insert(recordInfos, {1,""})
 		table.insert(recordInfos, {1,t("SKILLS_LABEL")})
 		for k, v in ipairs(characters[currentID].proficiencies.class_skills) do
@@ -7578,10 +7578,10 @@ end
 
 function setMageBookLevel(num, noSound)
 	currentBookSpell = 0
-	currentSpellLevel = num
-	if noSound ~= true then
+	if noSound ~= true and num ~= currentSpellLevel then
 		Infinity_PlaySound('GAM_05')
 	end
+	currentSpellLevel = num
 	mageScreen:SetSpellLevel(num - 1)
 	refreshMageBook()
 end
@@ -7895,12 +7895,12 @@ menu
 		sound ""
 		action
 		"
-			local idx = 4 * (currentBookSpell - 1) + cellNumber
-			if bookSpells[idx] and #bottomSpells < #bottomSpellsPlaceHolder then
-				createMageMemorizationSparkle(62 * (cellNumber - 1), 0, 62, 62, 'bookListMage', currentBookSpell)
+			currentBookSpell = 4 * (currentBookSpell - 1) + cellNumber
+			if bookSpells[currentBookSpell] and #bottomSpells < #bottomSpellsPlaceHolder then
+				createMageMemorizationSparkle(62 * (cellNumber - 1), 0, 62, 62, 'bookListMage', -1)
 				Infinity_PlaySound('GAM_24')
 				showMageMemorizationFlash = true
-				mageScreen:MemorizeSpell(bookSpells[idx].level, bookSpells[idx].index)
+				mageScreen:MemorizeSpell(bookSpells[currentBookSpell].level, bookSpells[currentBookSpell].index)
 			end
 		"
 		actionAlt
@@ -9178,10 +9178,10 @@ end
 
 function setPriestBookLevel(num, noSound)
 	currentBookSpell = 0
-	currentSpellLevel = num
-	if noSound ~= true then
+	if noSound ~= true and num ~= currentSpellLevel then
 		Infinity_PlaySound('GAM_06')
 	end
+	currentSpellLevel = num
 	refreshPriestBook()
 end
 
@@ -9414,12 +9414,12 @@ menu
 		sound ""
 		action
 		"
-			local idx = 4 * (currentBookSpell - 1) + cellNumber
-			if characters[id].priestSpells[currentSpellLevel][idx] and #bottomSpells < #bottomSpellsPlaceHolder then
-				createPriestMemorizationSparkle(62 * (cellNumber - 1), 0, 62, 62, 'bookListPriest', currentBookSpell)
+			currentBookSpell = 4 * (currentBookSpell - 1) + cellNumber
+			if characters[id].priestSpells[currentSpellLevel][currentBookSpell] and #bottomSpells < #bottomSpellsPlaceHolder then
+				createPriestMemorizationSparkle(62 * (cellNumber - 1), 0, 62, 62, 'bookListPriest', -1)
 				Infinity_PlaySound('GAM_24')
 				showPriestMemorizationFlash = true
-				priestScreen:MemorizeSpell(characters[id].priestSpells[currentSpellLevel][idx].level, characters[id].priestSpells[currentSpellLevel][idx].index)
+				priestScreen:MemorizeSpell(characters[id].priestSpells[currentSpellLevel][currentBookSpell].level, characters[id].priestSpells[currentSpellLevel][currentBookSpell].index)
 			end
 		"
 		actionAlt
@@ -16197,6 +16197,10 @@ function nextOrDone()
 	end
 end
 
+function shouldShowSpecialistMessage()
+	return false
+end
+
 function autopickSpells()
 	local spells = {table.unpack(chargen.choose_spell)}
 	local rnd = {}
@@ -16304,6 +16308,10 @@ menu
 				needSpecialist = true
 			end
 		"
+		actionAlt
+		"
+			needSpecialist = false
+		"
 	}
 	label
 	{
@@ -16311,6 +16319,15 @@ menu
 		text lua "t('SPELLS_REMAINING_NORMAL') .. ': ' .. chargen.extraSpells"
 		text style "normal"
 		text align center center
+	}
+	label
+	{
+		area 436 128 382 478
+		enabled "shouldShowSpecialistMessage()"
+		text lua "t('SPECIALIST_SPELL_REQ')"
+		text style "normal"
+		text align center center
+		rectangle 0
 	}
 
 	text
