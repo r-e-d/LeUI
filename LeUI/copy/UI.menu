@@ -501,27 +501,44 @@ menu
 	}
 	button
 	{
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
+		on escape
 		action
 		"
-			characterScreen:OnDoneButtonClick()
+			characterScreen:OnCancelButtonClick()
 			currentPanelID = 0
 			Infinity_PopMenu('CHARACTER_CUSTOMIZE')
 		"
 	}
 	button
 	{
-		on escape
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
+		action
+		"
+			if reverseButtonPosition then
+				characterScreen:OnDoneButtonClick()
+			else
+				characterScreen:OnCancelButtonClick()
+			end
+			currentPanelID = 0
+			Infinity_PopMenu('CHARACTER_CUSTOMIZE')
+		"
+	}
+	button
+	{
 		bam GUIOSTUR
 		area 464 653 234 44
 		text style "button"
-		text "CANCEL_BUTTON"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
-			characterScreen:OnCancelButtonClick()
+			if reverseButtonPosition then
+				characterScreen:OnCancelButtonClick()
+			else
+				characterScreen:OnDoneButtonClick()
+			end
 			currentPanelID = 0
 			Infinity_PopMenu('CHARACTER_CUSTOMIZE')
 		"
@@ -713,10 +730,6 @@ menu
 	button
 	{
 		on escape
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
 		action
 		"
 			Infinity_PopMenu()
@@ -724,13 +737,32 @@ menu
 	}
 	button
 	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'BIOGRAPHY_BUTTON')"
+		action
+		"
+			if reverseButtonPosition then
+				Infinity_PopMenu()
+			else
+				Infinity_PushMenu('CHARACTER_BIO')
+			end
+		"
+	}
+	button
+	{
 		bam GUIOSTUR
 		area 464 653 234 44
 		text style "button"
-		text "BIOGRAPHY_BUTTON"
+		text lua "t(reverseButtonPosition and 'BIOGRAPHY_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
-			Infinity_PushMenu('CHARACTER_BIO')
+			if reverseButtonPosition then
+				Infinity_PushMenu('CHARACTER_BIO')
+			else
+				Infinity_PopMenu()
+			end
 		"
 	}
 }
@@ -878,27 +910,44 @@ menu
 	}
 	button
 	{
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
+		on escape
 		action
 		"
-			characterScreen:OnDoneButtonClick()
+			characterScreen:OnCancelButtonClick()
 			Infinity_PopMenu()
 			currentPanelID = 17
 		"
 	}
 	button
 	{
-		on escape
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
+		action
+		"
+			if reverseButtonPosition then
+				characterScreen:OnDoneButtonClick()
+			else
+				characterScreen:OnCancelButtonClick()
+			end
+			Infinity_PopMenu()
+			currentPanelID = 17
+		"
+	}
+	button
+	{
 		bam GUIOSTUR
 		area 464 653 234 44
 		text style "button"
-		text "CANCEL_BUTTON"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
-			characterScreen:OnCancelButtonClick()
+			if reverseButtonPosition then
+				characterScreen:OnCancelButtonClick()
+			else
+				characterScreen:OnDoneButtonClick()
+			end
 			Infinity_PopMenu()
 			currentPanelID = 17
 		"
@@ -1189,33 +1238,54 @@ menu
 
 	button
 	{
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
+		on escape
 		action
 		"
-			if showingSmartOptions == true then
-				for index, var in pairs(scriptOptions) do
-					characterScreen:SetTempSmartScriptLocal(var[3], var[5])
-				end
-			end
-
-			characterScreen:OnDoneButtonClick()
+			characterScreen:OnCancelButtonClick()
 			Infinity_PopMenu()
 			currentPanelID = 17
 		"
 	}
 	button
 	{
-		on escape
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
+		action
+		"
+			if reverseButtonPosition then
+				if showingSmartOptions == true then
+					for index, var in pairs(scriptOptions) do
+						characterScreen:SetTempSmartScriptLocal(var[3], var[5])
+					end
+				end
+				characterScreen:OnDoneButtonClick()
+			else
+				characterScreen:OnCancelButtonClick()
+			end
+			Infinity_PopMenu()
+			currentPanelID = 17
+		"
+	}
+	button
+	{
 		bam GUIOSTUR
 		area 464 653 234 44
 		text style "button"
-		text "CANCEL_BUTTON"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
-			characterScreen:OnCancelButtonClick()
+			if reverseButtonPosition then
+				characterScreen:OnCancelButtonClick()
+			else
+				if showingSmartOptions == true then
+					for index, var in pairs(scriptOptions) do
+						characterScreen:SetTempSmartScriptLocal(var[3], var[5])
+					end
+				end
+				characterScreen:OnDoneButtonClick()
+			end
 			Infinity_PopMenu()
 			currentPanelID = 17
 		"
@@ -1321,28 +1391,48 @@ menu
 	}
 	button
 	{
-		clickable	lua "characterScreen:IsDoneButtonClickable(currentID)"
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
-		action
-		"
-			characterScreen:OnDoneButtonClick()
-		"
-	}
-	button
-	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "CANCEL_BUTTON"
 		action
 		"
 			characterScreen:OnCancelButtonClick()
 			Infinity_PopMenu('CHARACTER_EXPORT')
 			currentPanelID = 0
+		"
+	}
+	button
+	{
+		clickable	lua "reverseButtonPosition and characterScreen:IsDoneButtonClickable(currentID) or true"
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
+		action
+		"
+			if reverseButtonPosition then
+				characterScreen:OnDoneButtonClick()
+			else
+				characterScreen:OnCancelButtonClick()
+				Infinity_PopMenu('CHARACTER_EXPORT')
+				currentPanelID = 0
+			end
+		"
+	}
+	button
+	{
+		clickable	lua "reverseButtonPosition and true or characterScreen:IsDoneButtonClickable(currentID)"
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
+		action
+		"
+			if reverseButtonPosition then
+				characterScreen:OnCancelButtonClick()
+				Infinity_PopMenu('CHARACTER_EXPORT')
+				currentPanelID = 0
+			else
+				characterScreen:OnDoneButtonClick()
+			end
 		"
 	}
 }
@@ -1451,27 +1541,44 @@ menu
 	}
 	button
 	{
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
+		on escape
 		action
 		"
-			characterScreen:OnDoneButtonClick()
+			characterScreen:OnCancelButtonClick()
 			Infinity_PopMenu()
 			currentPanelID = 17
 		"
 	}
 	button
 	{
-		on escape
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
+		action
+		"
+			if reverseButtonPosition then
+				characterScreen:OnDoneButtonClick()
+			else
+				characterScreen:OnCancelButtonClick()
+			end
+			Infinity_PopMenu()
+			currentPanelID = 17
+		"
+	}
+	button
+	{
 		bam GUIOSTUR
 		area 464 653 234 44
 		text style "button"
-		text "CANCEL_BUTTON"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
-			characterScreen:OnCancelButtonClick()
+			if reverseButtonPosition then
+				characterScreen:OnCancelButtonClick()
+			else
+				characterScreen:OnDoneButtonClick()
+			end
 			Infinity_PopMenu()
 			currentPanelID = 17
 		"
@@ -1792,22 +1899,23 @@ menu
 		bam GUIOSTUL
 		area 210 653 234 44
 		text style "button"
-		text "DONE_BUTTON"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
 		action
 		"
-			panelID = 8
-			Infinity_ChangeOption(3, keyboardSLDR, panelID)
-			Infinity_ChangeOption(2, mouseSLDR, panelID)
-			Infinity_ChangeOption(12, difficultySLDR + 1, panelID) -- cannot set story mode through slider
+			if reverseButtonPosition then
+				panelID = 8
+				Infinity_ChangeOption(3, keyboardSLDR, panelID)
+				Infinity_ChangeOption(2, mouseSLDR, panelID)
+				Infinity_ChangeOption(12, difficultySLDR + 1, panelID) -- cannot set story mode through slider
 
-			for index, var in pairs(toggleTitles) do
-				if var[1] == 'COLORED_MARKERS_LABEL' then
-					panelID = 9
- 				end
-				Infinity_ChangeOption(var[3], var[5], panelID)
+				for index, var in pairs(toggleTitles) do
+					if var[1] == 'COLORED_MARKERS_LABEL' then
+						panelID = 9
+					end
+					Infinity_ChangeOption(var[3], var[5], panelID)
+				end
+				panelID = 8
 			end
-
-			panelID = 8
 			Infinity_PopMenu()
 		"
 	}
@@ -1816,9 +1924,23 @@ menu
 		bam GUIOSTUR
 		area 464 653 234 44
 		text style "button"
-		text "CANCEL_BUTTON"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
+			if not reverseButtonPosition then
+				panelID = 8
+				Infinity_ChangeOption(3, keyboardSLDR, panelID)
+				Infinity_ChangeOption(2, mouseSLDR, panelID)
+				Infinity_ChangeOption(12, difficultySLDR + 1, panelID) -- cannot set story mode through slider
+
+				for index, var in pairs(toggleTitles) do
+					if var[1] == 'COLORED_MARKERS_LABEL' then
+						panelID = 9
+					end
+					Infinity_ChangeOption(var[3], var[5], panelID)
+				end
+				panelID = 8
+			end
 			Infinity_PopMenu()
 		"
 	}
@@ -2024,15 +2146,17 @@ menu
 		bam GUIOSTUL
 		area 210 653 234 44
 		text style "button"
-		text "DONE_BUTTON"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
 		action
 		"
-			panelID = 10
-			for index, var in pairs(autoPauseToggles) do
-				Infinity_ChangeOption(var[3], var[5], panelID)
-			end
-			for index, var in pairs(characterPauseToggles) do
-				Infinity_ChangeOption(var[3], var[5], panelID)
+			if reverseButtonPosition then
+				panelID = 10
+				for index, var in pairs(autoPauseToggles) do
+					Infinity_ChangeOption(var[3], var[5], panelID)
+				end
+				for index, var in pairs(characterPauseToggles) do
+					Infinity_ChangeOption(var[3], var[5], panelID)
+				end
 			end
 
 			panelID = 8
@@ -2045,9 +2169,19 @@ menu
 		bam GUIOSTUR
 		area 464 653 234 44
 		text style "button"
-		text "CANCEL_BUTTON"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
+			if not reverseButtonPosition then
+				panelID = 10
+				for index, var in pairs(autoPauseToggles) do
+					Infinity_ChangeOption(var[3], var[5], panelID)
+				end
+				for index, var in pairs(characterPauseToggles) do
+					Infinity_ChangeOption(var[3], var[5], panelID)
+				end
+			end
+
 			panelID = 8
 			helpString = 'GAMEPLAY_DESCRIPTION'
 			Infinity_PopMenu()
@@ -2090,8 +2224,8 @@ LeUI_uiStrings = {
   LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_DESCRIPTION = "Enable this option for small AI Toggle and Select All buttons on right sidebar",
   LEUI_CLICK_TO_LEVEL_UP_LABEL = "Left Click to Level Up",
   LEUI_CLICK_TO_LEVEL_UP_DESCRIPTION = "Enable this option for level up your character by clicking on portrait",
-  LEUI_REVERSE_BUTTON_POSITIONS_LABEL = "Reverse +/- Buttons Positions",
-  LEUI_REVERSE_BUTTON_POSITIONS_DESCRIPTION = "Enable this option for reversing +/- buttons positions",
+  LEUI_REVERSE_BUTTON_POSITIONS_LABEL = "Reverse Buttons Positions",
+  LEUI_REVERSE_BUTTON_POSITIONS_DESCRIPTION = "Enable this option to reverse buttons positions",
   LEUI_SINGLE_CLICK_TRAVEL_LABEL = "Single Click Travel",
   LEUI_SINGLE_CLICK_TRAVEL_DESCRIPTION = "Enable this option for map traveling with single click",
   LEUI_JOURNAL_COLLAPSED_LABEL = "Journal Collapsed",
@@ -2303,41 +2437,45 @@ menu
 		bam GUIOSTUL
 		area 210 653 234 44
 		text style "button"
-		text "DONE_BUTTON"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
 		action
 		"
 			panelID = 6
-			Infinity_ChangeOption(22, fontSizeSLDR, panelID)
-			for index, var in pairs(graphicsToggles) do
-				if var[6] == 1 then
-					if var[3] == 100 then
-						showSidebarToggle = var[5] == 1 and true or false
-						options['LeUI'][LeUI_uiStrings.LEUI_SIDEBAR_TOGGLE_LABEL] = var[5] == 1 and '1' or '0'
-					elseif var[3] == 101 then
-						showQuickSaveButton = var[5] == 1 and true or false
-						options['LeUI'][LeUI_uiStrings.LEUI_QUICKSAVE_LABEL] = var[5] == 1 and '1' or '0'
-					elseif var[3] == 102 then
-						showHighlightButton = var[5] == 1 and true or false
-						options['LeUI'][LeUI_uiStrings.LEUI_HIGHLIGHT_LABEL] = var[5] == 1 and '1' or '0'
-					elseif var[3] == 103 then
-						rightSidebarSmallButton = var[5] == 1 and true or false
-						options['LeUI'][LeUI_uiStrings.LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_LABEL] = var[5] == 1 and '1' or '0'
-					elseif var[3] == 104 then
-						clickToLevelUp = var[5] == 1 and true or false
-						options['LeUI'][LeUI_uiStrings.LEUI_CLICK_TO_LEVEL_UP_LABEL] = var[5] == 1 and '1' or '0'
-					elseif var[3] == 106 then
-						reverseButtonPosition = var[5] == 1 and true or false
-						options['LeUI'][LeUI_uiStrings.LEUI_REVERSE_BUTTON_POSITIONS_LABEL] = var[5] == 1 and '1' or '0'
-					elseif var[3] == 107 then
-						singleClickTravel = var[5] == 1 and true or false
-						options['LeUI'][LeUI_uiStrings.LEUI_SINGLE_CLICK_TRAVEL_LABEL] = var[5] == 1 and '1' or '0'
-					elseif var[3] == 108 then
-						journalCollapsed = var[5] == 1 and true or false
-						options['LeUI'][LeUI_uiStrings.LEUI_JOURNAL_COLLAPSED_LABEL] = var[5] == 1 and '1' or '0'
-					else
-						Infinity_ChangeOption(var[3], var[5], panelID)
+			if reverseButtonPosition then
+				Infinity_ChangeOption(22, fontSizeSLDR, panelID)
+				for index, var in pairs(graphicsToggles) do
+					if var[6] == 1 then
+						if var[3] == 100 then
+							showSidebarToggle = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_SIDEBAR_TOGGLE_LABEL] = var[5] == 1 and '1' or '0'
+						elseif var[3] == 101 then
+							showQuickSaveButton = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_QUICKSAVE_LABEL] = var[5] == 1 and '1' or '0'
+						elseif var[3] == 102 then
+							showHighlightButton = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_HIGHLIGHT_LABEL] = var[5] == 1 and '1' or '0'
+						elseif var[3] == 103 then
+							rightSidebarSmallButton = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_LABEL] = var[5] == 1 and '1' or '0'
+						elseif var[3] == 104 then
+							clickToLevelUp = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_CLICK_TO_LEVEL_UP_LABEL] = var[5] == 1 and '1' or '0'
+						elseif var[3] == 106 then
+							reverseButtonPosition = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_REVERSE_BUTTON_POSITIONS_LABEL] = var[5] == 1 and '1' or '0'
+						elseif var[3] == 107 then
+							singleClickTravel = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_SINGLE_CLICK_TRAVEL_LABEL] = var[5] == 1 and '1' or '0'
+						elseif var[3] == 108 then
+							journalCollapsed = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_JOURNAL_COLLAPSED_LABEL] = var[5] == 1 and '1' or '0'
+						else
+							Infinity_ChangeOption(var[3], var[5], panelID)
+						end
 					end
 				end
+			else
+				Infinity_ChangeOption(22, fontSizeCancel, panelID)
 			end
 			Infinity_PopMenu()
 		"
@@ -2347,11 +2485,46 @@ menu
 		bam GUIOSTUR
 		area 464 653 234 44
 		text style "button"
-		text "CANCEL_BUTTON"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
 			panelID = 6
-			Infinity_ChangeOption(22, fontSizeCancel, panelID)
+			if reverseButtonPosition then
+				Infinity_ChangeOption(22, fontSizeCancel, panelID)
+			else
+				Infinity_ChangeOption(22, fontSizeSLDR, panelID)
+				for index, var in pairs(graphicsToggles) do
+					if var[6] == 1 then
+						if var[3] == 100 then
+							showSidebarToggle = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_SIDEBAR_TOGGLE_LABEL] = var[5] == 1 and '1' or '0'
+						elseif var[3] == 101 then
+							showQuickSaveButton = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_QUICKSAVE_LABEL] = var[5] == 1 and '1' or '0'
+						elseif var[3] == 102 then
+							showHighlightButton = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_HIGHLIGHT_LABEL] = var[5] == 1 and '1' or '0'
+						elseif var[3] == 103 then
+							rightSidebarSmallButton = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_SIDEBAR_RIGHT_SMALL_BUTTONS_LABEL] = var[5] == 1 and '1' or '0'
+						elseif var[3] == 104 then
+							clickToLevelUp = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_CLICK_TO_LEVEL_UP_LABEL] = var[5] == 1 and '1' or '0'
+						elseif var[3] == 106 then
+							reverseButtonPosition = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_REVERSE_BUTTON_POSITIONS_LABEL] = var[5] == 1 and '1' or '0'
+						elseif var[3] == 107 then
+							singleClickTravel = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_SINGLE_CLICK_TRAVEL_LABEL] = var[5] == 1 and '1' or '0'
+						elseif var[3] == 108 then
+							journalCollapsed = var[5] == 1 and true or false
+							options['LeUI'][LeUI_uiStrings.LEUI_JOURNAL_COLLAPSED_LABEL] = var[5] == 1 and '1' or '0'
+						else
+							Infinity_ChangeOption(var[3], var[5], panelID)
+						end
+					end
+				end
+			end
 			Infinity_PopMenu()
 		"
 	}
@@ -2563,15 +2736,17 @@ menu
 		bam GUIOSTUL
 		area 210 653 234 44
 		text style "button"
-		text "DONE_BUTTON"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
 		action
 		"
-			panelID = 7
-			Infinity_ChangeOption(1, ambientSLDR, panelID)
-			Infinity_ChangeOption(2, sfxSLDR, panelID)
-			Infinity_ChangeOption(3, voiceSLDR, panelID)
-			Infinity_ChangeOption(4, musicSLDR, panelID)
-			Infinity_ChangeOption(22, movieSLDR, panelID)
+			if reverseButtonPosition then
+				panelID = 7
+				Infinity_ChangeOption(1, ambientSLDR, panelID)
+				Infinity_ChangeOption(2, sfxSLDR, panelID)
+				Infinity_ChangeOption(3, voiceSLDR, panelID)
+				Infinity_ChangeOption(4, musicSLDR, panelID)
+				Infinity_ChangeOption(22, movieSLDR, panelID)
+			end
 
 			panelID = 8
 			Infinity_PopMenu()
@@ -2582,9 +2757,18 @@ menu
 		bam GUIOSTUR
 		area 464 653 234 44
 		text style "button"
-		text "CANCEL_BUTTON"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
+			if not reverseButtonPosition then
+				panelID = 7
+				Infinity_ChangeOption(1, ambientSLDR, panelID)
+				Infinity_ChangeOption(2, sfxSLDR, panelID)
+				Infinity_ChangeOption(3, voiceSLDR, panelID)
+				Infinity_ChangeOption(4, musicSLDR, panelID)
+				Infinity_ChangeOption(22, movieSLDR, panelID)
+			end
+
 			panelID = 8
 			Infinity_PopMenu()
 		"
@@ -2841,22 +3025,24 @@ menu
 		bam GUIOSTUL
 		area 210 653 234 44
 		text style "button"
-		text "DONE_BUTTON"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
 		action
 		"
-			panelID = 7
-			for index, var in pairs(command) do
-				if var[4] == 2 then
-					Infinity_ChangeOption(var[3], 1, panelID)
+			if reverseButtonPosition then
+				panelID = 7
+				for index, var in pairs(command) do
+					if var[4] == 2 then
+						Infinity_ChangeOption(var[3], 1, panelID)
+					end
 				end
-			end
-			for index, var in pairs(selectOpt) do
-				if var[4] == 2 then
-					Infinity_ChangeOption(var[3], 1, panelID)
+				for index, var in pairs(selectOpt) do
+					if var[4] == 2 then
+						Infinity_ChangeOption(var[3], 1, panelID)
+					end
 				end
-			end
-			for index, var in pairs(soundsToggles) do
-				Infinity_ChangeOption(var[3], var[5], panelID)
+				for index, var in pairs(soundsToggles) do
+					Infinity_ChangeOption(var[3], var[5], panelID)
+				end
 			end
 
 			helpString = 18040
@@ -2868,9 +3054,26 @@ menu
 		bam GUIOSTUR
 		area 464 653 234 44
 		text style "button"
-		text "CANCEL_BUTTON"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
+			if not reverseButtonPosition then
+				panelID = 7
+				for index, var in pairs(command) do
+					if var[4] == 2 then
+						Infinity_ChangeOption(var[3], 1, panelID)
+					end
+				end
+				for index, var in pairs(selectOpt) do
+					if var[4] == 2 then
+						Infinity_ChangeOption(var[3], 1, panelID)
+					end
+				end
+				for index, var in pairs(soundsToggles) do
+					Infinity_ChangeOption(var[3], var[5], panelID)
+				end
+			end
+
 			helpString = 18040
 			Infinity_PopMenu()
 		"
@@ -3199,19 +3402,22 @@ menu
 		bam GUIOSTUL
 		area 210 653 234 44
 		text style "button"
-		text "DONE_BUTTON"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
 		action
 		"
 			helpString = 'GAMEPLAY_DESCRIPTION'
-			panelID = 9
-			Infinity_ChangeOption(8, markerFeedSLDR, panelID)
-			Infinity_ChangeOption(9, locatorFeedSLDR, panelID)
-			Infinity_ChangeOption(1, ttDelaySLDR, 8)
+			if reverseButtonPosition then
+				panelID = 9
+				Infinity_ChangeOption(8, markerFeedSLDR, panelID)
+				Infinity_ChangeOption(9, locatorFeedSLDR, panelID)
+				Infinity_ChangeOption(1, ttDelaySLDR, 8)
 
-			for index, var in pairs(messagesToggles) do
-				Infinity_ChangeOption(var[3], var[5], panelID)
+				for index, var in pairs(messagesToggles) do
+					Infinity_ChangeOption(var[3], var[5], panelID)
+				end
+			else
+				panelID = 8
 			end
-
 			Infinity_PopMenu()
 		"
 	}
@@ -3220,11 +3426,22 @@ menu
 		bam GUIOSTUR
 		area 464 653 234 44
 		text style "button"
-		text "CANCEL_BUTTON"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
 			helpString = 'GAMEPLAY_DESCRIPTION'
-			panelID = 8
+			if reverseButtonPosition then
+				panelID = 8
+			else
+				panelID = 9
+				Infinity_ChangeOption(8, markerFeedSLDR, panelID)
+				Infinity_ChangeOption(9, locatorFeedSLDR, panelID)
+				Infinity_ChangeOption(1, ttDelaySLDR, 8)
+
+				for index, var in pairs(messagesToggles) do
+					Infinity_ChangeOption(var[3], var[5], panelID)
+				end
+			end
 			Infinity_PopMenu()
 		"
 	}
@@ -3430,12 +3647,17 @@ menu
 		bam GUIOSTUL
 		area 210 653 234 44
 		text style "button"
-		text "DONE_BUTTON"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'REVERT_BUTTON')"
 		action
 		"
-			helpString = 'GAMEPLAY_DESCRIPTION'
-			Infinity_StopKeybind()
-			Infinity_PopMenu()
+			if reverseButtonPosition then
+				helpString = 'GAMEPLAY_DESCRIPTION'
+				Infinity_StopKeybind()
+				Infinity_PopMenu()
+			else
+				keyString = ''
+				revertKeymap()
+			end
 		"
 	}
 	button
@@ -3443,11 +3665,17 @@ menu
 		bam GUIOSTUR
 		area 464 653 234 44
 		text style "button"
-		text "REVERT_BUTTON"
+		text lua "t(reverseButtonPosition and 'REVERT_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
-			keyString = ''
-			revertKeymap()
+			if reverseButtonPosition then
+				keyString = ''
+				revertKeymap()
+			else
+				helpString = 'GAMEPLAY_DESCRIPTION'
+				Infinity_StopKeybind()
+				Infinity_PopMenu()
+			end
 		"
 	}
 }
@@ -3627,10 +3855,12 @@ menu
 		bam GUIOSTUL
 		area 210 653 234 44
 		text style "button"
-		text "DONE_BUTTON"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
 		action
 		"
-			Infinity_SetLanguage(languages[language_idx][1], showsubtitles)
+			if reverseButtonPosition then
+				Infinity_SetLanguage(languages[language_idx][1], showsubtitles)
+			end
 			Infinity_PopMenu()
 		"
 	}
@@ -3639,9 +3869,12 @@ menu
 		bam GUIOSTUR
 		area 464 653 234 44
 		text style "button"
-		text "CANCEL_BUTTON"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
+			if not reverseButtonPosition then
+				Infinity_SetLanguage(languages[language_idx][1], showsubtitles)
+			end
 			Infinity_PopMenu()
 		"
 	}
@@ -5938,10 +6171,6 @@ menu
 	button
 	{
 		on return
-		area 210 653 234 44
-		bam GUIOSTUL
-		text style "button"
-		text "DONE_BUTTON"
 		action
 		"
 			--save settings
@@ -5960,12 +6189,54 @@ menu
 	button
 	{
 		on escape
+		action
+		"
+			Infinity_PopMenu('CHARACTER_COLOR')
+		"
+	}
+	button
+	{
+		area 210 653 234 44
+		bam GUIOSTUL
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
+		action
+		"
+			if reverseButtonPosition then
+				--save settings
+				SLIDER_color_hair_start = SLIDER_color_hair
+				SLIDER_color_skin_start = SLIDER_color_skin
+				SLIDER_color_major_start = SLIDER_color_major
+				SLIDER_color_minor_start = SLIDER_color_minor
+
+				if (e:GetActiveEngine() == createCharScreen) then
+					createCharScreen:OnDoneButtonClick()
+				end
+			end
+
+			Infinity_PopMenu('CHARACTER_COLOR')
+		"
+	}
+	button
+	{
 		area 464 653 234 44
 		bam GUIOSTUR
 		text style "button"
-		text "CANCEL_BUTTON"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
+			if not reverseButtonPosition then
+				--save settings
+				SLIDER_color_hair_start = SLIDER_color_hair
+				SLIDER_color_skin_start = SLIDER_color_skin
+				SLIDER_color_major_start = SLIDER_color_major
+				SLIDER_color_minor_start = SLIDER_color_minor
+
+				if (e:GetActiveEngine() == createCharScreen) then
+					createCharScreen:OnDoneButtonClick()
+				end
+			end
+
 			Infinity_PopMenu('CHARACTER_COLOR')
 		"
 	}
@@ -8624,10 +8895,6 @@ menu
 	{
 		on return
 		clickable lua "contingencyComplete()"
-		area 210 653 234 44
-		bam GUIOSTUL
-		text "DONE_BUTTON"
-		text style "button"
 		action
 		"
 			Infinity_PopMenu()
@@ -8638,14 +8905,46 @@ menu
 	button
 	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "CANCEL_BUTTON"
 		action
 		"
 			Infinity_PopMenu()
 			mageScreen:CancelSequencingSpells()
+			e:SelectEngine(worldScreen)
+		"
+	}
+	button
+	{
+		clickable lua "reverseButtonPosition and contingencyComplete() or true"
+		area 210 653 234 44
+		bam GUIOSTUL
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
+		text style "button"
+		action
+		"
+			Infinity_PopMenu()
+			if reverseButtonPosition then
+				mageScreen:DoneSequencingSpells()
+			else
+				mageScreen:CancelSequencingSpells()
+			end
+			e:SelectEngine(worldScreen)
+		"
+	}
+	button
+	{
+		clickable lua "reverseButtonPosition and true or contingencyComplete()"
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
+		action
+		"
+			Infinity_PopMenu()
+			if reverseButtonPosition then
+				mageScreen:CancelSequencingSpells()
+			else
+				mageScreen:DoneSequencingSpells()
+			end
 			e:SelectEngine(worldScreen)
 		"
 	}
@@ -15019,11 +15318,6 @@ menu
 	button
 	{
 		on return
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
-		clickable lua "createCharScreen:IsDoneButtonClickable()"
 		action
 		"
 			setCurrentPortrait(selPortrait)
@@ -15034,10 +15328,6 @@ menu
 	button
 	{
 		on escape
-		area 464 653 234 44
-		bam GUIOSTUR
-		text style "button"
-		text "CANCEL_BUTTON"
 		action
 		"
 			Infinity_PopMenu()
@@ -15046,6 +15336,52 @@ menu
 			else
 				createCharScreen:OnDoneButtonClick()
 				createCharScreen:OnMainBackButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
+		action
+		"
+			if reverseButtonPosition then
+				setCurrentPortrait(selPortrait)
+				Infinity_PopMenu()
+				createCharScreen:OnDoneButtonClick()
+			else
+				Infinity_PopMenu()
+				if CurrentlyInGame() then
+					createCharScreen:OnCancelButtonClick()
+				else
+					createCharScreen:OnDoneButtonClick()
+					createCharScreen:OnMainBackButtonClick()
+				end
+			end
+		"
+	}
+	button
+	{
+		area 464 653 234 44
+		bam GUIOSTUR
+		text style "button"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
+		action
+		"
+			if reverseButtonPosition then
+				Infinity_PopMenu()
+				if CurrentlyInGame() then
+					createCharScreen:OnCancelButtonClick()
+				else
+					createCharScreen:OnDoneButtonClick()
+					createCharScreen:OnMainBackButtonClick()
+				end
+			else
+				setCurrentPortrait(selPortrait)
+				Infinity_PopMenu()
+				createCharScreen:OnDoneButtonClick()
 			end
 		"
 	}
@@ -15144,24 +15480,50 @@ menu
 	button
 	{
 		on return
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
 		clickable lua "createCharScreen:IsDoneButtonClickable() and currentChargenRace"
 		action "Infinity_PopMenu(); createCharScreen:OnDoneButtonClick()"
 	}
 	button
 	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "BACK_BUTTON"
 		action
 		"
 			Infinity_PopMenu()
 			createCharScreen:OnCancelButtonClick()
+		"
+	}
+	button
+	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'BACK_BUTTON')"
+		clickable lua "reverseButtonPosition and (createCharScreen:IsDoneButtonClickable() and currentChargenRace) or true"
+		action
+		"
+			if reverseButtonPosition then
+				Infinity_PopMenu(); createCharScreen:OnDoneButtonClick()
+			else
+				Infinity_PopMenu()
+				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'BACK_BUTTON' or 'DONE_BUTTON')"
+		clickable lua "reverseButtonPosition and true or (createCharScreen:IsDoneButtonClickable() and currentChargenRace)"
+		action
+		"
+			if reverseButtonPosition then
+				Infinity_PopMenu()
+				createCharScreen:OnCancelButtonClick()
+			else
+				Infinity_PopMenu(); createCharScreen:OnDoneButtonClick()
+			end
 		"
 	}
 }
@@ -15247,10 +15609,6 @@ menu
 	button
 	{
 		on return
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
 		clickable lua "createCharScreen:IsDoneButtonClickable() and currentChargenClass"
 		action
 		"
@@ -15261,15 +15619,49 @@ menu
 	button
 	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "BACK_BUTTON"
 		action
 		"
 			Infinity_PopMenu()
 			if createCharScreen:GetCurrentStep() ~= const.STEP_DUALCLASS_CLASS then
 				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'BACK_BUTTON')"
+		clickable lua "reverseButtonPosition and (createCharScreen:IsDoneButtonClickable() and currentChargenClass) or true"
+		action
+		"
+			Infinity_PopMenu()
+			if reverseButtonPosition then
+				createCharScreen:OnDoneButtonClick()
+			else
+				if createCharScreen:GetCurrentStep() ~= const.STEP_DUALCLASS_CLASS then
+					createCharScreen:OnCancelButtonClick()
+				end
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'BACK_BUTTON' or 'DONE_BUTTON')"
+		clickable lua "reverseButtonPosition and true or (createCharScreen:IsDoneButtonClickable() and currentChargenClass)"
+		action
+		"
+			Infinity_PopMenu()
+			if reverseButtonPosition then
+				if createCharScreen:GetCurrentStep() ~= const.STEP_DUALCLASS_CLASS then
+					createCharScreen:OnCancelButtonClick()
+				end
+			else
+				createCharScreen:OnDoneButtonClick()
 			end
 		"
 	}
@@ -15353,10 +15745,6 @@ menu
 	button
 	{
 		on return
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
 		clickable lua "createCharScreen:IsDoneButtonClickable() and currentChargenKit"
 		action
 		"
@@ -15367,14 +15755,44 @@ menu
 	button
 	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "BACK_BUTTON"
 		action
 		"
 			Infinity_PopMenu()
 			createCharScreen:OnCancelButtonClick()
+		"
+	}
+	button
+	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'BACK_BUTTON')"
+		clickable lua "reverseButtonPosition and (createCharScreen:IsDoneButtonClickable() and currentChargenKit) or true"
+		action
+		"
+			Infinity_PopMenu()
+			if reverseButtonPosition then
+				createCharScreen:OnDoneButtonClick()
+			else
+				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'BACK_BUTTON' or 'DONE_BUTTON')"
+		clickable lua "reverseButtonPosition and true or (createCharScreen:IsDoneButtonClickable() and currentChargenKit)"
+		action
+		"
+			Infinity_PopMenu()
+			if reverseButtonPosition then
+				createCharScreen:OnCancelButtonClick()
+			else
+				createCharScreen:OnDoneButtonClick()
+			end
 		"
 	}
 }
@@ -15458,10 +15876,6 @@ menu
 	button
 	{
 		on return
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
 		clickable lua "createCharScreen:IsDoneButtonClickable() and currentChargenAlignment"
 		action
 		"
@@ -15472,14 +15886,44 @@ menu
 	button
 	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "BACK_BUTTON"
 		action
 		"
 			Infinity_PopMenu()
 			createCharScreen:OnCancelButtonClick()
+		"
+	}
+	button
+	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'BACK_BUTTON')"
+		clickable lua "reverseButtonPosition and (createCharScreen:IsDoneButtonClickable() and currentChargenAlignment) or true"
+		action
+		"
+			Infinity_PopMenu()
+			if reverseButtonPosition then
+				createCharScreen:OnDoneButtonClick()
+			else
+				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'BACK_BUTTON' or 'DONE_BUTTON')"
+		clickable lua "reverseButtonPosition and true or (createCharScreen:IsDoneButtonClickable() and currentChargenAlignment)"
+		action
+		"
+			Infinity_PopMenu()
+			if reverseButtonPosition then
+				createCharScreen:OnCancelButtonClick()
+			else
+				createCharScreen:OnDoneButtonClick()
+			end
 		"
 	}
 }
@@ -15674,11 +16118,6 @@ menu
 	button
 	{
 		on return
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text lua "nextOrDone()"
-		clickable lua "createCharScreen:IsDoneButtonClickable()"
 		action
 		"
 			Infinity_PopMenu()
@@ -15688,14 +16127,42 @@ menu
 	button
 	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "BACK_BUTTON"
 		action
 		"
 			Infinity_PopMenu()
 			createCharScreen:OnCancelButtonClick()
+		"
+	}
+	button
+	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "reverseButtonPosition and nextOrDone() or t('BACK_BUTTON')"
+		action
+		"
+			Infinity_PopMenu()
+			if reverseButtonPosition then
+				createCharScreen:OnDoneButtonClick()
+			else
+				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "reverseButtonPosition and t('BACK_BUTTON') or nextOrDone()"
+		action
+		"
+			Infinity_PopMenu()
+			if reverseButtonPosition then
+				createCharScreen:OnCancelButtonClick()
+			else
+				createCharScreen:OnDoneButtonClick()
+			end
 		"
 	}
 }
@@ -16050,36 +16517,18 @@ menu
 	button
 	{
 		on return
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
-		clickable lua "createCharScreen:IsDoneButtonClickable()"
 		action
 		"
-			createCharScreen:OnDoneButtonClick()
-		"
-	}
-	button
-	{
-		on return
-		enabled "chargen.levelingUp and createCharScreen:IsHighLevelAbilitiesButtonClickable()"
-		area 210 653 234 44
-		bam GUIOSTUL
-		text "HIGH_LEVEL_ABILITIES_BUTTON"
-		text style "button"
-		action
-		"
-			createCharScreen:OnHighLevelAbilitiesButtonClick()
+			if chargen.levelingUp and createCharScreen:IsHighLevelAbilitiesButtonClickable() then
+				createCharScreen:OnHighLevelAbilitiesButtonClick()
+			elseif createCharScreen:IsDoneButtonClickable() then
+				createCharScreen:OnDoneButtonClick()
+			end
 		"
 	}
 	button
 	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "BACK_BUTTON"
 		action
 		"
 			for k,v in pairs(chargen.proficiency) do
@@ -16097,6 +16546,74 @@ menu
 				end
 			end
 			createCharScreen:OnCancelButtonClick()
+		"
+	}
+	button
+	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and ((chargen.levelingUp and createCharScreen:IsHighLevelAbilitiesButtonClickable()) and 'HIGH_LEVEL_ABILITIES_BUTTON' or 'DONE_BUTTON') or 'BACK_BUTTON')"
+		clickable lua "reverseButtonPosition and ((chargen.levelingUp and createCharScreen:IsHighLevelAbilitiesButtonClickable()) or createCharScreen:IsDoneButtonClickable()) or true"
+		action
+		"
+			if reverseButtonPosition then
+				if chargen.levelingUp and createCharScreen:IsHighLevelAbilitiesButtonClickable() then
+					createCharScreen:OnHighLevelAbilitiesButtonClick()
+				elseif createCharScreen:IsDoneButtonClickable() then
+					createCharScreen:OnDoneButtonClick()
+				end
+			else
+				for k,v in pairs(chargen.proficiency) do
+					while plusButtonClickable(k) do
+						local points = chargen.extraProficiencySlots
+						createCharScreen:OnProficiencyPlusMinusButtonClick(v.id, true)
+						if points == chargen.extraProficiencySlots then break end
+					end
+				end
+				for k,v in pairs(chargen.thief_skill) do
+					while createCharScreen:IsThiefSkillPlusMinusButtonClickable() do
+						local points = chargen.extraSkillPoints
+						createCharScreen:OnThiefSkillPlusMinusButtonClick(v.id, true)
+						if points == chargen.extraSkillPoints then break end
+					end
+				end
+				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'BACK_BUTTON' or ((chargen.levelingUp and createCharScreen:IsHighLevelAbilitiesButtonClickable()) and 'HIGH_LEVEL_ABILITIES_BUTTON' or 'DONE_BUTTON'))"
+		clickable lua "reverseButtonPosition and true or ((chargen.levelingUp and createCharScreen:IsHighLevelAbilitiesButtonClickable()) or createCharScreen:IsDoneButtonClickable())"
+		action
+		"
+			if reverseButtonPosition then
+				for k,v in pairs(chargen.proficiency) do
+					while plusButtonClickable(k) do
+						local points = chargen.extraProficiencySlots
+						createCharScreen:OnProficiencyPlusMinusButtonClick(v.id, true)
+						if points == chargen.extraProficiencySlots then break end
+					end
+				end
+				for k,v in pairs(chargen.thief_skill) do
+					while createCharScreen:IsThiefSkillPlusMinusButtonClickable() do
+						local points = chargen.extraSkillPoints
+						createCharScreen:OnThiefSkillPlusMinusButtonClick(v.id, true)
+						if points == chargen.extraSkillPoints then break end
+					end
+				end
+				createCharScreen:OnCancelButtonClick()
+			else
+				if chargen.levelingUp and createCharScreen:IsHighLevelAbilitiesButtonClickable() then
+					createCharScreen:OnHighLevelAbilitiesButtonClick()
+				elseif createCharScreen:IsDoneButtonClickable() then
+					createCharScreen:OnDoneButtonClick()
+				end
+			end
 		"
 	}
 }
@@ -16294,10 +16811,6 @@ menu
 	button
 	{
 		on return
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text lua "nextOrDone()"
 		clickable lua "createCharScreen:IsDoneButtonClickable()"
 		action
 		"
@@ -16307,14 +16820,44 @@ menu
 	button
 	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "BACK_BUTTON"
 		action
 		"
 			Infinity_PopMenu()
 			createCharScreen:OnCancelButtonClick()
+		"
+	}
+	button
+	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "reverseButtonPosition and nextOrDone() or t('BACK_BUTTON')"
+		clickable lua "reverseButtonPosition and createCharScreen:IsDoneButtonClickable() or true"
+		action
+		"
+			if reverseButtonPosition then
+				createCharScreen:OnDoneButtonClick()
+			else
+				Infinity_PopMenu()
+				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "reverseButtonPosition and t('BACK_BUTTON') or nextOrDone()"
+		clickable lua "reverseButtonPosition and true or createCharScreen:IsDoneButtonClickable()"
+		action
+		"
+			if reverseButtonPosition then
+				Infinity_PopMenu()
+				createCharScreen:OnCancelButtonClick()
+			else
+				createCharScreen:OnDoneButtonClick()
+			end
 		"
 	}
 }
@@ -16470,10 +17013,6 @@ menu
 	button
 	{
 		on return
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text lua "nextOrDone()"
 		clickable lua "createCharScreen:IsDoneButtonClickable()"
 		action
 		"
@@ -16483,14 +17022,44 @@ menu
 	button
 	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "BACK_BUTTON"
 		action
 		"
 			Infinity_PopMenu()
 			createCharScreen:OnCancelButtonClick()
+		"
+	}
+	button
+	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "reverseButtonPosition and nextOrDone() or t('BACK_BUTTON')"
+		clickable lua "reverseButtonPosition and createCharScreen:IsDoneButtonClickable() or true"
+		action
+		"
+			if reverseButtonPosition then
+				createCharScreen:OnDoneButtonClick()
+			else
+				Infinity_PopMenu()
+				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "reverseButtonPosition and t('BACK_BUTTON') or nextOrDone()"
+		clickable lua "reverseButtonPosition and true or createCharScreen:IsDoneButtonClickable()"
+		action
+		"
+			if reverseButtonPosition then
+				Infinity_PopMenu()
+				createCharScreen:OnCancelButtonClick()
+			else
+				createCharScreen:OnDoneButtonClick()
+			end
 		"
 	}
 }
@@ -16626,10 +17195,6 @@ menu
 	button
 	{
 		on return
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text lua "nextOrDone()"
 		clickable lua "createCharScreen:IsDoneButtonClickable()"
 		action
 		"
@@ -16639,14 +17204,44 @@ menu
 	button
 	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "BACK_BUTTON"
 		action
 		"
 			Infinity_PopMenu()
 			createCharScreen:OnCancelButtonClick()
+		"
+	}
+	button
+	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "reverseButtonPosition and nextOrDone() or t('BACK_BUTTON')"
+		clickable lua "reverseButtonPosition and createCharScreen:IsDoneButtonClickable() or true"
+		action
+		"
+			if reverseButtonPosition then
+				createCharScreen:OnDoneButtonClick()
+			else
+				Infinity_PopMenu()
+				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "reverseButtonPosition and t('BACK_BUTTON') or nextOrDone()"
+		clickable lua "reverseButtonPosition and true or createCharScreen:IsDoneButtonClickable()"
+		action
+		"
+			if reverseButtonPosition then
+				Infinity_PopMenu()
+				createCharScreen:OnCancelButtonClick()
+			else
+				createCharScreen:OnDoneButtonClick()
+			end
 		"
 	}
 }
@@ -16722,28 +17317,53 @@ menu
 	button
 	{
 		on return
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
-		clickable lua "createCharScreen:IsDoneButtonClickable() and currentChargenCustomSound"
+		clickable lua "createCharScreen:IsDoneButtonClickable()"
 		action
 		"
-			Infinity_PopMenu()
 			createCharScreen:OnDoneButtonClick()
 		"
 	}
 	button
 	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "BACK_BUTTON"
 		action
 		"
 			Infinity_PopMenu()
 			createCharScreen:OnCancelButtonClick()
+		"
+	}
+	button
+	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'BACK_BUTTON')"
+		clickable lua "reverseButtonPosition and createCharScreen:IsDoneButtonClickable() or true"
+		action
+		"
+			if reverseButtonPosition then
+				createCharScreen:OnDoneButtonClick()
+			else
+				Infinity_PopMenu()
+				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'BACK_BUTTON' or 'DONE_BUTTON')"
+		clickable lua "reverseButtonPosition and true or createCharScreen:IsDoneButtonClickable()"
+		action
+		"
+			if reverseButtonPosition then
+				Infinity_PopMenu()
+				createCharScreen:OnCancelButtonClick()
+			else
+				createCharScreen:OnDoneButtonClick()
+			end
 		"
 	}
 }
@@ -16825,28 +17445,53 @@ menu
 	button
 	{
 		on return
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
-		clickable lua "createCharScreen:IsDoneButtonClickable() and currentChargenHatedRace"
+		clickable lua "createCharScreen:IsDoneButtonClickable()"
 		action
 		"
-			Infinity_PopMenu()
 			createCharScreen:OnDoneButtonClick()
 		"
 	}
 	button
 	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "BACK_BUTTON"
 		action
 		"
 			Infinity_PopMenu()
 			createCharScreen:OnCancelButtonClick()
+		"
+	}
+	button
+	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'BACK_BUTTON')"
+		clickable lua "reverseButtonPosition and createCharScreen:IsDoneButtonClickable() or true"
+		action
+		"
+			if reverseButtonPosition then
+				createCharScreen:OnDoneButtonClick()
+			else
+				Infinity_PopMenu()
+				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'BACK_BUTTON' or 'DONE_BUTTON')"
+		clickable lua "reverseButtonPosition and true or createCharScreen:IsDoneButtonClickable()"
+		action
+		"
+			if reverseButtonPosition then
+				Infinity_PopMenu()
+				createCharScreen:OnCancelButtonClick()
+			else
+				createCharScreen:OnDoneButtonClick()
+			end
 		"
 	}
 }
@@ -17007,25 +17652,40 @@ menu
 	}
 	button
 	{
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
+		on escape
 		action
 		"
-			createCharScreen:OnDoneButtonClick()
+			createCharScreen:OnCancelButtonClick()
 		"
 	}
 	button
 	{
-		on escape
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
+		action
+		"
+			if reverseButtonPosition then
+				createCharScreen:OnDoneButtonClick()
+			else
+				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
 		bam GUIOSTUR
 		area 464 653 234 44
 		text style "button"
-		text "CANCEL_BUTTON"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
 		action
 		"
-			createCharScreen:OnCancelButtonClick()
+			if reverseButtonPosition then
+				createCharScreen:OnCancelButtonClick()
+			else
+				createCharScreen:OnDoneButtonClick()
+			end
 		"
 	}
 }
@@ -17115,10 +17775,6 @@ menu
 	button
 	{
 		on return
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text lua "NextOrDone()"
 		clickable lua "list_GUICG_20_2_idx > 0"
 		action
 		"
@@ -17129,14 +17785,44 @@ menu
 	button
 	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "CANCEL_BUTTON"
 		action
 		"
 			Infinity_PopMenu('CHARGEN_IMPORT')
 			createCharScreen:OnCancelButtonClick()
+		"
+	}
+	button
+	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "reverseButtonPosition and NextOrDone() or t('CANCEL_BUTTON')"
+		clickable lua "reverseButtonPosition and list_GUICG_20_2_idx > 0 or true"
+		action
+		"
+			Infinity_PopMenu('CHARGEN_IMPORT')
+			if reverseButtonPosition then
+				createCharScreen:OnDoneButtonClick()
+			else
+				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "reverseButtonPosition and t('CANCEL_BUTTON') or NextOrDone()"
+		clickable lua "reverseButtonPosition and true or list_GUICG_20_2_idx > 0"
+		action
+		"
+			Infinity_PopMenu('CHARGEN_IMPORT')
+			if reverseButtonPosition then
+				createCharScreen:OnCancelButtonClick()
+			else
+				createCharScreen:OnDoneButtonClick()
+			end
 		"
 	}
 }
@@ -17244,10 +17930,6 @@ menu
 	button
 	{
 		on return
-		bam GUIOSTUL
-		area 210 653 234 44
-		text style "button"
-		text "DONE_BUTTON"
 		action
 		"
 			Infinity_PopMenu('CHARGEN_EXPORT')
@@ -17257,14 +17939,42 @@ menu
 	button
 	{
 		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text style "button"
-		text "CANCEL_BUTTON"
 		action
 		"
 			Infinity_PopMenu('CHARGEN_EXPORT')
 			createCharScreen:OnCancelButtonClick()
+		"
+	}
+	button
+	{
+		bam GUIOSTUL
+		area 210 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
+		action
+		"
+			Infinity_PopMenu('CHARGEN_EXPORT')
+			if reverseButtonPosition then
+				createCharScreen:OnDoneButtonClick()
+			else
+				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUR
+		area 464 653 234 44
+		text style "button"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
+		action
+		"
+			Infinity_PopMenu('CHARGEN_EXPORT')
+			if reverseButtonPosition then
+				createCharScreen:OnCancelButtonClick()
+			else
+				createCharScreen:OnDoneButtonClick()
+			end
 		"
 	}
 }
@@ -17335,26 +18045,42 @@ menu
 	}
 	button
 	{
-		bam GUIOSTUL
-		area 210 653 234 44
-		clickable lua "createCharScreen:GetCurrentStep() == const.STEP_DUALCLASS_DONE"
-		text "DONE_BUTTON"
-		text style "button"
+		on escape
 		action
 		"
-			createCharScreen:OnDoneButtonClick()
+			createCharScreen:OnCancelButtonClick()
 		"
 	}
 	button
 	{
-		on escape
-		bam GUIOSTUR
-		area 464 653 234 44
-		text "CANCEL_BUTTON"
+		bam GUIOSTUL
+		area 210 653 234 44
+		clickable lua "reverseButtonPosition and createCharScreen:GetCurrentStep() == const.STEP_DUALCLASS_DONE or true"
+		text lua "t(reverseButtonPosition and 'DONE_BUTTON' or 'CANCEL_BUTTON')"
 		text style "button"
 		action
 		"
-			createCharScreen:OnCancelButtonClick()
+			if reverseButtonPosition then
+				createCharScreen:OnDoneButtonClick()
+			else
+				createCharScreen:OnCancelButtonClick()
+			end
+		"
+	}
+	button
+	{
+		bam GUIOSTUR
+		area 464 653 234 44
+		clickable lua "reverseButtonPosition and true or createCharScreen:GetCurrentStep() == const.STEP_DUALCLASS_DONE"
+		text lua "t(reverseButtonPosition and 'CANCEL_BUTTON' or 'DONE_BUTTON')"
+		text style "button"
+		action
+		"
+			if reverseButtonPosition then
+				createCharScreen:OnCancelButtonClick()
+			else
+				createCharScreen:OnDoneButtonClick()
+			end
 		"
 	}
 }
