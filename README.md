@@ -4,7 +4,7 @@ The goal of this mod is to provide an unified and improved UI for Baldur's Gate 
 
 ## Compatibility
 
-For EE version 2.6, use the v4.6 version of this mod.
+For EE version 2.6, use the v4.7 version of this mod.
 
 For EE version 2.5, use the v4.3.2 version of this mod.
 
@@ -20,6 +20,6 @@ To install, extract the contents of the archive into your game folder (the folde
 
 LeUI should be installed *before* EEUITweaks.
 
-LeUI should be installed *before* mods that patch the UI (Sword Coast Stratagems, Tome & Blood, Might & Guile, Shadow Magic, Deities of Faerun, or Faiths & Powers).
+LeUI should be installed *before* mods that patch the UI (Sword Coast Stratagems, Talents of Faerûn, Tome & Blood, Might & Guile, Shadow Magic, Deities of Faerun, or Faiths & Powers).
 
 LeUI *is not compatible* with other UI overhauls mods (Dragonspear UI++, Revised Dragon Scale, ...).
