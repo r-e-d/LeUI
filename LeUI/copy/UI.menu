@@ -13,61 +13,17 @@ listMetaInfo = {}
 combatLog = {}
 
 function updateAttrTable()
-	if (characters[currentID] ~= nil) then
-		attributeItems = {
-			{ characters[currentID].attr.str, 9582 },
-			{ characters[currentID].attr.dex, 9584 },
-			{ characters[currentID].attr.con, 9583 },
-			{ characters[currentID].attr.int, 9585 },
-			{ characters[currentID].attr.wis, 9586 },
-			{ characters[currentID].attr.cha, 9587 }
-		}
-		buildRecordStats()
-		buildRecordInfos()
-	end
-end
+	if (characters[currentID] == nil) then return end
 
-function characterDescString(char)
-	return Infinity_FetchString(char.gender) .. "\n" .. Infinity_FetchString(char.race) .. "\n" .. char.class .. "\n" .. Infinity_FetchString(char.alignment)
-end
+	attributeItems = {
+		{ characters[currentID].attr.str, 9582 },
+		{ characters[currentID].attr.dex, 9584 },
+		{ characters[currentID].attr.con, 9583 },
+		{ characters[currentID].attr.int, 9585 },
+		{ characters[currentID].attr.wis, 9586 },
+		{ characters[currentID].attr.cha, 9587 }
+	}
 
-function displaySTR()
-	local txt = characters[currentID].attr.str.current
-
-	if (characters[currentID].attr.str.current == 18 and characters[currentID].attr.str.extra ~= 0) then
-		txt = txt .. '/' .. string.format('%02d', characters[currentID].attr.str.extra % 100)
-	end
-	if (characters[currentID].attr.str.current > characters[currentID].attr.str.base or characters[currentID].attr.str.extra > characters[currentID].attr.str.extraBase) then
-		txt = '^G' .. txt .. '^-'
-	end
-	if (characters[currentID].attr.str.current < characters[currentID].attr.str.base or characters[currentID].attr.str.extra < characters[currentID].attr.str.extraBase) then
-		txt = '^R' .. txt .. '^-'
-	end
-	return txt
-end
-
-function displayBuff(current, base)
-	if(current > base) then
-		return '^G' .. current .. '^-'
-	elseif (current < base) then
-		return '^R' .. current .. '^-'
-	end
-	return current
-end
-
-function displayAttr(index)
-	if (index == 1) then
-		return displaySTR()
-	else
-		return displayBuff(attributeItems[index][1].current, attributeItems[index][1].base)
-	end
-end
-
-function CurrentlyInGame()
-	return characterScreen:IsInGame()
-end
-
-function buildRecordStats()
 	recordStats = {}
 
 	table.insert(recordStats, {1,t("ABILITIES_TITLE")})
@@ -97,25 +53,7 @@ function buildRecordStats()
 		local pos = s:find(":", 1)
 		table.insert(recordStats, {2,s:sub(1, pos - 1),s:sub(pos + 2)})
 	end
-end
-function isEmpty(t)
-	if next(t) == nil then
-		return true
-	end
-	return false
-end
-function getClassString()
-	table.insert(recordInfos, {1,characters[currentID].classlevel.first.details})
-	if characters[currentID].classlevel.second then
-		table.insert(recordInfos, {1,""})
-		table.insert(recordInfos, {1,characters[currentID].classlevel.second.details})
-	end
-	if characters[currentID].classlevel.third then
-		table.insert(recordInfos, {1,""})
-		table.insert(recordInfos, {1,characters[currentID].classlevel.third.details})
-	end
-end
-function buildRecordInfos()
+
 	recordInfos = {}
 
 	if characters[currentID].classlevel.second then
@@ -173,6 +111,64 @@ function buildRecordInfos()
 			table.insert(recordInfos, {1,t("WEAPON_STYLE_BONUS_LABEL")})
 			table.insert(recordInfos, {1,weaponStyleBonus})
 		end
+	end
+end
+
+function characterDescString(char)
+	return Infinity_FetchString(char.gender) .. "\n" .. Infinity_FetchString(char.race) .. "\n" .. char.class .. "\n" .. Infinity_FetchString(char.alignment)
+end
+
+function displaySTR()
+	local txt = characters[currentID].attr.str.current
+
+	if (characters[currentID].attr.str.current == 18 and characters[currentID].attr.str.extra ~= 0) then
+		txt = txt .. '/' .. string.format('%02d', characters[currentID].attr.str.extra % 100)
+	end
+	if (characters[currentID].attr.str.current > characters[currentID].attr.str.base or characters[currentID].attr.str.extra > characters[currentID].attr.str.extraBase) then
+		txt = '^G' .. txt .. '^-'
+	end
+	if (characters[currentID].attr.str.current < characters[currentID].attr.str.base or characters[currentID].attr.str.extra < characters[currentID].attr.str.extraBase) then
+		txt = '^R' .. txt .. '^-'
+	end
+	return txt
+end
+
+function displayBuff(current, base)
+	if(current > base) then
+		return '^G' .. current .. '^-'
+	elseif (current < base) then
+		return '^R' .. current .. '^-'
+	end
+	return current
+end
+
+function displayAttr(index)
+	if (index == 1) then
+		return displaySTR()
+	else
+		return displayBuff(attributeItems[index][1].current, attributeItems[index][1].base)
+	end
+end
+
+function CurrentlyInGame()
+	return characterScreen:IsInGame()
+end
+
+function isEmpty(t)
+	if next(t) == nil then
+		return true
+	end
+	return false
+end
+function getClassString()
+	table.insert(recordInfos, {1,characters[currentID].classlevel.first.details})
+	if characters[currentID].classlevel.second then
+		table.insert(recordInfos, {1,""})
+		table.insert(recordInfos, {1,characters[currentID].classlevel.second.details})
+	end
+	if characters[currentID].classlevel.third then
+		table.insert(recordInfos, {1,""})
+		table.insert(recordInfos, {1,characters[currentID].classlevel.third.details})
 	end
 end
 function getStatusString(strRef)
