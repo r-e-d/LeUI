@@ -15744,8 +15744,7 @@ menu
 		clickable lua "createCharScreen:IsDoneButtonClickable() and currentChargenKit"
 		action
 		"
-			Infinity_PopMenu()
-			createCharScreen:OnDoneButtonClick()
+			Infinity_PopMenu(); createCharScreen:OnDoneButtonClick()
 		"
 	}
 	button
@@ -15766,10 +15765,10 @@ menu
 		clickable lua "reverseButtonPosition and (createCharScreen:IsDoneButtonClickable() and currentChargenKit) or true"
 		action
 		"
-			Infinity_PopMenu()
 			if reverseButtonPosition then
-				createCharScreen:OnDoneButtonClick()
+				Infinity_PopMenu(); createCharScreen:OnDoneButtonClick()
 			else
+				Infinity_PopMenu()
 				createCharScreen:OnCancelButtonClick()
 			end
 		"
@@ -15783,11 +15782,11 @@ menu
 		clickable lua "reverseButtonPosition and true or (createCharScreen:IsDoneButtonClickable() and currentChargenKit)"
 		action
 		"
-			Infinity_PopMenu()
 			if reverseButtonPosition then
+				Infinity_PopMenu()
 				createCharScreen:OnCancelButtonClick()
 			else
-				createCharScreen:OnDoneButtonClick()
+				Infinity_PopMenu(); createCharScreen:OnDoneButtonClick()
 			end
 		"
 	}
