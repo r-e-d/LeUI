@@ -9357,8 +9357,8 @@ menu
 	{
 		area 95 70 52 52
 		bam lua "PopupDetails.icon"
-		sequence 0
 		align center center
+		sequence 0
 	}
 	label
 	{
