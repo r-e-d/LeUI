@@ -6961,29 +6961,10 @@ function startThreeBookHighlight(book)
 end
 
 function onCampaignButton(buttonNum)
-	if(buttonNum == const.START_CAMPAIGN_BG1) then
-		startEngine:OnCampaignButtonClick('BG1',true)
-		Infinity_SetINIValue('Program Options','Active Campaign',const.START_CAMPAIGN_BG1)
-	elseif(buttonNum == const.START_CAMPAIGN_SOD) then
-		startEngine:OnCampaignButtonClick('SOD',true)
-		Infinity_SetINIValue('Program Options','Active Campaign',const.START_CAMPAIGN_SOD)
-	elseif(buttonNum == const.START_CAMPAIGN_SOA) then
-		startEngine:OnCampaignButtonClick('SOA',true)
-		Infinity_SetINIValue('Program Options','Active Campaign',const.START_CAMPAIGN_SOA)
-	elseif(buttonNum == const.START_CAMPAIGN_TOB) then
-		startEngine:OnCampaignButtonClick('TOB',true)
-		Infinity_SetINIValue('Program Options','Active Campaign',const.START_CAMPAIGN_TOB)
-	elseif(buttonNum == const.START_CAMPAIGN_BP1) then
-		startEngine:OnCampaignButtonClick('BP1',true)
-		Infinity_SetINIValue('Program Options','Active Campaign',const.START_CAMPAIGN_BP1)
-	elseif(buttonNum == const.START_CAMPAIGN_BP2) then
-		startEngine:OnCampaignButtonClick('BP2',true)
-		Infinity_SetINIValue('Program Options','Active Campaign',const.START_CAMPAIGN_BP2)
-	elseif(buttonNum == const.START_CAMPAIGN_TUT) then
-		startEngine:OnCampaignButtonClick('TUT',true)
-		Infinity_SetINIValue('Program Options','Active Campaign',const.START_CAMPAIGN_TUT)
+	if startCampaignData[buttonNum] ~= nil then
+		startEngine:OnCampaignButtonClick(startCampaignData[buttonNum].id,true)
+		Infinity_SetINIValue('Program Options','Active Campaign',buttonNum)
 	else
-		buttonNum = const.START_CAMPAIGN_BG1
 		startEngine:OnCampaignButtonClick('BG1',true)
 		Infinity_SetINIValue('Program Options','Active Campaign',const.START_CAMPAIGN_BG1)
 	end
@@ -7411,6 +7392,7 @@ menu
 		table "startCampaignData"
 		var selectedOpt
 		scrollbar 'GUISCRP'
+		sound ""
 		action
 		"
 			onCampaignButton(selectedOpt)
