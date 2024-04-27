@@ -16654,8 +16654,7 @@ function autopickSpells()
 			return rnd[s1.name] > rnd[s2.name]
 		end)
 	for _, v in pairs(spells) do
-		local spell = spellBook[chargen.currentSpellLevelChoice][v.key]
-		if not v.enabled and chargen.extraSpells > 0 then
+		if not v.enabled and not v.known and chargen.extraSpells > 0 then
 			createCharScreen:OnLearnMageSpellButtonClick(v.k)
 			if chargen.extraSpells == 0 and not createCharScreen:IsDoneButtonClickable() then
 				createCharScreen:OnLearnMageSpellButtonClick(v.k)
