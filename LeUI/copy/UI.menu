@@ -14199,7 +14199,13 @@ function dragMessagesY(newY)
 
 	--lower bound on height, sliced rects can't get too small and we don't want to make the message box invisible.
 	--also don't go too high because it looks bad.
-	if hNew > 50 and hNew < 450 then
+	if hNew < 50 then
+		newY = h - 50
+	elseif hNew > 450 then
+		newY = h - 450
+	end
+
+	if newY ~= 0 then
 		adjustItemGroup({"messagesHandleY"},0,newY,0,0)
 		adjustItemGroup({"messagesRect","worldMessageBox"},0,newY,0,-newY)
 	end
